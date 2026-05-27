@@ -12,16 +12,16 @@
             <div class="py-24 md:py-32">
                 <p class="text-brand-muted font-medium mb-3 uppercase tracking-wider text-sm">Distribuidor Oficial en Paraguay</p>
                 <h1 class="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">
-                    Calidad Hamilton Beach<br>
-                    <span class="text-brand-muted">para tu hogar</span>
+                    {{ $banner?->title ?? 'Calidad Hamilton Beach' }}<br>
+                    <span class="text-brand-muted">{{ $banner?->subtitle ?? 'para tu hogar' }}</span>
                 </h1>
                 <p class="text-lg mb-8 text-brand-muted leading-relaxed">
-                    Cafeteras, tostadoras, pavas eléctricas y molinillos de café con respaldo y garantía oficial en Paraguay.
+                    {{ $banner?->description ?? 'Cafeteras, tostadoras, pavas eléctricas y molinillos de café con respaldo y garantía oficial en Paraguay.' }}
                 </p>
                 <div class="flex flex-wrap gap-4">
-                    <a href="/productos"
+                    <a href="{{ $banner?->cta_url ?? '/productos' }}"
                        class="inline-block bg-white text-brand-dark px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition shadow">
-                        Ver catálogo
+                        {{ $banner?->cta_text ?? 'Ver catálogo' }}
                     </a>
                     <a href="/contacto"
                        class="inline-block border-2 border-white text-white px-8 py-3 rounded-lg font-bold hover:bg-brand transition">
@@ -31,8 +31,8 @@
             </div>
             <!-- Imagen hero -->
             <div class="hidden md:flex items-center">
-                <img src="/images/products/cafetera-retro-black-1.webp"
-                     alt="Cafetera Hamilton Beach Retro Black"
+                <img src="{{ $banner?->image?->url ?? '/images/products/cafetera-retro-black-1.webp' }}"
+                     alt="{{ $banner?->title ?? 'Cafetera Hamilton Beach' }}"
                      class="w-full h-full object-contain drop-shadow-2xl">
             </div>
         </div>
@@ -98,39 +98,28 @@
             </a>
         </div>
 
-        @php
-            $productos = [
-                ['id' => 1, 'nombre' => 'Cafetera Espresso Retro Black',   'categoria' => 'Cafeteras',  'precio' => '850.000',   'imagen' => '/images/products/cafetera-retro-black-1.webp'],
-                ['id' => 2, 'nombre' => 'Cafetera Home Barista 7-in-1',    'categoria' => 'Cafeteras',  'precio' => '1.200.000', 'imagen' => '/images/products/cafetera-home-barista.webp'],
-                ['id' => 3, 'nombre' => 'Tostadora Toaster Silver',        'categoria' => 'Tostadoras', 'precio' => '320.000',   'imagen' => '/images/products/tostadora-silver.webp'],
-                ['id' => 4, 'nombre' => 'Pava Eléctrica Cool-Touch',       'categoria' => 'Pavas',      'precio' => '280.000',   'imagen' => '/images/products/pava-cool-touch.webp'],
-                ['id' => 5, 'nombre' => 'Pava Eléctrica Double-Wall',      'categoria' => 'Pavas',      'precio' => '350.000',   'imagen' => '/images/products/pava-double-wall.webp'],
-                ['id' => 6, 'nombre' => 'Molinillo de Café Profesional',   'categoria' => 'Molinillos', 'precio' => '450.000',   'imagen' => '/images/products/pava-digital.webp'],
-            ];
-        @endphp
-
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            @foreach($productos as $producto)
-            <a href="/productos/{{ $producto['id'] }}"
+            @foreach($featuredProducts as $producto)
+            <a href="/productos/{{ $producto->slug }}"
                class="group bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 overflow-hidden">
                 <!-- Imagen -->
                 <div class="bg-gray-50 h-56 relative overflow-hidden">
-                    <img src="{{ $producto['imagen'] }}" alt="{{ $producto['nombre'] }}"
+                    <img src="{{ $producto->featuredImage?->url ?? '/images/products/cafetera-retro-black-1.webp' }}" alt="{{ $producto->title }}"
                          class="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300">
                     <div class="absolute top-3 left-3">
                         <span class="bg-white text-gray-600 text-xs font-medium px-2 py-1 rounded-full border border-gray-200 shadow-sm">
-                            {{ $producto['categoria'] }}
+                            {{ $producto->category?->name ?? '' }}
                         </span>
                     </div>
                 </div>
                 <!-- Info -->
                 <div class="p-5">
                     <h3 class="font-semibold text-gray-900 group-hover:text-brand transition line-clamp-2 mb-3">
-                        {{ $producto['nombre'] }}
+                        {{ $producto->title }}
                     </h3>
                     <div class="mb-4">
                         <p class="text-xs text-gray-400 uppercase tracking-wider">Precio sugerido</p>
-                        <p class="text-sm font-bold text-gray-800">≈ Gs. {{ $producto['precio'] }}</p>
+                        <p class="text-sm font-bold text-gray-800">≈ {{ $producto->formatted_price }}</p>
                     </div>
                     <div class="flex items-center justify-between">
                         <span class="text-sm text-gray-500">Ver puntos de venta</span>
@@ -159,23 +148,25 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-3xl font-extrabold text-gray-900 text-center mb-10">Explorar por categoría</h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            @php
-                $categorias = [
-                    ['nombre' => 'Cafeteras', 'slug' => 'cafeteras', 'icon' => 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z'],
-                    ['nombre' => 'Tostadoras', 'slug' => 'tostadoras', 'icon' => 'M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z'],
-                    ['nombre' => 'Pavas', 'slug' => 'pavas', 'icon' => 'M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z'],
-                    ['nombre' => 'Molinillos', 'slug' => 'molinillos', 'icon' => 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4'],
-                ];
-            @endphp
-            @foreach($categorias as $cat)
-            <a href="/productos?categoria={{ $cat['slug'] }}"
-               class="group bg-gray-50 hover:bg-brand-light border border-gray-200 hover:border-brand-muted rounded-xl p-6 text-center transition">
-                <div class="w-12 h-12 bg-white group-hover:bg-brand-light rounded-xl flex items-center justify-center mx-auto mb-3 shadow-sm transition">
-                    <svg class="w-6 h-6 text-gray-500 group-hover:text-brand transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="{{ $cat['icon'] }}"/>
-                    </svg>
+            @foreach($categories as $cat)
+            <a href="/productos?categoria={{ $cat->slug }}"
+               class="group bg-gray-50 hover:bg-brand-light border border-gray-200 hover:border-brand-muted rounded-xl p-6 text-center transition flex flex-col items-center">
+                <div class="flex items-center justify-center h-24 mb-3">
+                    @if($cat->icon_type === 'svg' && $cat->icon)
+                        <img src="/images/icons/{{ $cat->icon }}" alt="{{ $cat->name }}" class="w-16 h-16 object-contain opacity-70 group-hover:opacity-100 transition">
+                    @elseif($cat->icon_type === 'image' && $cat->image)
+                        <img src="{{ $cat->image->url }}" alt="{{ $cat->name }}" class="w-24 h-24 object-contain">
+                    @elseif($cat->icon)
+                        <svg class="w-12 h-12 text-gray-500 group-hover:text-brand transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="{{ $cat->icon }}"/>
+                        </svg>
+                    @else
+                        <svg class="w-12 h-12 text-gray-500 group-hover:text-brand transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                        </svg>
+                    @endif
                 </div>
-                <p class="font-semibold text-gray-800 group-hover:text-brand transition text-sm">{{ $cat['nombre'] }}</p>
+                <p class="font-semibold text-gray-800 group-hover:text-brand transition text-sm mt-auto">{{ $cat->name }}</p>
             </a>
             @endforeach
         </div>

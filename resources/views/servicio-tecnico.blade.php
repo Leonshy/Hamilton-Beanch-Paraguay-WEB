@@ -35,7 +35,6 @@
 <div class="bg-gray-50 py-14">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {{-- Texto enriquecido desde el backend: {!! $pagina->contenido !!} --}}
         <div class="mb-10
                     prose prose-gray max-w-none
                     prose-headings:font-bold prose-headings:text-gray-900
@@ -50,24 +49,7 @@
                     prose-table:w-full prose-table:border-collapse
                     prose-th:bg-gray-50 prose-th:text-left prose-th:px-4 prose-th:py-2 prose-th:text-sm prose-th:font-semibold prose-th:text-gray-700 prose-th:border prose-th:border-gray-200
                     prose-td:px-4 prose-td:py-2 prose-td:text-sm prose-td:text-gray-600 prose-td:border prose-td:border-gray-200">
-
-            <p>Contamos con <strong>técnicos capacitados y certificados por Hamilton Beach</strong> para garantizar el correcto funcionamiento de tus electrodomésticos, utilizando únicamente repuestos originales de la marca.</p>
-
-            <h2>¿Qué incluye nuestro servicio?</h2>
-            <ul>
-                <li><strong>Diagnóstico gratuito</strong> — evaluamos el estado de tu equipo sin costo.</li>
-                <li><strong>Repuestos originales Hamilton Beach</strong> — calidad y durabilidad garantizada.</li>
-                <li><strong>Garantía de reparación de 90 días</strong> sobre mano de obra y repuestos utilizados.</li>
-                <li>Atención personalizada por técnicos autorizados por la marca.</li>
-            </ul>
-
-            <h2>¿Cómo solicitar el servicio?</h2>
-            <ol>
-                <li>Contactanos por WhatsApp o teléfono describiendo el problema y el modelo de tu equipo.</li>
-                <li>Nuestro equipo técnico evalúa el equipo y te informa el presupuesto sin compromiso.</li>
-                <li>Una vez aprobado, realizamos la reparación con repuestos originales Hamilton Beach.</li>
-                <li>Retirás tu equipo funcionando con garantía de 90 días sobre la reparación realizada.</li>
-            </ol>
+            {!! $page?->content !!}
         </div>
 
         <!-- CTA unificado -->

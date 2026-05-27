@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "copy-tinymce": "node scripts/copy-tinymce.cjs"
     },
     "devDependencies": {
         "@tailwindcss/postcss": "^4.2.4",
@@ -17,5 +18,8 @@
         "postcss": "^8.5.14",
         "tailwindcss": "^4.2.4",
         "vite": "^7.0.7"
+    },
+    "dependencies": {
+        "tinymce": "^8.3.2"
     }
 }

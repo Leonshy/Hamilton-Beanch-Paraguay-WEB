@@ -30,61 +30,26 @@
 
 <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
 
-    @php
-        $faqs = [
-            [
-                'titulo' => '¿Dónde puedo comprar los productos Hamilton Beach en Paraguay?',
-                'respuesta' => 'Los productos Hamilton Beach están disponibles en nuestros puntos de venta autorizados en todo el país. En cada ficha de producto encontrarás los enlaces a los puntos de venta donde podés adquirirlo. También podés consultarnos directamente por WhatsApp para saber el punto más cercano a tu ubicación.',
-            ],
-            [
-                'titulo' => '¿Qué garantía tienen los productos?',
-                'respuesta' => 'Todos los productos Hamilton Beach vendidos a través de distribuidores autorizados en Paraguay cuentan con garantía oficial de 1 año que cubre defectos de fabricación y problemas de funcionamiento. La garantía no cubre daños por mal uso, accidentes, voltaje inadecuado ni desgaste natural. Consultá la póliza completa en nuestra sección de Garantía.',
-            ],
-            [
-                'titulo' => '¿Cómo valido la garantía de mi producto?',
-                'respuesta' => 'Para validar la garantía necesitás conservar la factura de compra emitida por el punto de venta autorizado y la póliza de garantía. Si perdiste la póliza, podemos emitir una nueva contra la presentación de la factura original. Contactanos por WhatsApp o formulario de contacto.',
-            ],
-            [
-                'titulo' => '¿Tienen servicio técnico oficial en Paraguay?',
-                'respuesta' => 'Sí, contamos con servicio técnico oficial con técnicos capacitados por Hamilton Beach. Realizamos diagnóstico gratuito, reparaciones con repuestos originales y ofrecemos 90 días de garantía sobre la reparación. Para solicitar el servicio contactanos por WhatsApp o completá el formulario de contacto.',
-            ],
-            [
-                'titulo' => '¿Cómo obtengo el manual de uso de mi producto?',
-                'respuesta' => 'Los manuales de uso están disponibles en la ficha de cada producto en nuestro catálogo. Ingresá a la sección Productos, encontrá tu modelo y descargá el PDF desde el enlace al final de la descripción. También podés visitar nuestra sección de Manuales de Producto para obtener más información.',
-            ],
-            [
-                'titulo' => '¿Qué hago si mi producto presenta una falla?',
-                'respuesta' => 'Si tu producto presenta una falla, seguí estos pasos: 1) Revisá el manual de uso por si es un problema de configuración o uso. 2) Si el equipo está dentro del período de garantía, contactanos con la factura y póliza de garantía. 3) Nuestro equipo técnico te asesorará sobre el proceso de reparación sin costo. Contactanos por WhatsApp o formulario.',
-            ],
-            [
-                'titulo' => '¿Venden repuestos y accesorios?',
-                'respuesta' => 'Sí, contamos con repuestos originales Hamilton Beach. Para consultar disponibilidad del repuesto que necesitás, contactanos por WhatsApp indicando el modelo de tu equipo y la pieza requerida.',
-            ],
-            [
-                'titulo' => '¿Tienen descuentos para empresas o compras al por mayor?',
-                'respuesta' => 'Sí, ofrecemos condiciones especiales para empresas, instituciones y revendedores. Para recibir una cotización personalizada, contactanos por email a info@hamiltonbeach.com.py indicando los productos de interés y las cantidades.',
-            ],
-        ];
-    @endphp
-
     <div class="space-y-2">
-        @foreach($faqs as $faq)
+        @forelse($faqs as $faq)
         <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
             <button
                 class="w-full px-6 py-5 text-left flex justify-between items-center gap-4 hover:bg-gray-50 transition"
                 onclick="toggleFaq(this)">
-                <span class="font-semibold text-gray-800 text-sm leading-snug">{{ $faq['titulo'] }}</span>
+                <span class="font-semibold text-gray-800 text-sm leading-snug">{{ $faq->question }}</span>
                 <svg class="w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                 </svg>
             </button>
             <div class="faq-content hidden px-6 pb-5">
                 <div class="border-t border-gray-100 pt-4">
-                    <p class="text-gray-600 text-sm leading-relaxed">{{ $faq['respuesta'] }}</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">{{ $faq->answer }}</p>
                 </div>
             </div>
         </div>
-        @endforeach
+        @empty
+        <p class="text-center text-gray-400 py-8">No hay preguntas frecuentes disponibles.</p>
+        @endforelse
     </div>
 
     <!-- CTA unificado -->

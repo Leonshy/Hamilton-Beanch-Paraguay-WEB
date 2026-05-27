@@ -23,30 +23,36 @@
             <div class="bg-white rounded-xl border border-gray-200 p-5 sticky top-20">
                 <h3 class="text-base font-bold text-gray-900 mb-4">Filtrar por</h3>
 
-                <!-- Categorías -->
-                <div class="mb-6">
-                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Categoría</h4>
-                    <div class="space-y-2">
-                        @php
-                            $categorias = ['Todas', 'Cafeteras', 'Tostadoras', 'Pavas Eléctricas', 'Molinillos'];
-                        @endphp
-                        @foreach($categorias as $i => $cat)
-                        <label class="flex items-center cursor-pointer group">
-                            <input type="{{ $i === 0 ? 'radio' : 'radio' }}" name="categoria" class="mr-2.5 accent-brand" {{ $i === 0 ? 'checked' : '' }}>
-                            <span class="text-sm text-gray-700 group-hover:text-brand transition">{{ $cat }}</span>
-                        </label>
-                        @endforeach
-                    </div>
-                </div>
+                <form id="filter-form" action="/productos" method="GET">
+                    @if(request('q'))<input type="hidden" name="q" value="{{ request('q') }}">@endif
+                    @if(request('sort'))<input type="hidden" name="sort" value="{{ request('sort') }}">@endif
 
-                <div class="border-t border-gray-100 pt-5">
-                    <button class="w-full bg-brand hover:bg-brand-dark text-white py-2.5 rounded-lg text-sm font-semibold transition">
-                        Aplicar
-                    </button>
-                    <button class="w-full text-gray-500 hover:text-brand py-2 rounded-lg text-sm transition mt-1">
-                        Limpiar filtros
-                    </button>
-                </div>
+                    <!-- Categorías -->
+                    <div class="mb-6">
+                        <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Categoría</h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center cursor-pointer group">
+                                <input type="radio" name="categoria" value="" class="mr-2.5 accent-brand" {{ request('categoria', '') === '' ? 'checked' : '' }}>
+                                <span class="text-sm text-gray-700 group-hover:text-brand transition">Todas</span>
+                            </label>
+                            @foreach($categories as $cat)
+                            <label class="flex items-center cursor-pointer group">
+                                <input type="radio" name="categoria" value="{{ $cat->slug }}" class="mr-2.5 accent-brand" {{ request('categoria') === $cat->slug ? 'checked' : '' }}>
+                                <span class="text-sm text-gray-700 group-hover:text-brand transition">{{ $cat->name }}</span>
+                            </label>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-100 pt-5">
+                        <button type="submit" class="w-full bg-brand hover:bg-brand-dark text-white py-2.5 rounded-lg text-sm font-semibold transition">
+                            Aplicar
+                        </button>
+                        <a href="/productos" class="block w-full text-center text-gray-500 hover:text-brand py-2 rounded-lg text-sm transition mt-1">
+                            Limpiar filtros
+                        </a>
+                    </div>
+                </form>
             </div>
         </aside>
 
@@ -54,50 +60,39 @@
         <div class="lg:col-span-3">
             <!-- Ordenamiento -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-                <p class="text-sm text-gray-500">Mostrando <span class="font-semibold text-gray-800">6</span> productos</p>
+                <p class="text-sm text-gray-500">Mostrando <span class="font-semibold text-gray-800">{{ $products->total() }}</span> productos</p>
                 <div class="flex items-center gap-2">
                     <label class="text-sm text-gray-500">Ordenar:</label>
-                    <select class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand bg-white">
-                        <option>Relevancia</option>
-                        <option>Nombre: A–Z</option>
-                        <option>Nombre: Z–A</option>
-                        <option>Más nuevo</option>
-                        <option>Más vendido</option>
+                    <select name="sort" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand bg-white"
+                            onchange="window.location.href='/productos?'+new URLSearchParams({...Object.fromEntries(new URLSearchParams(window.location.search)), sort: this.value}).toString()">
+                        <option value="relevancia" {{ request('sort','relevancia')==='relevancia' ? 'selected' : '' }}>Relevancia</option>
+                        <option value="az"         {{ request('sort')==='az'         ? 'selected' : '' }}>Nombre: A–Z</option>
+                        <option value="za"         {{ request('sort')==='za'         ? 'selected' : '' }}>Nombre: Z–A</option>
+                        <option value="nuevo"      {{ request('sort')==='nuevo'      ? 'selected' : '' }}>Más nuevo</option>
                     </select>
                 </div>
             </div>
 
-            @php
-                $productos = [
-                    ['id' => 1, 'nombre' => 'Cafetera Espresso Retro Black',  'categoria' => 'Cafeteras',  'precio' => '850.000',   'imagen' => '/images/products/cafetera-retro-black-1.webp'],
-                    ['id' => 2, 'nombre' => 'Cafetera Home Barista 7-in-1',   'categoria' => 'Cafeteras',  'precio' => '1.200.000', 'imagen' => '/images/products/cafetera-home-barista.webp'],
-                    ['id' => 3, 'nombre' => 'Tostadora Toaster Silver',       'categoria' => 'Tostadoras', 'precio' => '320.000',   'imagen' => '/images/products/tostadora-silver.webp'],
-                    ['id' => 4, 'nombre' => 'Pava Eléctrica Cool-Touch',      'categoria' => 'Pavas',      'precio' => '280.000',   'imagen' => '/images/products/pava-cool-touch.webp'],
-                    ['id' => 5, 'nombre' => 'Pava Eléctrica Double-Wall',     'categoria' => 'Pavas',      'precio' => '350.000',   'imagen' => '/images/products/pava-double-wall.webp'],
-                    ['id' => 6, 'nombre' => 'Molinillo de Café Profesional',  'categoria' => 'Molinillos', 'precio' => '450.000',   'imagen' => '/images/products/pava-digital.webp'],
-                ];
-            @endphp
-
             <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                @foreach($productos as $producto)
-                <a href="/productos/{{ $producto['id'] }}"
+                @forelse($products as $producto)
+                <a href="/productos/{{ $producto->slug }}"
                    class="group bg-white rounded-xl border border-gray-200 hover:border-brand-muted hover:shadow-md transition overflow-hidden">
                     <!-- Imagen -->
                     <div class="bg-gray-50 h-52 relative overflow-hidden">
-                        <img src="{{ $producto['imagen'] }}" alt="{{ $producto['nombre'] }}"
+                        <img src="{{ $producto->featuredImage?->url ?? '/images/products/cafetera-retro-black-1.webp' }}" alt="{{ $producto->title }}"
                              class="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300">
                         <span class="absolute top-3 left-3 bg-white border border-gray-200 text-gray-600 text-xs font-medium px-2.5 py-1 rounded-full">
-                            {{ $producto['categoria'] }}
+                            {{ $producto->category?->name ?? '' }}
                         </span>
                     </div>
                     <!-- Info -->
                     <div class="p-4">
                         <h3 class="font-semibold text-gray-900 group-hover:text-brand transition text-sm leading-snug mb-2 line-clamp-2">
-                            {{ $producto['nombre'] }}
+                            {{ $producto->title }}
                         </h3>
                         <div class="mb-3">
                             <p class="text-xs text-gray-400 uppercase tracking-wider">Precio sugerido</p>
-                            <p class="text-sm font-bold text-gray-800">≈ Gs. {{ $producto['precio'] }}</p>
+                            <p class="text-sm font-bold text-gray-800">≈ {{ $producto->formatted_price }}</p>
                         </div>
                         <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                             <span class="text-xs text-gray-500">Ver puntos de venta</span>
@@ -107,21 +102,38 @@
                         </div>
                     </div>
                 </a>
-                @endforeach
+                @empty
+                <div class="col-span-3 text-center py-16 text-gray-400">
+                    <p class="text-lg font-medium">No hay productos disponibles</p>
+                    <a href="/productos" class="text-brand hover:underline text-sm mt-2 inline-block">Ver todos los productos</a>
+                </div>
+                @endforelse
             </div>
 
             <!-- Paginación -->
+            @if($products->hasPages())
             <div class="flex justify-center mt-10 gap-1">
-                <button class="w-9 h-9 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600 transition text-sm">
-                    ‹
-                </button>
-                <button class="w-9 h-9 flex items-center justify-center bg-brand text-white rounded-lg text-sm font-semibold">1</button>
-                <button class="w-9 h-9 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600 transition text-sm">2</button>
-                <button class="w-9 h-9 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600 transition text-sm">3</button>
-                <button class="w-9 h-9 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600 transition text-sm">
-                    ›
-                </button>
+                @if($products->onFirstPage())
+                <span class="w-9 h-9 flex items-center justify-center border border-gray-200 rounded-lg text-gray-300 text-sm cursor-not-allowed">‹</span>
+                @else
+                <a href="{{ $products->withQueryString()->previousPageUrl() }}" class="w-9 h-9 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600 transition text-sm">‹</a>
+                @endif
+
+                @foreach($products->withQueryString()->getUrlRange(1, $products->lastPage()) as $page => $url)
+                @if($page == $products->currentPage())
+                <span class="w-9 h-9 flex items-center justify-center bg-brand text-white rounded-lg text-sm font-semibold">{{ $page }}</span>
+                @else
+                <a href="{{ $url }}" class="w-9 h-9 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600 transition text-sm">{{ $page }}</a>
+                @endif
+                @endforeach
+
+                @if($products->hasMorePages())
+                <a href="{{ $products->withQueryString()->nextPageUrl() }}" class="w-9 h-9 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600 transition text-sm">›</a>
+                @else
+                <span class="w-9 h-9 flex items-center justify-center border border-gray-200 rounded-lg text-gray-300 text-sm cursor-not-allowed">›</span>
+                @endif
             </div>
+            @endif
         </div>
     </div>
 </div>

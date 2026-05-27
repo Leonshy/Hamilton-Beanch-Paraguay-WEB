@@ -1,19 +1,17 @@
 <!-- Banner superior negro (marquee) -->
+@if($announcements->isNotEmpty())
 <div class="bg-gray-900 text-white py-2 overflow-hidden text-xs font-medium tracking-wide">
     <div class="marquee-track whitespace-nowrap">
-        <span class="inline-block px-8">DISTRIBUIDOR OFICIAL HAMILTON BEACH® EN PARAGUAY</span>
-        <span class="inline-block text-brand-muted px-2">|</span>
-        <span class="inline-block px-8">GARANTÍA 1 AÑO CON SERVICIO TÉCNICO OFICIAL</span>
-        <span class="inline-block text-brand-muted px-2">|</span>
-        <span class="inline-block px-8">DISTRIBUIDOR OFICIAL HAMILTON BEACH® EN PARAGUAY</span>
-        <span class="inline-block text-brand-muted px-2">|</span>
-        <span class="inline-block px-8">GARANTÍA 1 AÑO CON SERVICIO TÉCNICO OFICIAL</span>
-        <span class="inline-block text-brand-muted px-2">|</span>
-        <span class="inline-block px-8">DISTRIBUIDOR OFICIAL HAMILTON BEACH® EN PARAGUAY</span>
-        <span class="inline-block text-brand-muted px-2">|</span>
-        <span class="inline-block px-8">GARANTÍA 1 AÑO CON SERVICIO TÉCNICO OFICIAL</span>
+        {{-- Se duplica el set completo para que el loop sea continuo y sin saltos --}}
+        @foreach([1, 2] as $_)
+            @foreach($announcements as $ann)
+                <span class="inline-block px-8">{{ $ann->text }}</span>
+                <span class="inline-block text-brand-muted px-2">|</span>
+            @endforeach
+        @endforeach
     </div>
 </div>
+@endif
 
 <!-- Fila: Logo + Contacto -->
 <div class="bg-white border-b border-gray-100">
@@ -26,18 +24,23 @@
             </a>
 
             <!-- Datos de contacto -->
+            @php
+                $navPhone = $siteSettings['phone'] ?? '+595 (9) 1234-567';
+                $navPhoneTel = 'tel:+' . preg_replace('/\D/', '', $navPhone);
+                $navEmail = $siteSettings['email'] ?? 'info@hamiltonbeach.com.py';
+            @endphp
             <div class="hidden md:flex items-center gap-6 text-sm text-gray-600">
-                <a href="tel:+595911234567" class="flex items-center gap-2 hover:text-brand transition">
+                <a href="{{ $navPhoneTel }}" class="flex items-center gap-2 hover:text-brand transition">
                     <svg class="w-4 h-4 text-brand flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                     </svg>
-                    +595 (9) 1234-567
+                    {{ $navPhone }}
                 </a>
-                <a href="mailto:info@hamiltonbeach.com.py" class="flex items-center gap-2 hover:text-brand transition">
+                <a href="mailto:{{ $navEmail }}" class="flex items-center gap-2 hover:text-brand transition">
                     <svg class="w-4 h-4 text-brand flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                     </svg>
-                    info@hamiltonbeach.com.py
+                    {{ $navEmail }}
                 </a>
             </div>
 
@@ -136,17 +139,17 @@
         <a href="/contacto" class="block py-2 text-sm font-medium text-gray-700 hover:text-brand">Contacto</a>
         <!-- Contacto mobile -->
         <div class="pt-3 border-t border-gray-100 space-y-2">
-            <a href="tel:+595911234567" class="flex items-center gap-2 text-sm text-gray-600 hover:text-brand">
+            <a href="{{ $navPhoneTel }}" class="flex items-center gap-2 text-sm text-gray-600 hover:text-brand">
                 <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                 </svg>
-                +595 (9) 1234-567
+                {{ $navPhone }}
             </a>
-            <a href="mailto:info@hamiltonbeach.com.py" class="flex items-center gap-2 text-sm text-gray-600 hover:text-brand">
+            <a href="mailto:{{ $navEmail }}" class="flex items-center gap-2 text-sm text-gray-600 hover:text-brand">
                 <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                 </svg>
-                info@hamiltonbeach.com.py
+                {{ $navEmail }}
             </a>
         </div>
     </div>

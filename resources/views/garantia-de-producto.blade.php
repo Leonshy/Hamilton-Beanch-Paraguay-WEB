@@ -34,7 +34,6 @@
 <div class="bg-gray-50 py-14">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {{-- Texto enriquecido desde el backend: {!! $pagina->contenido !!} --}}
         <div class="mb-10
                     prose prose-gray max-w-none
                     prose-headings:font-bold prose-headings:text-gray-900
@@ -49,34 +48,7 @@
                     prose-table:w-full prose-table:border-collapse
                     prose-th:bg-gray-50 prose-th:text-left prose-th:px-4 prose-th:py-2 prose-th:text-sm prose-th:font-semibold prose-th:text-gray-700 prose-th:border prose-th:border-gray-200
                     prose-td:px-4 prose-td:py-2 prose-td:text-sm prose-td:text-gray-600 prose-td:border prose-td:border-gray-200">
-
-            <p><strong>Importante:</strong> Conservá este documento junto con la factura de compra. En caso de pérdida de la póliza, el distribuidor podrá emitir una nueva contra presentación de la factura original.</p>
-
-            <h2>¿Qué cubre la garantía?</h2>
-            <ul>
-                <li>Defectos de fabricación en materiales y mano de obra.</li>
-                <li>Fallas en el funcionamiento normal del equipo.</li>
-                <li>Reemplazo de partes y componentes defectuosos.</li>
-                <li>Mano de obra dentro de la red de servicio autorizado.</li>
-            </ul>
-
-            <h2>¿Qué NO cubre la garantía?</h2>
-            <ul>
-                <li>Daños por uso incorrecto o negligencia.</li>
-                <li>Daños por voltaje inadecuado o sobretensión.</li>
-                <li>Reparaciones realizadas por técnicos no autorizados.</li>
-                <li>Daños estéticos (rayones, golpes, decoloración).</li>
-                <li>Productos con número de serie alterado o removido.</li>
-                <li>Desgaste natural por uso normal.</li>
-            </ul>
-
-            <h2>¿Cómo hacer un reclamo de garantía?</h2>
-            <ol>
-                <li>Contactanos por teléfono, WhatsApp o formulario de contacto indicando el modelo del equipo y la falla.</li>
-                <li>Tené a mano la factura de compra y la póliza de garantía para agilizar el proceso.</li>
-                <li>Nuestro equipo coordinará la revisión del equipo. El plazo máximo de reparación bajo garantía es de 30 días hábiles.</li>
-                <li>Una vez reparado, recibirás tu equipo en perfectas condiciones sin costo adicional.</li>
-            </ol>
+            {!! $page?->content !!}
         </div>
 
         <!-- CTA unificado -->

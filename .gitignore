@@ -1,7 +1,9 @@
 *.log
 .DS_Store
 .env
+.env.*
 .env.backup
+.env.local
 .env.production
 .phpactor.json
 .phpunit.result.cache
@@ -22,3 +24,5 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+CLAUDE_CONTEXT.md
+/reference

@@ -34,7 +34,6 @@
 <div class="bg-gray-50 py-14">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {{-- Texto enriquecido desde el backend: {!! $pagina->contenido !!} --}}
         <div class="mb-10
                     prose prose-gray max-w-none
                     prose-headings:font-bold prose-headings:text-gray-900
@@ -49,27 +48,7 @@
                     prose-table:w-full prose-table:border-collapse
                     prose-th:bg-gray-50 prose-th:text-left prose-th:px-4 prose-th:py-2 prose-th:text-sm prose-th:font-semibold prose-th:text-gray-700 prose-th:border prose-th:border-gray-200
                     prose-td:px-4 prose-td:py-2 prose-td:text-sm prose-td:text-gray-600 prose-td:border prose-td:border-gray-200">
-
-            <p>Cada producto Hamilton Beach incluye un <strong>manual de uso</strong> con información detallada sobre su funcionamiento, recomendaciones de seguridad y consejos de mantenimiento.</p>
-
-            <h2>¿Cómo encontrar el manual de tu producto?</h2>
-            <ol>
-                <li>Ingresá a la sección <a href="/productos">Productos</a> y encontrá el modelo de tu electrodoméstico Hamilton Beach.</li>
-                <li>Hacé clic en el producto para ver toda la información, características y especificaciones técnicas.</li>
-                <li>Al final de la descripción encontrarás el enlace para descargar el manual de uso en formato PDF.</li>
-            </ol>
-
-            <h2>¿Por qué es importante leer el manual?</h2>
-            <ul>
-                <li>Asegura el uso correcto y seguro del electrodoméstico.</li>
-                <li>Prolonga la vida útil de tu producto.</li>
-                <li>Contiene advertencias de seguridad importantes.</li>
-                <li>Es requerido para validar la garantía en caso de reclamo.</li>
-                <li>Incluye guías de limpieza y mantenimiento.</li>
-                <li>Describe todas las funciones y modos de operación.</li>
-            </ul>
-
-            <p><strong>Recomendación:</strong> Conservá el manual impreso en un lugar seguro junto con la factura de compra y la póliza de garantía.</p>
+            {!! $page?->content !!}
         </div>
 
         <!-- CTA unificado -->
