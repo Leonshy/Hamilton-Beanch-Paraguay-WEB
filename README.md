@@ -1,77 +1,102 @@
-# Hamilton Beach Paraguay - Frontend
+# Hamilton Beach Paraguay — Sitio Web Oficial
 
-Frontend de catálogo de productos Hamilton Beach para Paraguay, construido con Laravel 11, Blade y Tailwind CSS.
-
-## 🎨 Características
-
-- ✨ Diseño responsive moderno usando Tailwind CSS
-- 📱 Compatible con todos los dispositivos
-- 🛍️ Catálogo de productos con filtros
-- 📦 Página de detalle de producto con múltiples retailers
-- ❓ Sección de preguntas frecuentes
-- 🎯 Centro de ayuda completo
-- 📧 Formulario de contacto
-- 🎨 Diseño replicado del sitio de Argentina adaptado a Paraguay
-
-## 🚀 Instalación Rápida
-
-### Terminal:
-```bash
-cd /Users/leonshy/Hamilton-Beanch-Paraguay-WEB
-php artisan serve
-```
-
-Luego abre: http://localhost:8000
-
-## 📂 Estructura del Proyecto
-
-**Vistas Creadas:**
-- `index.blade.php` - Página de inicio
-- `productos.blade.php` - Catálogo
-- `producto-detalle.blade.php` - Detalle de producto  
-- `preguntas-frecuentes.blade.php` - FAQs
-- `centro-ayuda.blade.php` - Centro de ayuda
-- `contacto.blade.php` - Formulario de contacto
-
-**Componentes Reutilizables:**
-- `layouts/app.blade.php` - Layout base
-- `partials/navbar.blade.php` - Navegación
-- `partials/footer.blade.php` - Pie de página
-
-## 🔀 Rutas Disponibles
-
-- `/` - Inicio
-- `/productos` - Catálogo
-- `/productos/{id}` - Detalle de producto
-- `/preguntas-frecuentes` - FAQs
-- `/centro-ayuda` - Ayuda
-- `/contacto` - Contacto
-
-## 🎨 Stack Técnico
-
-✅ Laravel 11  
-✅ PHP 8.x  
-✅ Blade Templates  
-✅ Tailwind CSS  
-✅ Responsive Design  
-
-## ⚙️ Configuración Inicial
-
-Si es primera vez:
-```bash
-composer install
-npm install
-npm run dev
-cp .env.example .env
-php artisan key:generate
-php artisan serve
-```
-
-## 📝 Datos
-
-Todos los datos son **hardcodeados** para visualización. Listos para conectar a BD cuando lo necesites.
+Sitio web corporativo y catálogo de productos para **Distec**, distribuidor oficial de Hamilton Beach en Paraguay.
+Construido con Laravel 12, Blade y Tailwind CSS v4. Frontend completo con panel de administración CMS.
 
 ---
 
-**Status**: ✅ Frontend Completo - Listo para visualizar  
-**Próximo**: Conectar Backend + Base de Datos
+## Stack técnico
+
+- **Laravel 12** + PHP 8.2
+- **Blade** templates
+- **Tailwind CSS v4** con `@theme` para tokens de marca
+- **@tailwindcss/typography** para prose/rich text
+- Assets compilados localmente (`public/build` incluido en git — el servidor no corre npm)
+
+## Estructura de vistas
+
+```
+resources/views/
+├── layouts/
+│   └── app.blade.php             Layout base
+├── partials/
+│   ├── navbar.blade.php          Navbar 3 filas: marquee + logo/contacto + menú sticky con búsqueda
+│   ├── footer.blade.php          Footer con logo, links y redes
+│   └── cta-ayuda.blade.php       CTA "¿No encontraste tu respuesta?" reutilizable
+├── index.blade.php               Inicio: hero, trust badges, productos destacados, categorías
+├── productos.blade.php           Catálogo con sidebar de filtros y grilla de productos
+├── producto-detalle.blade.php    Ficha: galería, descripción corta, prose body, puntos de venta
+├── preguntas-frecuentes.blade.php
+├── centro-ayuda.blade.php
+├── servicio-tecnico.blade.php    Cuerpo editable vía texto enriquecido + cta-ayuda
+├── manuales-de-producto.blade.php
+├── garantia-de-producto.blade.php
+└── contacto.blade.php            Héroe verde, datos con SVG, formulario, redes sociales
+```
+
+## Rutas
+
+| URL | Vista |
+|-----|-------|
+| `/` | index |
+| `/productos` | productos |
+| `/productos/{id}` | producto-detalle |
+| `/preguntas-frecuentes` | preguntas-frecuentes |
+| `/centro-ayuda` | centro-ayuda |
+| `/servicio-tecnico` | servicio-tecnico |
+| `/manuales-de-producto` | manuales-de-producto |
+| `/garantia-de-producto` | garantia-de-producto |
+| `/contacto` | contacto |
+
+## Colores de marca
+
+Definidos en `resources/css/app.css` con `@theme`:
+
+| Token | Hex | Uso |
+|-------|-----|-----|
+| `brand` | `#387900` | Color principal |
+| `brand-dark` | `#2d6200` | Hover, fondos oscuros |
+| `brand-light` | `#f0f7e6` | Fondos suaves |
+| `brand-muted` | `#c8e6a0` | Texto sobre fondo verde |
+
+## Instalación local
+
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
+php artisan serve
+```
+
+Abrir: http://localhost:8000
+
+> No se necesita `npm run build` — los assets compilados están en `public/build`.
+
+## Servidor de staging
+
+- **URL**: http://hamilton.webparaguay.com *(staging — dominio de producción pendiente)*
+- **Hosting**: Plesk en 177.251.252.12 (puerto SSH 53931, usuario `hamiltonprueba`)
+- **Document root**: `httpdocs/public`
+- **PHP**: 8.2 via Plesk
+- **Base de datos**: MySQL (configurada en `.env` del servidor)
+
+### Deploy / actualización
+
+```bash
+# En el servidor via SSH
+ssh hamiltonprueba@177.251.252.12 -p 53931
+
+cd ~/httpdocs
+git pull origin main
+composer install --no-dev --optimize-autoloader
+php artisan config:clear
+php artisan cache:clear
+php artisan migrate --force
+```
+
+> Los assets CSS/JS se compilan localmente y se suben con el commit. No correr `npm` en el servidor.
+
+---
+
+**Estado**: Frontend + panel admin CMS completo. Desplegado en staging `hamilton.webparaguay.com`.
