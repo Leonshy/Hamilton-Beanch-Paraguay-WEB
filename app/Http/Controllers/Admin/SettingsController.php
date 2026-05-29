@@ -92,6 +92,16 @@ class SettingsController extends Controller
         return back()->with('success', 'Integraciones guardadas.');
     }
 
+    public function toggleMaintenance(Request $request)
+    {
+        $value = $request->input('value', '0');
+        SiteSetting::set('maintenance_mode', $value === '1' ? '1' : '0');
+        SiteSetting::clearCache();
+
+        $msg = $value === '1' ? 'Modo mantenimiento activado.' : 'Modo mantenimiento desactivado.';
+        return redirect()->route('admin.settings.general')->with('success', $msg);
+    }
+
     public function home()
     {
         $raw      = SiteSetting::get('home_features', '');

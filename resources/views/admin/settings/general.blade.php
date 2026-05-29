@@ -66,11 +66,42 @@
             </div>
         </div>
         <div class="col-lg-4">
-            <div class="card hb-admin-card">
+            <div class="card hb-admin-card mb-4">
                 <div class="card-body">
                     <button type="submit" class="btn btn-hb-primary w-100">
                         <i class="bi bi-save me-2"></i>Guardar cambios
                     </button>
+                </div>
+            </div>
+
+            {{-- Modo mantenimiento (formulario independiente) --}}
+            @php $maintenance = \App\Models\SiteSetting::get('maintenance_mode') === '1'; @endphp
+            <div class="card hb-admin-card border-{{ $maintenance ? 'warning' : 'secondary' }}">
+                <div class="card-header bg-{{ $maintenance ? 'warning bg-opacity-10' : '' }}">
+                    <h6 class="mb-0 text-{{ $maintenance ? 'warning' : '' }}">
+                        <i class="bi bi-cone-striped me-2"></i>Modo mantenimiento
+                    </h6>
+                </div>
+                <div class="card-body">
+                    @if($maintenance)
+                    <div class="alert alert-warning py-2 px-3 small mb-3">
+                        <i class="bi bi-exclamation-triangle me-1"></i>
+                        El sitio está en mantenimiento. Solo los usuarios logueados pueden verlo.
+                    </div>
+                    @else
+                    <p class="text-muted small mb-3">
+                        Al activar, los visitantes verán una página de mantenimiento. Los administradores logueados pueden navegar normalmente.
+                    </p>
+                    @endif
+                    <form action="{{ route('admin.settings.maintenance') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="value" value="{{ $maintenance ? '0' : '1' }}">
+                        <button type="submit"
+                                class="btn w-100 btn-{{ $maintenance ? 'warning' : 'outline-secondary' }}">
+                            <i class="bi bi-{{ $maintenance ? 'check-circle' : 'cone-striped' }} me-2"></i>
+                            {{ $maintenance ? 'Desactivar mantenimiento' : 'Activar mantenimiento' }}
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
