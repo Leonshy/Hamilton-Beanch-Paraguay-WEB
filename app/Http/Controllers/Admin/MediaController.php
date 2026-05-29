@@ -82,13 +82,30 @@ class MediaController extends Controller
 
     public function picker(Request $request)
     {
-        $type  = $request->get('type', 'image');
-        $media = Media::where('type', $type)->latest()->take(60)->get();
-        return response()->json($media->map(fn($m) => [
-            'id'    => $m->id,
-            'title' => $m->name,
-            'value' => $m->url,
-            'thumb' => $m->url,
-        ]));
+        $type   = $request->input('type', 'image');
+        $search = $request->input('search', '');
+        $page   = max(1, (int) $request->input('page', 1));
+        $perPage = 60;
+
+        $query = Media::where('type', $type)->latest();
+
+        if ($search) {
+            $query->where(fn($q) => $q->where('name', 'like', "%{$search}%")
+                ->orWhere('file_name', 'like', "%{$search}%"));
+        }
+
+        $paginated = $query->paginate($perPage, ['*'], 'page', $page);
+
+        return response()->json([
+            'items'    => $paginated->map(fn($m) => [
+                'id'    => $m->id,
+                'title' => $m->name,
+                'value' => $m->url,
+                'thumb' => $m->url,
+            ]),
+            'has_more' => $paginated->hasMorePages(),
+            'next_page' => $paginated->hasMorePages() ? $page + 1 : null,
+            'total'    => $paginated->total(),
+        ]);
     }
 }

@@ -207,21 +207,43 @@
     galleryPickerBtn.addEventListener('click', openGalleryPicker);
   }
 
+  var currentMediaType = 'image';
+  var currentMediaCb   = null;
+
   function loadMediaGrid(type, cb) {
+    currentMediaType = type || 'image';
+    currentMediaCb   = cb;
     var grid = document.getElementById('mediaPickerGrid');
-    var url  = window.ADMIN_MEDIA_PICKER_URL;
+    if (!grid) return;
+    grid.innerHTML = '<div class="col-12 text-center py-4 text-muted"><i class="bi bi-arrow-repeat"></i> Cargando...</div>';
+    appendMediaPage(1, true);
+  }
+
+  function appendMediaPage(page, replace) {
+    var grid   = document.getElementById('mediaPickerGrid');
+    var url    = window.ADMIN_MEDIA_PICKER_URL;
+    var search = (document.getElementById('mediaPickerSearch') || {}).value || '';
     if (!grid || !url) return;
 
-    grid.innerHTML = '<div class="col-12 text-center py-4 text-muted"><i class="bi bi-arrow-repeat"></i> Cargando...</div>';
-
-    fetch(url + '?type=' + (type || 'image'))
+    fetch(url + '?type=' + currentMediaType + '&page=' + page + '&search=' + encodeURIComponent(search))
       .then(function (r) { return r.json(); })
-      .then(function (items) {
-        if (!items.length) {
+      .then(function (data) {
+        // Eliminar botón "cargar más" anterior si existe
+        var oldBtn = grid.querySelector('.hb-load-more');
+        if (oldBtn) oldBtn.parentNode.remove();
+
+        if (replace) {
+          // Limpiar todo excepto el spinner (que ya no existe a este punto)
+          grid.innerHTML = '';
+        }
+
+        var items = data.items || [];
+
+        if (replace && !items.length) {
           grid.innerHTML = '<div class="col-12 text-center py-4 text-muted">No hay archivos</div>';
           return;
         }
-        grid.innerHTML = '';
+
         items.forEach(function (item) {
           var col = document.createElement('div');
           col.className = 'col-6 col-md-3 col-lg-2';
@@ -235,7 +257,6 @@
 
           col.querySelector('.hb-media-grid-item').addEventListener('click', function () {
             if (galleryMode) {
-              // Multi-select: toggle y mantener modal abierto
               var id  = this.dataset.id;
               var idx = gallerySelection.findIndex(function (s) { return s.id === id; });
               if (idx >= 0) {
@@ -247,8 +268,8 @@
               return;
             }
 
-            if (cb) {
-              cb(this.dataset.url, this.dataset.id);
+            if (currentMediaCb) {
+              currentMediaCb(this.dataset.url, this.dataset.id);
             } else if (currentTarget) {
               var inp = document.getElementById(currentTarget);
               if (inp) inp.value = this.dataset.id;
@@ -274,12 +295,48 @@
           grid.appendChild(col);
         });
 
-        // Si estamos en modo galería, marcar las ya seleccionadas
+        // Botón "Cargar más" si hay más páginas
+        if (data.has_more) {
+          var loadMoreCol = document.createElement('div');
+          loadMoreCol.className = 'col-12 text-center mt-2';
+          loadMoreCol.innerHTML =
+            '<button type="button" class="btn btn-outline-secondary btn-sm hb-load-more">' +
+            '<i class="bi bi-arrow-down me-1"></i>Cargar más (' + data.total + ' en total)' +
+            '</button>';
+          loadMoreCol.querySelector('.hb-load-more').addEventListener('click', function () {
+            appendMediaPage(data.next_page, false);
+          });
+          grid.appendChild(loadMoreCol);
+        }
+
         if (galleryMode) updateGalleryBadges();
       })
       .catch(function () {
-        grid.innerHTML = '<div class="col-12 text-center py-4 text-danger">Error al cargar archivos</div>';
+        var grid = document.getElementById('mediaPickerGrid');
+        if (grid) grid.innerHTML = '<div class="col-12 text-center py-4 text-danger">Error al cargar archivos</div>';
       });
+  }
+
+  // Búsqueda y filtro de tipo en el modal
+  var mediaSearchBtn = document.getElementById('mediaPickerSearchBtn');
+  var mediaSearchInput = document.getElementById('mediaPickerSearch');
+  var mediaTypeSelect  = document.getElementById('mediaPickerType');
+
+  if (mediaSearchBtn) {
+    mediaSearchBtn.addEventListener('click', function () {
+      appendMediaPage(1, true);
+    });
+  }
+  if (mediaSearchInput) {
+    mediaSearchInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); appendMediaPage(1, true); }
+    });
+  }
+  if (mediaTypeSelect) {
+    mediaTypeSelect.addEventListener('change', function () {
+      currentMediaType = this.value;
+      appendMediaPage(1, true);
+    });
   }
 
   // Botones que abren el media picker (modo single)
