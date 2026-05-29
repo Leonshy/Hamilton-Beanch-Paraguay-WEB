@@ -28,7 +28,8 @@ class ProductController extends Controller
         $data = $this->validateProduct($request);
         $data['user_id'] = auth()->id();
         $data['slug'] = $this->uniqueSlug($request->slug ?: $request->title);
-        $data['specifications'] = $this->parseSpecifications($request->specifications_json);
+        $data['specifications'] = $request->input('specifications');
+        $data['retailers'] = $this->parseRetailers($request->input('retailers', []));
         $data['is_featured'] = $request->boolean('is_featured');
         $data['no_index'] = $request->boolean('no_index');
 
@@ -53,7 +54,8 @@ class ProductController extends Controller
         if ($request->filled('slug') && $request->slug !== $product->slug) {
             $data['slug'] = $this->uniqueSlug($request->slug, $product->id);
         }
-        $data['specifications'] = $this->parseSpecifications($request->specifications_json);
+        $data['specifications'] = $request->input('specifications');
+        $data['retailers'] = $this->parseRetailers($request->input('retailers', []));
         $data['is_featured'] = $request->boolean('is_featured');
         $data['no_index'] = $request->boolean('no_index');
 
@@ -80,6 +82,7 @@ class ProductController extends Controller
             'status'           => 'required|in:published,draft',
             'order'            => 'nullable|integer',
             'price'            => 'nullable|integer|min:0',
+            'specifications'   => 'nullable|string',
             'attachment'       => 'nullable|string|max:500',
             'meta_title'       => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
@@ -102,6 +105,19 @@ class ProductController extends Controller
         return $slug;
     }
 
+    private function parseRetailers(array $retailers): ?array
+    {
+        $result = [];
+        $names = $retailers['name'] ?? [];
+        $urls  = $retailers['url']  ?? [];
+        foreach ($names as $i => $name) {
+            $name = trim($name);
+            if ($name === '') continue;
+            $result[] = ['name' => $name, 'url' => trim($urls[$i] ?? '')];
+        }
+        return $result ?: null;
+    }
+
     private function parseSpecifications(?string $json): ?array
     {
         if (!$json) return null;
@@ -111,8 +127,18 @@ class ProductController extends Controller
 
     private function syncGallery(Product $product, array $ids): void
     {
+        // El input viene como un string "1,2,3" dentro de un array — hay que aplanar
+        $flat = [];
+        foreach ($ids as $item) {
+            foreach (array_filter(array_map('trim', explode(',', (string) $item))) as $id) {
+                if (is_numeric($id)) {
+                    $flat[] = (int) $id;
+                }
+            }
+        }
+
         $sync = [];
-        foreach (array_filter($ids) as $order => $id) {
+        foreach ($flat as $order => $id) {
             $sync[$id] = ['order' => $order];
         }
         $product->gallery()->sync($sync);

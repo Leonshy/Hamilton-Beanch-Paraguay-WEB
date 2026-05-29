@@ -98,14 +98,14 @@
             </a>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             @foreach($featuredProducts as $producto)
             <a href="/productos/{{ $producto->slug }}"
                class="group bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-100 overflow-hidden">
                 <!-- Imagen -->
-                <div class="bg-gray-50 h-56 relative overflow-hidden">
+                <div class="bg-gray-50 aspect-square relative overflow-hidden">
                     <img src="{{ $producto->featuredImage?->url ?? '/images/products/cafetera-retro-black-1.webp' }}" alt="{{ $producto->title }}"
-                         class="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300">
+                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                     <div class="absolute top-3 left-3">
                         <span class="bg-white text-gray-600 text-xs font-medium px-2 py-1 rounded-full border border-gray-200 shadow-sm">
                             {{ $producto->category?->name ?? '' }}

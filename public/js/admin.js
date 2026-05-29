@@ -78,6 +78,10 @@
   var currentTarget    = null;
   var currentPreview   = null;
 
+  // ── Gallery multi-select state ──
+  var galleryMode      = false;
+  var gallerySelection = []; // [{id, url}]
+
   function openMediaPicker(type, cb) {
     var modalEl = document.getElementById('mediaPickerModal');
     if (!modalEl) return;
@@ -86,6 +90,121 @@
     }
     loadMediaGrid(type || 'image', cb);
     mediaPickerModal.show();
+  }
+
+  function openGalleryPicker() {
+    var modalEl = document.getElementById('mediaPickerModal');
+    if (!modalEl) return;
+    if (!mediaPickerModal) {
+      mediaPickerModal = new bootstrap.Modal(modalEl);
+    }
+
+    // Reconstruir selección actual desde el DOM de preview
+    gallerySelection = [];
+    document.querySelectorAll('#galleryPreview .gallery-thumb-wrap').forEach(function (el) {
+      gallerySelection.push({ id: el.dataset.id, url: el.dataset.url });
+    });
+
+    galleryMode = true;
+    updateConfirmBtn();
+    loadMediaGrid('image', null);
+    mediaPickerModal.show();
+  }
+
+  function updateConfirmBtn() {
+    var btn = document.getElementById('galleryConfirmBtn');
+    if (!btn) return;
+    btn.classList.toggle('d-none', !galleryMode);
+    btn.innerHTML = '<i class="bi bi-check2 me-1"></i>Confirmar selección (' + gallerySelection.length + ')';
+  }
+
+  function updateGalleryBadges() {
+    document.querySelectorAll('#mediaPickerGrid .hb-media-grid-item').forEach(function (item) {
+      var idx = gallerySelection.findIndex(function (s) { return s.id === item.dataset.id; });
+      var badge = item.querySelector('.gallery-order-badge');
+      if (idx >= 0) {
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'gallery-order-badge';
+          item.appendChild(badge);
+        }
+        badge.textContent = idx + 1;
+        item.classList.add('gallery-selected');
+      } else {
+        if (badge) badge.remove();
+        item.classList.remove('gallery-selected');
+      }
+    });
+    updateConfirmBtn();
+  }
+
+  function confirmGallerySelection() {
+    var inputsEl  = document.getElementById('galleryInputs');
+    var previewEl = document.getElementById('galleryPreview');
+    var emptyEl   = document.getElementById('galleryEmpty');
+
+    if (inputsEl) {
+      inputsEl.innerHTML = '';
+      gallerySelection.forEach(function (item) {
+        var inp = document.createElement('input');
+        inp.type = 'hidden';
+        inp.name = 'gallery_ids[]';
+        inp.value = item.id;
+        inputsEl.appendChild(inp);
+      });
+    }
+
+    if (previewEl) {
+      previewEl.innerHTML = '';
+      gallerySelection.forEach(function (item, idx) {
+        var wrap = document.createElement('div');
+        wrap.className = 'col-4 gallery-thumb-wrap';
+        wrap.dataset.id  = item.id;
+        wrap.dataset.url = item.url;
+        wrap.innerHTML =
+          '<div class="position-relative">' +
+          '<img src="' + item.url + '" alt="" class="w-100 rounded" style="height:70px;object-fit:cover">' +
+          '<span class="gallery-order-badge">' + (idx + 1) + '</span>' +
+          '</div>';
+        previewEl.appendChild(wrap);
+      });
+    }
+
+    if (emptyEl) emptyEl.remove();
+    if (!gallerySelection.length) {
+      var p = document.createElement('p');
+      p.className = 'text-muted small mb-0';
+      p.id = 'galleryEmpty';
+      p.textContent = 'Ninguna imagen seleccionada aún. Hacé clic en "Seleccionar imágenes".';
+      if (inputsEl) inputsEl.insertAdjacentElement('afterend', p);
+    }
+
+    galleryMode = false;
+    updateConfirmBtn();
+    if (mediaPickerModal) mediaPickerModal.hide();
+  }
+
+  // Reset gallery mode cuando se cierra el modal
+  var _modalEl = document.getElementById('mediaPickerModal');
+  if (_modalEl) {
+    _modalEl.addEventListener('hidden.bs.modal', function () {
+      if (galleryMode) {
+        galleryMode = false;
+        updateConfirmBtn();
+      }
+    });
+  }
+
+  // Botón confirmar galería
+  var galleryConfirmBtn = document.getElementById('galleryConfirmBtn');
+  if (galleryConfirmBtn) {
+    galleryConfirmBtn.addEventListener('click', confirmGallerySelection);
+  }
+
+  // Botón abrir galería
+  var galleryPickerBtn = document.getElementById('galleryPickerBtn');
+  if (galleryPickerBtn) {
+    galleryPickerBtn.addEventListener('click', openGalleryPicker);
   }
 
   function loadMediaGrid(type, cb) {
@@ -115,6 +234,19 @@
             '</div>';
 
           col.querySelector('.hb-media-grid-item').addEventListener('click', function () {
+            if (galleryMode) {
+              // Multi-select: toggle y mantener modal abierto
+              var id  = this.dataset.id;
+              var idx = gallerySelection.findIndex(function (s) { return s.id === id; });
+              if (idx >= 0) {
+                gallerySelection.splice(idx, 1);
+              } else {
+                gallerySelection.push({ id: id, url: this.dataset.url });
+              }
+              updateGalleryBadges();
+              return;
+            }
+
             if (cb) {
               cb(this.dataset.url, this.dataset.id);
             } else if (currentTarget) {
@@ -141,13 +273,16 @@
           });
           grid.appendChild(col);
         });
+
+        // Si estamos en modo galería, marcar las ya seleccionadas
+        if (galleryMode) updateGalleryBadges();
       })
       .catch(function () {
         grid.innerHTML = '<div class="col-12 text-center py-4 text-danger">Error al cargar archivos</div>';
       });
   }
 
-  // Botones que abren el media picker
+  // Botones que abren el media picker (modo single)
   document.querySelectorAll('.hb-media-picker-btn').forEach(function (btn) {
     btn.addEventListener('click', function () {
       currentTarget  = this.dataset.target;

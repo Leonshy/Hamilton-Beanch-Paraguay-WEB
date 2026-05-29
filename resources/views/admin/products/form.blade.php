@@ -50,9 +50,46 @@
             <div class="card hb-admin-card mb-4">
                 <div class="card-header"><h6 class="mb-0"><i class="bi bi-table me-2"></i>Especificaciones técnicas</h6></div>
                 <div class="card-body">
-                    <div class="form-text mb-3">Ingresá las especificaciones en formato JSON: <code>[{"label":"Capacidad","value":"1.7 L"},{"label":"Potencia","value":"1500W"}]</code></div>
-                    <textarea class="form-control font-monospace" id="specifications_json" name="specifications_json"
-                              rows="6" placeholder='[{"label":"Capacidad","value":"1.7 L"}]'>{{ old('specifications_json', isset($product) && $product->specifications ? json_encode($product->specifications, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : '') }}</textarea>
+                    <textarea class="form-control hb-wysiwyg" id="specifications" name="specifications"
+                              rows="8">{{ old('specifications', $product->specifications ?? '') }}</textarea>
+                </div>
+            </div>
+
+            {{-- Puntos de venta --}}
+            @php $retailers = old('retailers', isset($product) ? ['name' => collect($product->retailers ?? [])->pluck('name')->toArray(), 'url' => collect($product->retailers ?? [])->pluck('url')->toArray()] : ['name' => [], 'url' => []]) @endphp
+            <div class="card hb-admin-card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0"><i class="bi bi-shop me-2"></i>Puntos de venta</h6>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="addRetailerBtn">
+                        <i class="bi bi-plus-lg me-1"></i>Agregar
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="retailersList">
+                        @forelse($retailers['name'] as $i => $name)
+                        <div class="retailer-row row g-2 mb-2 align-items-center">
+                            <div class="col">
+                                <input type="text" class="form-control form-control-sm"
+                                       name="retailers[name][]"
+                                       placeholder="Nombre del punto de venta"
+                                       value="{{ $name }}">
+                            </div>
+                            <div class="col">
+                                <input type="url" class="form-control form-control-sm"
+                                       name="retailers[url][]"
+                                       placeholder="https://..."
+                                       value="{{ $retailers['url'][$i] ?? '' }}">
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-sm btn-outline-danger remove-retailer">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        @empty
+                        <p class="text-muted small mb-0" id="retailersEmpty">Ningún punto de venta agregado aún.</p>
+                        @endforelse
+                    </div>
                 </div>
             </div>
 
@@ -136,23 +173,36 @@
 
             {{-- Galería --}}
             <div class="card hb-admin-card mb-4">
-                <div class="card-header"><h6 class="mb-0">Galería de imágenes</h6></div>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0"><i class="bi bi-images me-2"></i>Galería de imágenes</h6>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="galleryPickerBtn">
+                        <i class="bi bi-plus-lg me-1"></i>Seleccionar imágenes
+                    </button>
+                </div>
                 <div class="card-body">
-                    @if(isset($product) && $product->gallery->count())
-                        <div class="row g-1 mb-2">
+                    <div class="row g-1 mb-2" id="galleryPreview">
+                        @if(isset($product) && $product->gallery->count())
                             @foreach($product->gallery as $img)
-                            <div class="col-4">
-                                <img src="{{ $img->url }}" alt="" class="w-100 rounded"
-                                     style="height:60px;object-fit:cover">
+                            <div class="col-4 gallery-thumb-wrap" data-id="{{ $img->id }}" data-url="{{ $img->url }}">
+                                <div class="position-relative">
+                                    <img src="{{ $img->url }}" alt="" class="w-100 rounded"
+                                         style="height:70px;object-fit:cover">
+                                    <span class="gallery-order-badge">{{ $loop->index + 1 }}</span>
+                                </div>
                             </div>
                             @endforeach
-                        </div>
+                        @endif
+                    </div>
+                    <div id="galleryInputs">
+                        @if(isset($product) && $product->gallery->count())
+                            @foreach($product->gallery as $img)
+                            <input type="hidden" name="gallery_ids[]" value="{{ $img->id }}">
+                            @endforeach
+                        @endif
+                    </div>
+                    @if(!isset($product) || !$product->gallery->count())
+                    <p class="text-muted small mb-0" id="galleryEmpty">Ninguna imagen seleccionada aún. Hacé clic en "Seleccionar imágenes".</p>
                     @endif
-                    <div class="form-text mb-2">IDs de imágenes separados por coma</div>
-                    <input type="text" class="form-control form-control-sm" name="gallery_ids[]"
-                           placeholder="Ej: 2,5,8"
-                           value="{{ isset($product) ? $product->gallery->pluck('id')->implode(',') : '' }}">
-                    <div class="form-text">Próximamente: selector visual de galería.</div>
                 </div>
             </div>
 
@@ -170,4 +220,39 @@
 </form>
 
 @include('admin.partials.media-picker-modal')
+
+@push('scripts')
+<script>
+const list = document.getElementById('retailersList');
+const emptyMsg = document.getElementById('retailersEmpty');
+
+function rowTemplate() {
+    return `<div class="retailer-row row g-2 mb-2 align-items-center">
+        <div class="col">
+            <input type="text" class="form-control form-control-sm" name="retailers[name][]" placeholder="Nombre del punto de venta">
+        </div>
+        <div class="col">
+            <input type="url" class="form-control form-control-sm" name="retailers[url][]" placeholder="https://...">
+        </div>
+        <div class="col-auto">
+            <button type="button" class="btn btn-sm btn-outline-danger remove-retailer"><i class="bi bi-trash"></i></button>
+        </div>
+    </div>`;
+}
+
+document.getElementById('addRetailerBtn').addEventListener('click', () => {
+    emptyMsg?.remove();
+    list.insertAdjacentHTML('beforeend', rowTemplate());
+});
+
+list.addEventListener('click', e => {
+    if (e.target.closest('.remove-retailer')) {
+        e.target.closest('.retailer-row').remove();
+        if (!list.querySelector('.retailer-row')) {
+            list.insertAdjacentHTML('beforeend', '<p class="text-muted small mb-0" id="retailersEmpty">Ningún punto de venta agregado aún.</p>');
+        }
+    }
+});
+</script>
+@endpush
 @endsection

@@ -73,14 +73,14 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
                 @forelse($products as $producto)
                 <a href="/productos/{{ $producto->slug }}"
                    class="group bg-white rounded-xl border border-gray-200 hover:border-brand-muted hover:shadow-md transition overflow-hidden">
                     <!-- Imagen -->
-                    <div class="bg-gray-50 h-52 relative overflow-hidden">
+                    <div class="bg-gray-50 aspect-square relative overflow-hidden">
                         <img src="{{ $producto->featuredImage?->url ?? '/images/products/cafetera-retro-black-1.webp' }}" alt="{{ $producto->title }}"
-                             class="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300">
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                         <span class="absolute top-3 left-3 bg-white border border-gray-200 text-gray-600 text-xs font-medium px-2.5 py-1 rounded-full">
                             {{ $producto->category?->name ?? '' }}
                         </span>

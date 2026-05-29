@@ -31,6 +31,9 @@
                     <button type="submit" class="btn btn-sm btn-hb-primary">Subir</button>
                 </form>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-hb-primary d-none" id="galleryConfirmBtn">
+                    <i class="bi bi-check2 me-1"></i>Confirmar selección (0)
+                </button>
             </div>
         </div>
     </div>

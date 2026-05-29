@@ -76,33 +76,23 @@
             @endif
 
             <!-- Puntos de venta -->
+            @if($product->retailers && count($product->retailers))
             <div class="mb-6">
                 <h2 class="text-base font-bold text-gray-900 mb-3">¿Dónde comprar?</h2>
                 <p class="text-sm text-gray-500 mb-4">Encontrá este producto en nuestros puntos de venta autorizados:</p>
                 <div class="space-y-3">
-                    <a href="#" target="_blank"
+                    @foreach($product->retailers as $retailer)
+                    <a href="{{ $retailer['url'] ?: '#' }}" target="_blank" rel="noopener"
                        class="flex items-center justify-between w-full bg-gray-800 hover:bg-gray-900 text-white px-5 py-3.5 rounded-xl font-semibold transition group">
-                        <span>Punto de Venta A</span>
+                        <span>{{ $retailer['name'] }}</span>
                         <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                         </svg>
                     </a>
-                    <a href="#" target="_blank"
-                       class="flex items-center justify-between w-full bg-gray-800 hover:bg-gray-900 text-white px-5 py-3.5 rounded-xl font-semibold transition group">
-                        <span>Punto de Venta B</span>
-                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                        </svg>
-                    </a>
-                    <a href="#" target="_blank"
-                       class="flex items-center justify-between w-full bg-gray-800 hover:bg-gray-900 text-white px-5 py-3.5 rounded-xl font-semibold transition group">
-                        <span>Punto de Venta C</span>
-                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                        </svg>
-                    </a>
+                    @endforeach
                 </div>
             </div>
+            @endif
 
             <!-- WhatsApp -->
             @php $waNum = preg_replace('/\D/', '', $siteSettings['whatsapp'] ?? '595911234567'); @endphp
@@ -147,24 +137,8 @@
 
                 {!! $product->content !!}
 
-                @if($product->specifications && count($product->specifications))
-                <h2>Especificaciones técnicas</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Especificación</th>
-                            <th>Detalle</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($product->specifications as $spec)
-                        <tr>
-                            <td>{{ $spec['label'] ?? ($spec[0] ?? '') }}</td>
-                            <td>{{ $spec['value'] ?? ($spec[1] ?? '') }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                @if($product->specifications)
+                {!! $product->specifications !!}
                 @endif
             </div>
 

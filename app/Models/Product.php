@@ -13,14 +13,14 @@ class Product extends Model
 
     protected $fillable = [
         'user_id', 'category_id', 'media_id', 'title', 'subtitle', 'content',
-        'slug', 'status', 'order', 'is_featured', 'attachment', 'price', 'specifications',
+        'slug', 'status', 'order', 'is_featured', 'attachment', 'price', 'specifications', 'retailers',
         'meta_title', 'meta_description', 'og_title', 'og_description', 'og_image', 'no_index',
     ];
 
     protected $casts = [
         'is_featured' => 'boolean',
         'no_index' => 'boolean',
-        'specifications' => 'array',
+        'retailers' => 'array',
         'price' => 'integer',
     ];
 
