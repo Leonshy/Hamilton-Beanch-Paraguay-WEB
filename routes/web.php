@@ -81,6 +81,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/settings/social',             [Admin\SettingsController::class, 'saveSocial'])->name('settings.social.save');
         Route::get('/settings/integrations',        [Admin\SettingsController::class, 'integrations'])->name('settings.integrations');
         Route::post('/settings/integrations',       [Admin\SettingsController::class, 'saveIntegrations'])->name('settings.integrations.save');
+        Route::get('/settings/home',                [Admin\SettingsController::class, 'home'])->name('settings.home');
+        Route::post('/settings/home',               [Admin\SettingsController::class, 'saveHome'])->name('settings.home.save');
 
         // Users (admin only)
         Route::resource('users', Admin\UserController::class)->middleware('can:admin-only');

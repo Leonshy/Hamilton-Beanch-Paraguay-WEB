@@ -91,4 +91,37 @@ class SettingsController extends Controller
         SiteSetting::clearCache();
         return back()->with('success', 'Integraciones guardadas.');
     }
+
+    public function home()
+    {
+        $raw      = SiteSetting::get('home_features', '');
+        $features = $raw ? json_decode($raw, true) : [];
+
+        // Garantizar siempre 3 bloques
+        while (count($features) < 3) {
+            $features[] = ['icon' => 'shield', 'title' => '', 'description' => ''];
+        }
+
+        return view('admin.settings.home', compact('features'));
+    }
+
+    public function saveHome(Request $request)
+    {
+        $request->validate([
+            'features.*.icon'        => 'required|string|max:50',
+            'features.*.title'       => 'required|string|max:255',
+            'features.*.description' => 'nullable|string|max:500',
+        ]);
+
+        $features = collect($request->input('features', []))->map(fn($f) => [
+            'icon'        => $f['icon'] ?? 'shield',
+            'title'       => $f['title'] ?? '',
+            'description' => $f['description'] ?? '',
+        ])->values()->toArray();
+
+        SiteSetting::set('home_features', json_encode($features, JSON_UNESCAPED_UNICODE));
+        SiteSetting::clearCache();
+
+        return back()->with('success', 'Bloques de inicio guardados.');
+    }
 }

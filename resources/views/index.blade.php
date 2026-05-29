@@ -40,47 +40,30 @@
 </div>
 
 <!-- Trust badges -->
+@php
+    $homeFeatures = json_decode(\App\Models\SiteSetting::get('home_features', '[]'), true) ?? [];
+@endphp
+@if(count($homeFeatures))
 <div class="bg-white border-b border-gray-100 py-10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            @foreach($homeFeatures as $feature)
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-brand-light rounded-xl flex items-center justify-center flex-shrink-0">
-                    <svg class="w-6 h-6 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
+                    @include('partials.trust-icon', ['icon' => $feature['icon'] ?? 'shield'])
                 </div>
                 <div>
-                    <h3 class="font-semibold text-gray-900">Puntos de venta en todo Paraguay</h3>
-                    <p class="text-gray-500 text-sm mt-0.5">Encontrá nuestros productos en tiendas autorizadas</p>
+                    <h3 class="font-semibold text-gray-900">{{ $feature['title'] ?? '' }}</h3>
+                    @if(!empty($feature['description']))
+                    <p class="text-gray-500 text-sm mt-0.5">{{ $feature['description'] }}</p>
+                    @endif
                 </div>
             </div>
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-brand-light rounded-xl flex items-center justify-center flex-shrink-0">
-                    <svg class="w-6 h-6 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="font-semibold text-gray-900">Garantía oficial 1 año</h3>
-                    <p class="text-gray-500 text-sm mt-0.5">Con respaldo de servicio técnico autorizado</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-brand-light rounded-xl flex items-center justify-center flex-shrink-0">
-                    <svg class="w-6 h-6 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="font-semibold text-gray-900">Servicio técnico oficial</h3>
-                    <p class="text-gray-500 text-sm mt-0.5">Técnicos capacitados con repuestos originales</p>
-                </div>
-            </div>
+            @endforeach
         </div>
     </div>
 </div>
+@endif
 
 <!-- Productos Destacados -->
 <div class="bg-gray-50 py-16">

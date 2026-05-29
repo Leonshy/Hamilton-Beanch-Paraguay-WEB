@@ -9,6 +9,7 @@
     <li class="nav-item"><a class="nav-link" href="{{ route('admin.settings.contact') }}">Contacto</a></li>
     <li class="nav-item"><a class="nav-link" href="{{ route('admin.settings.social') }}">Redes Sociales</a></li>
     <li class="nav-item"><a class="nav-link" href="{{ route('admin.settings.integrations') }}">Integraciones</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ route('admin.settings.home') }}">Página de Inicio</a></li>
 </ul>
 
 <form action="{{ route('admin.settings.general.save') }}" method="POST" enctype="multipart/form-data">
