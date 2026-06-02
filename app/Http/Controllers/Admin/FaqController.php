@@ -12,8 +12,15 @@ class FaqController extends Controller
     use HandlesOrder;
     public function index()
     {
-        $faqs = Faq::orderBy('order')->paginate(30);
+        $faqs = Faq::orderBy('order')->get();
         return view('admin.faqs.index', compact('faqs'));
+    }
+
+    public function reorder(Request $request)
+    {
+        $ids = $request->validate(['ids' => 'required|array', 'ids.*' => 'integer'])['ids'];
+        $this->applyReorder(Faq::class, $ids);
+        return response()->json(['ok' => true]);
     }
 
     public function create()

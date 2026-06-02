@@ -46,6 +46,13 @@ class AnnouncementController extends Controller
         return redirect()->route('admin.announcements.index')->with('success', 'Anuncio actualizado.');
     }
 
+    public function reorder(Request $request)
+    {
+        $ids = $request->validate(['ids' => 'required|array', 'ids.*' => 'integer'])['ids'];
+        $this->applyReorder(Announcement::class, $ids);
+        return response()->json(['ok' => true]);
+    }
+
     public function destroy(Announcement $announcement)
     {
         $announcement->delete();

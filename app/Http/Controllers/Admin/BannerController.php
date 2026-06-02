@@ -13,8 +13,8 @@ class BannerController extends Controller
     use HandlesOrder;
     public function index()
     {
-        $banners = Banner::with('image')->orderBy('position')->orderBy('order')->paginate(20);
-        return view('admin.banners.index', compact('banners'));
+        $grouped = Banner::with('image')->orderBy('position')->orderBy('order')->get()->groupBy('position');
+        return view('admin.banners.index', compact('grouped'));
     }
 
     public function create()
@@ -48,6 +48,20 @@ class BannerController extends Controller
         $banner->update($data);
         $this->saveInterval($request);
         return redirect()->route('admin.banners.index')->with('success', 'Banner actualizado correctamente.');
+    }
+
+    public function reorder(Request $request)
+    {
+        $data = $request->validate([
+            'ids'      => 'required|array',
+            'ids.*'    => 'integer',
+            'position' => 'required|in:home,productos',
+        ]);
+        // Sólo reordenar IDs que pertenecen a esa posición
+        $validIds = Banner::whereIn('id', $data['ids'])->where('position', $data['position'])->pluck('id')->all();
+        $ordered  = array_values(array_filter($data['ids'], fn($id) => in_array($id, $validIds)));
+        $this->applyReorder(Banner::class, $ordered);
+        return response()->json(['ok' => true]);
     }
 
     public function destroy(Banner $banner)

@@ -6,10 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 trait HandlesOrder
 {
-    /**
-     * Siguiente orden disponible (max + 1).
-     * Si $scopeColumn está definido, lo calcula dentro de ese scope (ej: banners por position).
-     */
     private function nextOrder(string $modelClass, ?string $scopeColumn = null, ?string $scopeValue = null): int
     {
         $query = $modelClass::query();
@@ -19,10 +15,6 @@ trait HandlesOrder
         return (int) $query->max('order') + 1;
     }
 
-    /**
-     * Desplaza hacia arriba todos los registros con order >= $order
-     * (excepto el registro con $ignoreId) para hacer lugar al nuevo valor.
-     */
     private function shiftOrderUp(string $modelClass, int $order, ?int $ignoreId = null, ?string $scopeColumn = null, ?string $scopeValue = null): void
     {
         $exists = $modelClass::query()
@@ -37,6 +29,16 @@ trait HandlesOrder
                 ->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId))
                 ->when($scopeColumn && $scopeValue !== null, fn($q) => $q->where($scopeColumn, $scopeValue))
                 ->increment('order');
+        }
+    }
+
+    protected function applyReorder(string $modelClass, array $ids, ?string $scopeColumn = null, ?string $scopeValue = null): void
+    {
+        foreach ($ids as $position => $id) {
+            $modelClass::query()
+                ->where('id', $id)
+                ->when($scopeColumn && $scopeValue !== null, fn($q) => $q->where($scopeColumn, $scopeValue))
+                ->update(['order' => $position + 1]);
         }
     }
 }

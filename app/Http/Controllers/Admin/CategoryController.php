@@ -13,8 +13,15 @@ class CategoryController extends Controller
     use HandlesOrder;
     public function index()
     {
-        $categories = Category::withCount('products')->orderBy('order')->paginate(20);
+        $categories = Category::withCount('products')->orderBy('order')->get();
         return view('admin.categories.index', compact('categories'));
+    }
+
+    public function reorder(Request $request)
+    {
+        $ids = $request->validate(['ids' => 'required|array', 'ids.*' => 'integer'])['ids'];
+        $this->applyReorder(Category::class, $ids);
+        return response()->json(['ok' => true]);
     }
 
     public function create()

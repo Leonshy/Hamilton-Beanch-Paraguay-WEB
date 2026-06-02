@@ -42,6 +42,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('products',   Admin\ProductController::class);
 
         // Categories
+        Route::post('/categories/reorder', [Admin\CategoryController::class, 'reorder'])->name('categories.reorder');
         Route::resource('categories', Admin\CategoryController::class);
 
         // Media
@@ -51,6 +52,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/media/picker',  [Admin\MediaController::class, 'picker'])->name('media.picker');
 
         // Announcements (barra marquee)
+        Route::post('/announcements/reorder', [Admin\AnnouncementController::class, 'reorder'])->name('announcements.reorder');
         Route::resource('announcements', Admin\AnnouncementController::class);
 
         // Pages
@@ -61,9 +63,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/help-center/{page}',       [Admin\HelpCenterController::class, 'update'])->name('help-center.update');
 
         // FAQs
+        Route::post('/faqs/reorder', [Admin\FaqController::class, 'reorder'])->name('faqs.reorder');
         Route::resource('faqs', Admin\FaqController::class);
 
         // Banners
+        Route::post('/banners/reorder', [Admin\BannerController::class, 'reorder'])->name('banners.reorder');
         Route::resource('banners', Admin\BannerController::class);
 
         // Contacts

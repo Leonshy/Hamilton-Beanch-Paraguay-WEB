@@ -90,11 +90,13 @@
     </div>
 
     {{-- Dots centrados al fondo --}}
-    <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-20" style="bottom: 16px; top: auto;">
+    <div class="absolute bottom-4 left-0 right-0 flex justify-center z-20" style="bottom: 16px; top: auto;">
+        <div class="flex items-center gap-2 bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-full">
         @foreach($banners as $i => $b)
         <button class="hero-dot w-2.5 h-2.5 rounded-full transition {{ $i === 0 ? 'bg-white' : 'bg-white/40' }}"
                 data-dot="{{ $i }}"></button>
         @endforeach
+        </div>
     </div>
     @endif
 </div>

@@ -24,16 +24,21 @@
         <table class="table table-hover hb-admin-table mb-0">
             <thead>
                 <tr>
-                    <th style="width:50px">Orden</th>
+                    <th style="width:36px"></th>
+                    <th style="width:60px">Orden</th>
                     <th>Texto</th>
                     <th style="width:100px">Estado</th>
                     <th style="width:120px">Acciones</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="sortable-announcements"
+                   data-url="{{ route('admin.announcements.reorder') }}">
                 @forelse($announcements as $ann)
-                <tr>
-                    <td class="text-muted small">{{ $ann->order }}</td>
+                <tr data-id="{{ $ann->id }}">
+                    <td class="hb-sort-handle text-center" style="cursor:grab;color:#aaa">
+                        <i class="bi bi-grip-vertical"></i>
+                    </td>
+                    <td class="text-muted small sort-order-num">{{ $ann->order }}</td>
                     <td>{{ $ann->text }}</td>
                     <td>
                         <span class="badge {{ $ann->is_active ? 'bg-success' : 'bg-secondary' }}">
@@ -54,10 +59,56 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="4" class="text-center text-muted py-5">No hay anuncios aún.</td></tr>
+                <tr><td colspan="5" class="text-center text-muted py-5">No hay anuncios aún.</td></tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 </div>
+
+<div id="sort-toast" class="d-none position-fixed bottom-0 end-0 m-3 p-2 px-3 bg-success text-white rounded shadow small" style="z-index:9999">
+    Orden guardado
+</div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
+<script>
+(function () {
+    var csrf = document.querySelector('meta[name=csrf-token]').content;
+    var tbody = document.getElementById('sortable-announcements');
+    if (!tbody) return;
+
+    function showToast() {
+        var t = document.getElementById('sort-toast');
+        t.classList.remove('d-none');
+        clearTimeout(window._sortTimer);
+        window._sortTimer = setTimeout(function () { t.classList.add('d-none'); }, 2500);
+    }
+
+    new Sortable(tbody, {
+        animation: 150,
+        handle: '.hb-sort-handle',
+        ghostClass: 'table-active',
+        onEnd: function () {
+            var ids = Array.from(tbody.querySelectorAll('tr[data-id]')).map(function (tr) {
+                return parseInt(tr.dataset.id);
+            });
+            fetch(tbody.dataset.url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
+                body: JSON.stringify({ ids: ids })
+            }).then(function (r) {
+                if (r.ok) {
+                    ids.forEach(function (id, i) {
+                        var cell = tbody.querySelector('tr[data-id="' + id + '"] .sort-order-num');
+                        if (cell) cell.textContent = i + 1;
+                    });
+                    showToast();
+                }
+            });
+        }
+    });
+})();
+</script>
+@endpush
