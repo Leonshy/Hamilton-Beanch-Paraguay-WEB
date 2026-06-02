@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Faq;
+use App\Traits\HandlesOrder;
 use Illuminate\Http\Request;
 
 class FaqController extends Controller
 {
+    use HandlesOrder;
     public function index()
     {
         $faqs = Faq::orderBy('order')->paginate(30);
@@ -16,13 +18,16 @@ class FaqController extends Controller
 
     public function create()
     {
-        return view('admin.faqs.form');
+        $nextOrder = $this->nextOrder(Faq::class);
+        return view('admin.faqs.form', compact('nextOrder'));
     }
 
     public function store(Request $request)
     {
         $data = $this->validateFaq($request);
         $data['is_active'] = $request->boolean('is_active');
+        $data['order'] = $data['order'] ?? $this->nextOrder(Faq::class);
+        $this->shiftOrderUp(Faq::class, (int) $data['order']);
         Faq::create($data);
         return redirect()->route('admin.faqs.index')->with('success', 'Pregunta frecuente creada correctamente.');
     }
@@ -36,6 +41,7 @@ class FaqController extends Controller
     {
         $data = $this->validateFaq($request);
         $data['is_active'] = $request->boolean('is_active');
+        $this->shiftOrderUp(Faq::class, (int) $data['order'], $faq->id);
         $faq->update($data);
         return redirect()->route('admin.faqs.index')->with('success', 'Pregunta actualizada correctamente.');
     }

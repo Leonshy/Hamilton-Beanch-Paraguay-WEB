@@ -71,7 +71,7 @@
                     <div class="mb-3">
                         <label class="form-label">Orden</label>
                         <input type="number" class="form-control" name="order"
-                               value="{{ old('order', $page->order ?? 0) }}" min="0">
+                               value="{{ old('order', $page->order ?? $nextOrder ?? 0) }}" min="0">
                     </div>
                     <button type="submit" class="btn btn-hb-primary w-100">
                         <i class="bi bi-save me-2"></i>{{ isset($page) ? 'Actualizar' : 'Guardar' }}

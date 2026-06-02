@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Announcement;
+use App\Traits\HandlesOrder;
 use Illuminate\Http\Request;
 
 class AnnouncementController extends Controller
 {
+    use HandlesOrder;
     public function index()
     {
         $announcements = Announcement::orderBy('order')->get();
@@ -16,13 +18,16 @@ class AnnouncementController extends Controller
 
     public function create()
     {
-        return view('admin.announcements.form');
+        $nextOrder = $this->nextOrder(Announcement::class);
+        return view('admin.announcements.form', compact('nextOrder'));
     }
 
     public function store(Request $request)
     {
         $data = $this->validateAnnouncement($request);
         $data['is_active'] = $request->boolean('is_active');
+        $data['order'] = $data['order'] ?? $this->nextOrder(Announcement::class);
+        $this->shiftOrderUp(Announcement::class, (int) $data['order']);
         Announcement::create($data);
         return redirect()->route('admin.announcements.index')->with('success', 'Anuncio creado correctamente.');
     }
@@ -36,6 +41,7 @@ class AnnouncementController extends Controller
     {
         $data = $this->validateAnnouncement($request);
         $data['is_active'] = $request->boolean('is_active');
+        $this->shiftOrderUp(Announcement::class, (int) $data['order'], $announcement->id);
         $announcement->update($data);
         return redirect()->route('admin.announcements.index')->with('success', 'Anuncio actualizado.');
     }

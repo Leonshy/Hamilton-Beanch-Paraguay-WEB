@@ -31,7 +31,7 @@
                 <div class="col-sm-6">
                     <label class="form-label">Orden</label>
                     <input type="number" class="form-control" name="order"
-                           value="{{ old('order', $announcement->order ?? 0) }}" min="0">
+                           value="{{ old('order', $announcement->order ?? $nextOrder ?? 0) }}" min="0">
                 </div>
                 <div class="col-sm-6 d-flex align-items-end pb-1">
                     <div class="form-check">

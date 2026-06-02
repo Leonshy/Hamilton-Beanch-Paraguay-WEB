@@ -6,11 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Media;
 use App\Models\Product;
+use App\Traits\HandlesOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
+    use HandlesOrder;
     public function index()
     {
         $products = Product::with('category', 'featuredImage')->orderBy('order')->paginate(20);
@@ -20,7 +22,8 @@ class ProductController extends Controller
     public function create()
     {
         $categories = Category::active()->ofType('product')->orderBy('name')->get();
-        return view('admin.products.form', compact('categories'));
+        $nextOrder = $this->nextOrder(Product::class);
+        return view('admin.products.form', compact('categories', 'nextOrder'));
     }
 
     public function store(Request $request)
@@ -32,6 +35,8 @@ class ProductController extends Controller
         $data['retailers'] = $this->parseRetailers($request->input('retailers', []));
         $data['is_featured'] = $request->boolean('is_featured');
         $data['no_index'] = $request->boolean('no_index');
+        $data['order'] = $data['order'] ?? $this->nextOrder(Product::class);
+        $this->shiftOrderUp(Product::class, (int) $data['order']);
 
         $product = Product::create($data);
 
@@ -58,6 +63,7 @@ class ProductController extends Controller
         $data['retailers'] = $this->parseRetailers($request->input('retailers', []));
         $data['is_featured'] = $request->boolean('is_featured');
         $data['no_index'] = $request->boolean('no_index');
+        $this->shiftOrderUp(Product::class, (int) $data['order'], $product->id);
 
         $product->update($data);
         $this->syncGallery($product, $request->input('gallery_ids', []));

@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Page;
+use App\Traits\HandlesOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class PageController extends Controller
 {
+    use HandlesOrder;
     public function index()
     {
         $pages = Page::orderBy('order')->paginate(20);
@@ -17,7 +19,8 @@ class PageController extends Controller
 
     public function create()
     {
-        return view('admin.pages.form');
+        $nextOrder = $this->nextOrder(Page::class);
+        return view('admin.pages.form', compact('nextOrder'));
     }
 
     public function store(Request $request)
@@ -26,7 +29,8 @@ class PageController extends Controller
         $data['user_id'] = auth()->id();
         $data['slug'] = $this->uniqueSlug($request->slug ?: $request->title);
         $data['no_index'] = $request->boolean('no_index');
-
+        $data['order'] = $data['order'] ?? $this->nextOrder(Page::class);
+        $this->shiftOrderUp(Page::class, (int) $data['order']);
         Page::create($data);
         return redirect()->route('admin.pages.index')->with('success', 'Página creada correctamente.');
     }
@@ -43,7 +47,7 @@ class PageController extends Controller
             $data['slug'] = $this->uniqueSlug($request->slug, $page->id);
         }
         $data['no_index'] = $request->boolean('no_index');
-
+        $this->shiftOrderUp(Page::class, (int) $data['order'], $page->id);
         $page->update($data);
         return redirect()->route('admin.pages.index')->with('success', 'Página actualizada correctamente.');
     }

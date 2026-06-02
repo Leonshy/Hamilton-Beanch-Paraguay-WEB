@@ -51,7 +51,7 @@
                     <div class="mb-3">
                         <label class="form-label">Orden</label>
                         <input type="number" class="form-control" name="order"
-                               value="{{ old('order', $faq->order ?? 0) }}" min="0">
+                               value="{{ old('order', $faq->order ?? $nextOrder ?? 0) }}" min="0">
                     </div>
                     <div class="form-check mb-4">
                         <input class="form-check-input" type="checkbox" name="is_active" value="1"

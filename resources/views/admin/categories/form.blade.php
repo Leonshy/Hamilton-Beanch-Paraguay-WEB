@@ -71,7 +71,7 @@ $currentImageUrl = isset($category) && $category->image ? $category->image->url 
                         <div class="col-md-6">
                             <label class="form-label">Orden</label>
                             <input type="number" class="form-control" name="order"
-                                   value="{{ old('order', $category->order ?? 0) }}" min="0">
+                                   value="{{ old('order', $category->order ?? $nextOrder ?? 0) }}" min="0">
                         </div>
                         <div class="col-md-6 d-flex align-items-end">
                             <div class="form-check mb-1">

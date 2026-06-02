@@ -4,40 +4,146 @@
 
 @section('content')
 
-<!-- Hero Section -->
-<div class="relative bg-gray-900 text-white overflow-hidden">
-    <div class="absolute inset-0 bg-brand-dark opacity-90"></div>
-    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div class="py-24 md:py-32">
-                <p class="text-brand-muted font-medium mb-3 uppercase tracking-wider text-sm">Distribuidor Oficial en Paraguay</p>
-                <h1 class="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">
-                    {{ $banner?->title ?? 'Calidad Hamilton Beach' }}<br>
-                    <span class="text-brand-muted">{{ $banner?->subtitle ?? 'para tu hogar' }}</span>
-                </h1>
-                <p class="text-lg mb-8 text-brand-muted leading-relaxed">
-                    {{ $banner?->description ?? 'Cafeteras, tostadoras, pavas eléctricas y molinillos de café con respaldo y garantía oficial en Paraguay.' }}
-                </p>
-                <div class="flex flex-wrap gap-4">
-                    <a href="{{ $banner?->cta_url ?? '/productos' }}"
-                       class="inline-block bg-white text-brand-dark px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition shadow">
-                        {{ $banner?->cta_text ?? 'Ver catálogo' }}
-                    </a>
-                    <a href="/contacto"
-                       class="inline-block border-2 border-white text-white px-8 py-3 rounded-lg font-bold hover:bg-brand transition">
-                        Contacto
-                    </a>
+<!-- Hero Section — Carrusel altura fija -->
+@if($banners->isNotEmpty())
+<div class="relative bg-brand-dark text-white overflow-hidden" id="heroSlider"
+     style="height: clamp(380px, 55vw, 580px);">
+
+    {{-- Slides: todos absolute, se muestran u ocultan con opacidad --}}
+    @foreach($banners as $i => $b)
+    <div class="hero-slide absolute inset-0 transition-opacity duration-700 {{ $i === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none' }}"
+         data-slide="{{ $i }}">
+
+        <div class="absolute inset-0 bg-brand-dark opacity-90"></div>
+
+        @php $hasImage = !empty($b->image?->url); @endphp
+        <div class="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+            @if($hasImage)
+            {{-- Con imagen: dos columnas --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 w-full items-center">
+                <div>
+            @else
+            {{-- Sin imagen: columna única centrada --}}
+            <div class="w-full flex justify-center">
+                <div class="text-center max-w-2xl">
+            @endif
+                    @if($b->tagline)
+                    <p class="text-brand-muted font-medium mb-3 uppercase tracking-wider text-sm">{{ $b->tagline }}</p>
+                    @endif
+                    <h1 class="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
+                        {{ $b->title ?? 'Calidad Hamilton Beach' }}
+                        @if($b->subtitle)
+                        <br><span class="text-brand-muted">{{ $b->subtitle }}</span>
+                        @endif
+                    </h1>
+                    @if($b->description)
+                    <p class="text-lg mb-8 text-brand-muted leading-relaxed">{{ $b->description }}</p>
+                    @endif
+                    @if($b->cta_text || $b->cta2_text)
+                    <div class="flex flex-wrap gap-4 {{ $hasImage ? '' : 'justify-center' }}">
+                        @if($b->cta_text)
+                        <a href="{{ $b->cta_url ?? '/productos' }}"
+                           class="inline-block bg-white text-brand-dark px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition shadow">
+                            {{ $b->cta_text }}
+                        </a>
+                        @endif
+                        @if($b->cta2_text)
+                        <a href="{{ $b->cta2_url ?? '/contacto' }}"
+                           class="inline-block border-2 border-white text-white px-8 py-3 rounded-lg font-bold hover:bg-brand transition">
+                            {{ $b->cta2_text }}
+                        </a>
+                        @endif
+                    </div>
+                    @endif
+            @if($hasImage)
+                </div>
+                {{-- Columna imagen --}}
+                <div class="hidden md:flex items-center justify-center h-full py-6 overflow-hidden">
+                    <img src="{{ $b->image->url }}" alt="{{ $b->title ?? 'Hamilton Beach' }}"
+                         class="max-h-full w-auto object-contain drop-shadow-2xl">
                 </div>
             </div>
-            <!-- Imagen hero -->
-            <div class="hidden md:flex items-center">
-                <img src="{{ $banner?->image?->url ?? '/images/products/cafetera-retro-black-1.webp' }}"
-                     alt="{{ $banner?->title ?? 'Cafetera Hamilton Beach' }}"
-                     class="w-full h-full object-contain drop-shadow-2xl">
+            @else
+                </div>
             </div>
+            @endif
         </div>
     </div>
+    @endforeach
+
+    {{-- Controles: wrapper inset-0 con flexbox para posicionamiento garantizado --}}
+    @if($banners->count() > 1)
+    {{-- Flechas (ocultas en mobile) --}}
+    <div class="absolute inset-0 z-20 hidden md:flex items-center justify-between px-4 pointer-events-none">
+        <button id="heroPrev" aria-label="Anterior"
+                class="pointer-events-auto w-10 h-10 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center transition">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </button>
+        <button id="heroNext" aria-label="Siguiente"
+                class="pointer-events-auto w-10 h-10 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center transition">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </button>
+    </div>
+
+    {{-- Dots centrados al fondo --}}
+    <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-20" style="bottom: 16px; top: auto;">
+        @foreach($banners as $i => $b)
+        <button class="hero-dot w-2.5 h-2.5 rounded-full transition {{ $i === 0 ? 'bg-white' : 'bg-white/40' }}"
+                data-dot="{{ $i }}"></button>
+        @endforeach
+    </div>
+    @endif
 </div>
+
+@php $heroInterval = (int)(\App\Models\SiteSetting::get('hero_slide_interval', 6)) * 1000; @endphp
+<script>
+(function () {
+    var slider = document.getElementById('heroSlider');
+    var slides = document.querySelectorAll('.hero-slide');
+    var dots   = document.querySelectorAll('.hero-dot');
+    if (!slider || slides.length <= 1) return;
+
+    var current  = 0;
+    var interval = {{ $heroInterval }};
+    var timer;
+
+    function goTo(n) {
+        slides[current].classList.replace('opacity-100', 'opacity-0');
+        slides[current].classList.add('pointer-events-none');
+        if (dots[current]) dots[current].classList.replace('bg-white', 'bg-white/40');
+        current = (n + slides.length) % slides.length;
+        slides[current].classList.replace('opacity-0', 'opacity-100');
+        slides[current].classList.remove('pointer-events-none');
+        if (dots[current]) dots[current].classList.replace('bg-white/40', 'bg-white');
+    }
+
+    function startTimer() { timer = setInterval(function () { goTo(current + 1); }, interval); }
+    function resetTimer()  { clearInterval(timer); startTimer(); }
+
+    var prevBtn = document.getElementById('heroPrev');
+    var nextBtn = document.getElementById('heroNext');
+    if (prevBtn) prevBtn.addEventListener('click', function () { goTo(current - 1); resetTimer(); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { goTo(current + 1); resetTimer(); });
+    dots.forEach(function (dot) {
+        dot.addEventListener('click', function () { goTo(+this.dataset.dot); resetTimer(); });
+    });
+
+    // Swipe en mobile
+    var touchX = 0;
+    slider.addEventListener('touchstart', function (e) { touchX = e.touches[0].clientX; }, { passive: true });
+    slider.addEventListener('touchend', function (e) {
+        var diff = touchX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) { goTo(current + (diff > 0 ? 1 : -1)); resetTimer(); }
+    }, { passive: true });
+
+    startTimer();
+})();
+</script>
+@endif
 
 <!-- Trust badges -->
 @php

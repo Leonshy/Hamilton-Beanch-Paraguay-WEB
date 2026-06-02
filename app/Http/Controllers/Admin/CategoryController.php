@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Traits\HandlesOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
+    use HandlesOrder;
     public function index()
     {
         $categories = Category::withCount('products')->orderBy('order')->paginate(20);
@@ -17,7 +19,8 @@ class CategoryController extends Controller
 
     public function create()
     {
-        return view('admin.categories.form');
+        $nextOrder = $this->nextOrder(Category::class);
+        return view('admin.categories.form', compact('nextOrder'));
     }
 
     public function store(Request $request)
@@ -25,7 +28,8 @@ class CategoryController extends Controller
         $data = $this->validateCategory($request);
         $data['slug'] = $this->uniqueSlug($request->slug ?: $request->name);
         $data['is_active'] = $request->boolean('is_active');
-
+        $data['order'] = $data['order'] ?? $this->nextOrder(Category::class);
+        $this->shiftOrderUp(Category::class, (int) $data['order']);
         Category::create($data);
         return redirect()->route('admin.categories.index')->with('success', 'Categoría creada correctamente.');
     }
@@ -42,7 +46,7 @@ class CategoryController extends Controller
             $data['slug'] = $this->uniqueSlug($request->slug, $category->id);
         }
         $data['is_active'] = $request->boolean('is_active');
-
+        $this->shiftOrderUp(Category::class, (int) $data['order'], $category->id);
         $category->update($data);
         return redirect()->route('admin.categories.index')->with('success', 'Categoría actualizada.');
     }

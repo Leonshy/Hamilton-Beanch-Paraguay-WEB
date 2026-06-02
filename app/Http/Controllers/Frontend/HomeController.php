@@ -11,11 +11,11 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $banner = Banner::with('image')
+        $banners = Banner::with('image')
             ->active()
             ->position('home')
             ->orderBy('order')
-            ->first();
+            ->get();
 
         $featuredProducts = Product::with('featuredImage', 'category')
             ->published()
@@ -30,6 +30,8 @@ class HomeController extends Controller
             ->orderBy('order')
             ->get();
 
-        return view('index', compact('banner', 'featuredProducts', 'categories'));
+        $banner = $banners->first(); // compatibilidad con otras partes de la vista
+
+        return view('index', compact('banners', 'banner', 'featuredProducts', 'categories'));
     }
 }

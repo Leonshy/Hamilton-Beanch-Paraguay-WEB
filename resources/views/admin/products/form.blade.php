@@ -120,7 +120,7 @@
                     <div class="mb-3">
                         <label class="form-label">Orden</label>
                         <input type="number" class="form-control" name="order"
-                               value="{{ old('order', $product->order ?? 0) }}" min="0">
+                               value="{{ old('order', $product->order ?? $nextOrder ?? 0) }}" min="0">
                     </div>
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" name="is_featured" value="1"
