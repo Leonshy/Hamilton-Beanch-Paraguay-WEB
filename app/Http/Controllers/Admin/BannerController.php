@@ -81,17 +81,9 @@ class BannerController extends Controller
     private function validateBanner(Request $request): array
     {
         return $request->validate([
-            'tagline'     => 'nullable|string|max:255',
-            'title'       => 'nullable|string|max:255',
-            'subtitle'    => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-            'cta_text'    => 'nullable|string|max:100',
-            'cta_url'     => 'nullable|string|max:500',
-            'cta2_text'   => 'nullable|string|max:100',
-            'cta2_url'    => 'nullable|string|max:500',
-            'position'    => 'required|in:home,productos',
-            'order'       => 'nullable|integer',
-            'media_id'    => 'nullable|exists:media,id',
+            'position' => 'required|in:home,productos',
+            'order'    => 'nullable|integer',
+            'media_id' => 'nullable|exists:media,id',
         ]);
     }
 }
