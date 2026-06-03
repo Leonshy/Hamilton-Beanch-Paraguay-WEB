@@ -4,93 +4,50 @@
 
 @section('content')
 
-<!-- Hero Section — Carrusel altura fija -->
+<!-- Hero Section — Banner imagen pura 16:9 -->
 @if($banners->isNotEmpty())
-<div class="relative bg-brand-dark text-white overflow-hidden" id="heroSlider"
-     style="height: clamp(380px, 55vw, 580px);">
+<div class="relative w-full bg-brand-dark overflow-hidden" id="heroSlider"
+     style="aspect-ratio: 1280/720; max-height: 80vh;">
 
-    {{-- Slides: todos absolute, se muestran u ocultan con opacidad --}}
     @foreach($banners as $i => $b)
     <div class="hero-slide absolute inset-0 transition-opacity duration-700 {{ $i === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none' }}"
          data-slide="{{ $i }}">
-
-        <div class="absolute inset-0 bg-brand-dark opacity-90"></div>
-
-        @php $hasImage = !empty($b->image?->url); @endphp
-        <div class="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
-            @if($hasImage)
-            {{-- Con imagen: dos columnas --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 w-full items-center">
-                <div>
-            @else
-            {{-- Sin imagen: columna única centrada --}}
-            <div class="w-full flex justify-center">
-                <div class="text-center max-w-2xl">
-            @endif
-                    @if($b->tagline)
-                    <p class="text-brand-muted font-medium mb-3 uppercase tracking-wider text-sm">{{ $b->tagline }}</p>
-                    @endif
-                    <h1 class="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
-                        {{ $b->title ?? 'Calidad Hamilton Beach' }}
-                        @if($b->subtitle)
-                        <br><span class="text-brand-muted">{{ $b->subtitle }}</span>
-                        @endif
-                    </h1>
-                    @if($b->description)
-                    <p class="text-lg mb-8 text-brand-muted leading-relaxed">{{ $b->description }}</p>
-                    @endif
-                    @if($b->cta_text || $b->cta2_text)
-                    <div class="flex flex-wrap gap-4 {{ $hasImage ? '' : 'justify-center' }}">
-                        @if($b->cta_text)
-                        <a href="{{ $b->cta_url ?? '/productos' }}"
-                           class="inline-block bg-white text-brand-dark px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition shadow">
-                            {{ $b->cta_text }}
-                        </a>
-                        @endif
-                        @if($b->cta2_text)
-                        <a href="{{ $b->cta2_url ?? '/contacto' }}"
-                           class="inline-block border-2 border-white text-white px-8 py-3 rounded-lg font-bold hover:bg-brand transition">
-                            {{ $b->cta2_text }}
-                        </a>
-                        @endif
-                    </div>
-                    @endif
-            @if($hasImage)
-                </div>
-                {{-- Columna imagen --}}
-                <div class="hidden md:flex items-center justify-center h-full py-6 overflow-hidden">
-                    <img src="{{ $b->image->url }}" alt="{{ $b->title ?? 'Hamilton Beach' }}"
-                         class="max-h-full w-auto object-contain drop-shadow-2xl">
-                </div>
+        @if($b->image?->url)
+            <img src="{{ $b->image->url }}"
+                 alt="{{ $b->title ?? 'Hamilton Beach' }}"
+                 class="w-full h-full object-cover">
+        @else
+            {{-- Placeholder cuando no hay imagen cargada --}}
+            <div class="w-full h-full flex flex-col items-center justify-center bg-brand-dark gap-3">
+                <svg class="w-16 h-16 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <p class="text-white/30 text-sm">Banner 1280 × 720 — Subí una imagen desde el admin</p>
             </div>
-            @else
-                </div>
-            </div>
-            @endif
-        </div>
+        @endif
     </div>
     @endforeach
 
-    {{-- Controles: wrapper inset-0 con flexbox para posicionamiento garantizado --}}
+    {{-- Flechas (solo si hay más de un banner) --}}
     @if($banners->count() > 1)
-    {{-- Flechas (ocultas en mobile) --}}
     <div class="absolute inset-0 z-20 hidden md:flex items-center justify-between px-4 pointer-events-none">
         <button id="heroPrev" aria-label="Anterior"
-                class="pointer-events-auto w-10 h-10 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center transition">
+                class="pointer-events-auto w-10 h-10 bg-black/30 hover:bg-black/50 rounded-full flex items-center justify-center transition">
             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
         </button>
         <button id="heroNext" aria-label="Siguiente"
-                class="pointer-events-auto w-10 h-10 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center transition">
+                class="pointer-events-auto w-10 h-10 bg-black/30 hover:bg-black/50 rounded-full flex items-center justify-center transition">
             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
         </button>
     </div>
 
-    {{-- Dots centrados al fondo --}}
-    <div class="absolute bottom-4 left-0 right-0 flex justify-center z-20" style="bottom: 16px; top: auto;">
+    {{-- Dots --}}
+    <div class="absolute bottom-4 left-0 right-0 flex justify-center z-20">
         <div class="flex items-center gap-2 bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-full">
         @foreach($banners as $i => $b)
         <button class="hero-dot w-2.5 h-2.5 rounded-full transition {{ $i === 0 ? 'bg-white' : 'bg-white/40' }}"
