@@ -21,9 +21,10 @@
                     @foreach([
                         'social_instagram' => ['Instagram', 'bi-instagram', 'https://instagram.com/hamiltonbeachpy'],
                         'social_facebook'  => ['Facebook', 'bi-facebook', 'https://facebook.com/hamiltonbeachpy'],
+                        'social_linkedin'  => ['LinkedIn', 'bi-linkedin', 'https://linkedin.com/company/hamiltonbeachpy'],
                         'social_tiktok'    => ['TikTok', 'bi-tiktok', 'https://tiktok.com/@hamiltonbeachpy'],
-                        'social_youtube'   => ['YouTube', 'bi-youtube', ''],
-                        'social_twitter'   => ['Twitter / X', 'bi-twitter-x', ''],
+                        'social_youtube'   => ['YouTube', 'bi-youtube', 'https://youtube.com/@hamiltonbeachpy'],
+                        'social_twitter'   => ['Twitter / X', 'bi-twitter-x', 'https://x.com/hamiltonbeachpy'],
                     ] as $key => [$label, $icon, $placeholder])
                     <div class="mb-3">
                         <label class="form-label"><i class="bi {{ $icon }} me-2"></i>{{ $label }}</label>

@@ -11,9 +11,12 @@
                 $ftPhoneTel = 'tel:+' . preg_replace('/\D/', '', $ftPhone);
                 $ftEmail = $siteSettings['email'] ?? 'info@hamiltonbeach.com.py';
                 $ftWa = 'https://wa.me/' . preg_replace('/\D/', '', $siteSettings['whatsapp'] ?? '595911234567');
-                $ftInsta = $siteSettings['instagram'] ?? 'https://instagram.com/hamiltonbeachpy';
-                $ftFb = $siteSettings['facebook'] ?? 'https://facebook.com/hamiltonbeachpy';
-                $ftTk = $siteSettings['tiktok'] ?? 'https://tiktok.com/@hamiltonbeachpy';
+                $ftInsta    = $siteSettings['social_instagram'] ?? '';
+                $ftFb       = $siteSettings['social_facebook']  ?? '';
+                $ftLinkedin = $siteSettings['social_linkedin']  ?? '';
+                $ftTk       = $siteSettings['social_tiktok']    ?? '';
+                $ftYt       = $siteSettings['social_youtube']   ?? '';
+                $ftTw       = $siteSettings['social_twitter']   ?? '';
                 $ftSchedule = $siteSettings['schedule'] ?? 'Lun–Vie: 9:00 – 18:00 hs';
             @endphp
             <div class="md:col-span-1">
@@ -21,10 +24,13 @@
                 <p class="text-sm leading-relaxed mb-4">
                     {{ $siteSettings['site_description'] ?? 'Distribuidor oficial en Paraguay. Electrodomésticos de calidad con respaldo y servicio técnico oficial.' }}
                 </p>
-                <div class="flex gap-4">
-                    @if($ftInsta)<a href="{{ $ftInsta }}" target="_blank" class="hover:text-white transition text-sm">Instagram</a>@endif
-                    @if($ftFb)<a href="{{ $ftFb }}" target="_blank" class="hover:text-white transition text-sm">Facebook</a>@endif
-                    @if($ftTk)<a href="{{ $ftTk }}" target="_blank" class="hover:text-white transition text-sm">TikTok</a>@endif
+                <div class="flex flex-wrap gap-3">
+                    @if($ftInsta)<a href="{{ $ftInsta }}" target="_blank" rel="noopener" class="hover:text-white transition" title="Instagram"><i class="bi bi-instagram text-lg"></i></a>@endif
+                    @if($ftFb)<a href="{{ $ftFb }}" target="_blank" rel="noopener" class="hover:text-white transition" title="Facebook"><i class="bi bi-facebook text-lg"></i></a>@endif
+                    @if($ftLinkedin)<a href="{{ $ftLinkedin }}" target="_blank" rel="noopener" class="hover:text-white transition" title="LinkedIn"><i class="bi bi-linkedin text-lg"></i></a>@endif
+                    @if($ftTk)<a href="{{ $ftTk }}" target="_blank" rel="noopener" class="hover:text-white transition" title="TikTok"><i class="bi bi-tiktok text-lg"></i></a>@endif
+                    @if($ftYt)<a href="{{ $ftYt }}" target="_blank" rel="noopener" class="hover:text-white transition" title="YouTube"><i class="bi bi-youtube text-lg"></i></a>@endif
+                    @if($ftTw)<a href="{{ $ftTw }}" target="_blank" rel="noopener" class="hover:text-white transition" title="Twitter / X"><i class="bi bi-twitter-x text-lg"></i></a>@endif
                 </div>
             </div>
 

@@ -69,7 +69,7 @@ class SettingsController extends Controller
 
     public function saveSocial(Request $request)
     {
-        foreach (['facebook', 'instagram', 'tiktok', 'youtube', 'twitter'] as $network) {
+        foreach (['facebook', 'instagram', 'linkedin', 'tiktok', 'youtube', 'twitter'] as $network) {
             SiteSetting::set("social_{$network}", $request->input("social_{$network}", ''));
         }
         SiteSetting::clearCache();
