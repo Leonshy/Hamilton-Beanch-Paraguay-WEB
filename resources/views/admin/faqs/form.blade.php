@@ -27,7 +27,7 @@
                     </div>
                     <div class="mb-0">
                         <label class="form-label">Respuesta <span class="text-danger">*</span></label>
-                        <textarea class="form-control @error('answer') is-invalid @enderror"
+                        <textarea class="form-control hb-wysiwyg @error('answer') is-invalid @enderror"
                                   name="answer" rows="6" required>{{ old('answer', $faq->answer ?? '') }}</textarea>
                         @error('answer')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>

@@ -43,7 +43,7 @@
             </button>
             <div class="faq-content hidden px-6 pb-5">
                 <div class="border-t border-gray-100 pt-4">
-                    <p class="text-gray-600 text-sm leading-relaxed">{{ $faq->answer }}</p>
+                    <div class="text-gray-600 text-sm leading-relaxed prose prose-sm max-w-none">{!! $faq->answer !!}</div>
                 </div>
             </div>
         </div>
