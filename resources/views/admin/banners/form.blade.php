@@ -35,7 +35,7 @@
                             data-target="media_id" data-preview="previewBannerImage">
                         <i class="bi bi-folder2-open me-2"></i>Seleccionar imagen de la biblioteca
                     </button>
-                    <div class="form-text mt-2">
+                    <div class="form-text mt-2" id="imgSizeHint">
                         Tamaño recomendado: <strong>1280 × 720 px</strong> (ratio 16:9) — formato WebP o JPG.
                     </div>
                 </div>
@@ -49,14 +49,20 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <label class="form-label">Posición <span class="text-danger">*</span></label>
-                        <select class="form-select" name="position" required>
-                            <option value="home" {{ old('position', $banner->position ?? 'home') === 'home' ? 'selected' : '' }}>Inicio (hero)</option>
-                            <option value="productos" {{ old('position', $banner->position ?? '') === 'productos' ? 'selected' : '' }}>Catálogo de productos</option>
+                        <select class="form-select" name="position" id="positionSelect" required>
+                            <option value="home" {{ old('position', $banner->position ?? 'home') === 'home' ? 'selected' : '' }}>Inicio (hero principal)</option>
+                            <option value="home_mid" {{ old('position', $banner->position ?? '') === 'home_mid' ? 'selected' : '' }}>Inicio (nuevos ingresos)</option>
                         </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Orden</label>
-                        <input type="number" class="form-control" name="order"
+                        @php
+                            $nextOrders = [
+                                'home'     => $nextOrderByPosition['home']     ?? $nextOrder ?? 0,
+                                'home_mid' => $nextOrderByPosition['home_mid'] ?? 0,
+                            ];
+                        @endphp
+                        <input type="number" class="form-control" name="order" id="orderInput"
                                value="{{ old('order', $banner->order ?? $nextOrder ?? 0) }}" min="0">
                     </div>
                     <div class="form-check mb-3">
@@ -88,4 +94,37 @@
 </form>
 
 @include('admin.partials.media-picker-modal')
+
+<script>
+(function () {
+    var select = document.getElementById('positionSelect');
+    if (!select) return;
+
+    var hints = {
+        'home':     '1280 × 720 px (ratio 16:9)',
+        'home_mid': '970 × 250 px (ratio 970:250)',
+    };
+
+    @if(!isset($banner))
+    var nextOrders = @json($nextOrders ?? []);
+    @endif
+
+    function updateHint(pos) {
+        var hint = hints[pos] || '1280 × 720 px (ratio 16:9)';
+        document.getElementById('imgSizeHint').innerHTML =
+            'Tamaño recomendado: <strong>' + hint + '</strong> — formato WebP o JPG.';
+    }
+
+    // Aplicar al cargar la página
+    updateHint(select.value);
+
+    select.addEventListener('change', function () {
+        updateHint(this.value);
+        @if(!isset($banner))
+        var orderInput = document.getElementById('orderInput');
+        if (orderInput) orderInput.value = nextOrders[this.value] ?? 0;
+        @endif
+    });
+})();
+</script>
 @endsection

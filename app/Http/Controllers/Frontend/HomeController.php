@@ -30,8 +30,14 @@ class HomeController extends Controller
             ->orderBy('order')
             ->get();
 
-        $banner = $banners->first(); // compatibilidad con otras partes de la vista
+        $midBanners = Banner::with('image')
+            ->active()
+            ->position('home_mid')
+            ->orderBy('order')
+            ->get();
 
-        return view('index', compact('banners', 'banner', 'featuredProducts', 'categories'));
+        $banner = $banners->first();
+
+        return view('index', compact('banners', 'banner', 'midBanners', 'featuredProducts', 'categories'));
     }
 }

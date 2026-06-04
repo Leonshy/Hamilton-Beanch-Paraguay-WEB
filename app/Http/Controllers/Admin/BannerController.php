@@ -21,7 +21,11 @@ class BannerController extends Controller
     {
         $position = request('position', 'home');
         $nextOrder = $this->nextOrder(Banner::class, 'position', $position);
-        return view('admin.banners.form', compact('nextOrder'));
+        $nextOrderByPosition = [
+            'home'     => $this->nextOrder(Banner::class, 'position', 'home'),
+            'home_mid' => $this->nextOrder(Banner::class, 'position', 'home_mid'),
+        ];
+        return view('admin.banners.form', compact('nextOrder', 'nextOrderByPosition'));
     }
 
     public function store(Request $request)
@@ -55,7 +59,7 @@ class BannerController extends Controller
         $data = $request->validate([
             'ids'      => 'required|array',
             'ids.*'    => 'integer',
-            'position' => 'required|in:home,productos',
+            'position' => 'required|in:home,home_mid',
         ]);
         // Sólo reordenar IDs que pertenecen a esa posición
         $validIds = Banner::whereIn('id', $data['ids'])->where('position', $data['position'])->pluck('id')->all();
@@ -81,7 +85,7 @@ class BannerController extends Controller
     private function validateBanner(Request $request): array
     {
         return $request->validate([
-            'position' => 'required|in:home,productos',
+            'position' => 'required|in:home,home_mid',
             'order'    => 'nullable|integer',
             'media_id' => 'nullable|exists:media,id',
             'link_url' => 'nullable|url|max:500',

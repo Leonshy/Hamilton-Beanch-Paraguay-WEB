@@ -201,6 +201,113 @@
     </div>
 </div>
 
+<!-- Banner Nuevos Ingresos 970×250 -->
+@if($midBanners->isNotEmpty())
+<div class="bg-gray-50 pb-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="relative w-full overflow-hidden rounded-xl" id="midBannerSlider"
+             style="aspect-ratio: 970/250; max-height: 250px;">
+
+            @foreach($midBanners as $i => $b)
+            <div class="mid-slide absolute inset-0 transition-opacity duration-700 {{ $i === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none' }}"
+                 data-slide="{{ $i }}">
+                @if($b->image?->url)
+                    <div class="relative w-full h-full {{ $b->link_url ? 'cursor-pointer' : '' }}"
+                         @if($b->link_url)
+                         onclick="window.location.href='{{ $b->link_url }}'"
+                         onmouseenter="this.querySelector('.mid-hover-overlay').style.opacity='1'"
+                         onmouseleave="this.querySelector('.mid-hover-overlay').style.opacity='0'"
+                         @endif>
+                        <img src="{{ $b->image->url }}"
+                             alt="Nuevos Ingresos"
+                             class="w-full h-full object-cover">
+                        @if($b->link_url)
+                        <div class="mid-hover-overlay" style="position:absolute;inset:0;background:rgba(255,255,255,0.25);opacity:0;transition:opacity 0.3s;pointer-events:none;"></div>
+                        @endif
+                    </div>
+                @else
+                    <div class="w-full h-full bg-brand-dark flex items-center justify-center">
+                        <p class="text-white/30 text-sm">Banner 970 × 250 — Subí una imagen desde el admin</p>
+                    </div>
+                @endif
+            </div>
+            @endforeach
+
+            {{-- Flechas --}}
+            @if($midBanners->count() > 1)
+            <div class="absolute inset-0 z-20 hidden md:flex items-center justify-between px-3 pointer-events-none">
+                <button id="midPrev" aria-label="Anterior"
+                        class="pointer-events-auto w-8 h-8 bg-black/30 hover:bg-black/50 rounded-full flex items-center justify-center transition">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <button id="midNext" aria-label="Siguiente"
+                        class="pointer-events-auto w-8 h-8 bg-black/30 hover:bg-black/50 rounded-full flex items-center justify-center transition">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+
+            {{-- Dots --}}
+            <div class="absolute bottom-3 left-0 right-0 flex justify-center z-20">
+                <div class="flex items-center gap-2 bg-black/30 backdrop-blur-sm px-3 py-1 rounded-full">
+                    @foreach($midBanners as $i => $b)
+                    <button class="mid-dot w-2 h-2 rounded-full transition {{ $i === 0 ? 'bg-white' : 'bg-white/40' }}"
+                            data-dot="{{ $i }}"></button>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+        </div>
+    </div>
+</div>
+
+@php $midInterval = (int)(\App\Models\SiteSetting::get('hero_slide_interval', 6)) * 1000; @endphp
+<script>
+(function () {
+    var slider = document.getElementById('midBannerSlider');
+    var slides = document.querySelectorAll('.mid-slide');
+    var dots   = document.querySelectorAll('.mid-dot');
+    if (!slider || slides.length <= 1) return;
+
+    var current = 0;
+    var timer;
+
+    function goTo(n) {
+        slides[current].classList.replace('opacity-100', 'opacity-0');
+        slides[current].classList.add('pointer-events-none');
+        if (dots[current]) dots[current].classList.replace('bg-white', 'bg-white/40');
+        current = (n + slides.length) % slides.length;
+        slides[current].classList.replace('opacity-0', 'opacity-100');
+        slides[current].classList.remove('pointer-events-none');
+        if (dots[current]) dots[current].classList.replace('bg-white/40', 'bg-white');
+    }
+
+    function startTimer() { timer = setInterval(function () { goTo(current + 1); }, {{ $midInterval }}); }
+    function resetTimer()  { clearInterval(timer); startTimer(); }
+
+    var prevBtn = document.getElementById('midPrev');
+    var nextBtn = document.getElementById('midNext');
+    if (prevBtn) prevBtn.addEventListener('click', function () { goTo(current - 1); resetTimer(); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { goTo(current + 1); resetTimer(); });
+    dots.forEach(function (dot) {
+        dot.addEventListener('click', function () { goTo(+this.dataset.dot); resetTimer(); });
+    });
+
+    var touchX = 0;
+    slider.addEventListener('touchstart', function (e) { touchX = e.touches[0].clientX; }, { passive: true });
+    slider.addEventListener('touchend', function (e) {
+        var diff = touchX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) { goTo(current + (diff > 0 ? 1 : -1)); resetTimer(); }
+    }, { passive: true });
+
+    startTimer();
+})();
+</script>
+@endif
+
 <!-- Categorías -->
 <div class="bg-white py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

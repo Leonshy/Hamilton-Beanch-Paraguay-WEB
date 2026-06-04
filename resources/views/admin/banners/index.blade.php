@@ -9,7 +9,7 @@
     </a>
 </div>
 
-@foreach(['home' => 'Inicio', 'productos' => 'Productos'] as $pos => $label)
+@foreach(['home' => 'Inicio (hero principal)', 'home_mid' => 'Inicio (nuevos ingresos)'] as $pos => $label)
 <h6 class="text-muted text-uppercase small fw-semibold mb-2 mt-4">Posición: {{ $label }}</h6>
 <div class="card hb-admin-card mb-3">
     <div class="card-body p-0">
