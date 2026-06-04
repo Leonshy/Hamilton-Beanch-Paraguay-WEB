@@ -33,6 +33,15 @@
                                value="{{ old('subtitle', $product->subtitle ?? '') }}">
                     </div>
                     <div class="mb-3">
+                        <label for="sku" class="form-label">SKU <span class="text-muted small">(código de producto)</span></label>
+                        <input type="text" class="form-control @error('sku') is-invalid @enderror"
+                               id="sku" name="sku"
+                               value="{{ old('sku', $product->sku ?? '') }}"
+                               placeholder="Ej: HB-54321">
+                        @error('sku')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        <div class="form-text">Opcional. Debe ser único entre todos los productos.</div>
+                    </div>
+                    <div class="mb-3">
                         <label for="slug" class="form-label">Slug (URL)</label>
                         <input type="text" class="form-control" id="slug" name="slug"
                                value="{{ old('slug', $product->slug ?? '') }}"

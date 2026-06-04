@@ -57,6 +57,9 @@
                 <h1 class="text-2xl md:text-3xl font-extrabold text-gray-900 mb-2 leading-tight">
                     {{ $product->title }}
                 </h1>
+                @if($product->sku)
+                <p class="text-xs text-gray-400 mb-2 font-mono">SKU: {{ $product->sku }}</p>
+                @endif
                 @if($product->price)
                 <p class="text-xl font-bold text-gray-800 mb-3">Precio sugerido ≈ {{ $product->formatted_price }}</p>
                 @endif

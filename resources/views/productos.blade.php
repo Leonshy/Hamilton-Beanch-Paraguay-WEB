@@ -60,7 +60,15 @@
         <div class="lg:col-span-3">
             <!-- Ordenamiento -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-                <p class="text-sm text-gray-500">Mostrando <span class="font-semibold text-gray-800">{{ $products->total() }}</span> productos</p>
+                <p class="text-sm text-gray-500">
+                    @if(request('q'))
+                        <span class="font-semibold text-gray-800">{{ $products->total() }}</span> resultado{{ $products->total() !== 1 ? 's' : '' }} para
+                        "<span class="text-brand font-semibold">{{ request('q') }}</span>"
+                        — <a href="/productos" class="text-gray-400 hover:text-brand transition underline">limpiar</a>
+                    @else
+                        Mostrando <span class="font-semibold text-gray-800">{{ $products->total() }}</span> productos
+                    @endif
+                </p>
                 <div class="flex items-center gap-2">
                     <label class="text-sm text-gray-500">Ordenar:</label>
                     <select name="sort" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand bg-white"
@@ -87,9 +95,12 @@
                     </div>
                     <!-- Info -->
                     <div class="p-4">
-                        <h3 class="font-semibold text-gray-900 group-hover:text-brand transition text-sm leading-snug mb-2 line-clamp-2">
+                        <h3 class="font-semibold text-gray-900 group-hover:text-brand transition text-sm leading-snug mb-1 line-clamp-2">
                             {{ $producto->title }}
                         </h3>
+                        @if($producto->sku)
+                        <p class="text-xs text-gray-400 font-mono mb-2">{{ $producto->sku }}</p>
+                        @endif
                         <div class="mb-3">
                             <p class="text-xs text-gray-400 uppercase tracking-wider">Precio sugerido</p>
                             <p class="text-sm font-bold text-gray-800">≈ {{ $producto->formatted_price }}</p>

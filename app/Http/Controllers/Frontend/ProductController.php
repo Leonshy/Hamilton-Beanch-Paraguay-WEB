@@ -15,6 +15,15 @@ class ProductController extends Controller
 
         $query = Product::with('featuredImage', 'category')->published();
 
+        if ($request->filled('q')) {
+            $search = $request->q;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('subtitle', 'like', "%{$search}%")
+                  ->orWhere('sku', 'like', "%{$search}%");
+            });
+        }
+
         if ($request->filled('categoria')) {
             $query->whereHas('category', fn($q) => $q->where('slug', $request->categoria));
         }
