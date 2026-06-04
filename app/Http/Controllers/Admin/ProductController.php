@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Media;
 use App\Models\Product;
+use App\Models\SalePoint;
 use App\Traits\HandlesOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -22,8 +23,9 @@ class ProductController extends Controller
     public function create()
     {
         $categories = Category::active()->ofType('product')->orderBy('name')->get();
+        $salePoints = SalePoint::active()->orderBy('order')->get();
         $nextOrder = $this->nextOrder(Product::class);
-        return view('admin.products.form', compact('categories', 'nextOrder'));
+        return view('admin.products.form', compact('categories', 'salePoints', 'nextOrder'));
     }
 
     public function store(Request $request)
@@ -40,8 +42,8 @@ class ProductController extends Controller
 
         $product = Product::create($data);
 
-        // Galería
         $this->syncGallery($product, $request->input('gallery_ids', []));
+        $this->syncSalePoints($product, $request);
 
         return redirect()->route('admin.products.index')->with('success', 'Producto creado correctamente.');
     }
@@ -49,8 +51,9 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         $categories = Category::active()->ofType('product')->orderBy('name')->get();
-        $product->load('gallery');
-        return view('admin.products.form', compact('product', 'categories'));
+        $salePoints = SalePoint::active()->orderBy('order')->get();
+        $product->load('gallery', 'salePoints');
+        return view('admin.products.form', compact('product', 'categories', 'salePoints'));
     }
 
     public function update(Request $request, Product $product)
@@ -67,6 +70,7 @@ class ProductController extends Controller
 
         $product->update($data);
         $this->syncGallery($product, $request->input('gallery_ids', []));
+        $this->syncSalePoints($product, $request);
 
         return redirect()->route('admin.products.index')->with('success', 'Producto actualizado correctamente.');
     }
@@ -130,6 +134,17 @@ class ProductController extends Controller
         if (!$json) return null;
         $decoded = json_decode($json, true);
         return is_array($decoded) ? $decoded : null;
+    }
+
+    private function syncSalePoints(Product $product, Request $request): void
+    {
+        $ids = $request->input('sale_point_ids', []);
+        $urls = $request->input('sale_point_url', []);
+        $sync = [];
+        foreach ($ids as $id) {
+            $sync[$id] = ['custom_url' => $urls[$id] ?? null ?: null];
+        }
+        $product->salePoints()->sync($sync);
     }
 
     private function syncGallery(Product $product, array $ids): void

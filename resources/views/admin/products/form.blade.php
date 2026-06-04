@@ -65,40 +65,58 @@
             </div>
 
             {{-- Puntos de venta --}}
-            @php $retailers = old('retailers', isset($product) ? ['name' => collect($product->retailers ?? [])->pluck('name')->toArray(), 'url' => collect($product->retailers ?? [])->pluck('url')->toArray()] : ['name' => [], 'url' => []]) @endphp
+            @php
+                $selectedSalePoints = isset($product) ? $product->salePoints->keyBy('id') : collect();
+                $isNew = !isset($product);
+            @endphp
             <div class="card hb-admin-card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header">
                     <h6 class="mb-0"><i class="bi bi-shop me-2"></i>Puntos de venta</h6>
-                    <button type="button" class="btn btn-sm btn-outline-secondary" id="addRetailerBtn">
-                        <i class="bi bi-plus-lg me-1"></i>Agregar
-                    </button>
                 </div>
                 <div class="card-body">
-                    <div id="retailersList">
-                        @forelse($retailers['name'] as $i => $name)
-                        <div class="retailer-row row g-2 mb-2 align-items-center">
-                            <div class="col">
-                                <input type="text" class="form-control form-control-sm"
-                                       name="retailers[name][]"
-                                       placeholder="Nombre del punto de venta"
-                                       value="{{ $name }}">
-                            </div>
-                            <div class="col">
-                                <input type="url" class="form-control form-control-sm"
-                                       name="retailers[url][]"
-                                       placeholder="https://..."
-                                       value="{{ $retailers['url'][$i] ?? '' }}">
-                            </div>
-                            <div class="col-auto">
-                                <button type="button" class="btn btn-sm btn-outline-danger remove-retailer">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
+                    @forelse($salePoints as $sp)
+                    @php
+                        $isSelected = $isNew || $selectedSalePoints->has($sp->id);
+                        $customUrl  = $selectedSalePoints->get($sp->id)?->pivot->custom_url ?? '';
+                    @endphp
+                    <div class="d-flex align-items-center gap-3 py-2 border-bottom">
+
+                        {{-- Toggle --}}
+                        <div class="form-check form-switch mb-0" style="min-width:3rem;">
+                            <input class="form-check-input sp-check" type="checkbox"
+                                   role="switch"
+                                   name="sale_point_ids[]"
+                                   value="{{ $sp->id }}"
+                                   id="sp_{{ $sp->id }}"
+                                   data-target="sp_url_{{ $sp->id }}"
+                                   {{ $isSelected ? 'checked' : '' }}
+                                   style="cursor:pointer;">
                         </div>
-                        @empty
-                        <p class="text-muted small mb-0" id="retailersEmpty">Ningún punto de venta agregado aún.</p>
-                        @endforelse
+
+                        {{-- Logo + Nombre --}}
+                        <label for="sp_{{ $sp->id }}" class="d-flex align-items-center gap-2 mb-0 flex-shrink-0" style="cursor:pointer;min-width:160px;">
+                            @if($sp->logo)
+                                <img src="{{ $sp->logo->url }}" alt="{{ $sp->name }}"
+                                     style="height:22px;max-width:70px;object-fit:contain;">
+                            @else
+                                <span class="badge bg-secondary">{{ strtoupper(substr($sp->name,0,1)) }}</span>
+                            @endif
+                            <span class="small fw-semibold">{{ $sp->name }}</span>
+                        </label>
+
+                        {{-- URL personalizada — siempre ocupa espacio, solo visible cuando activo --}}
+                        <div class="flex-grow-1" id="sp_url_{{ $sp->id }}"
+                             style="visibility:{{ $isSelected ? 'visible' : 'hidden' }};">
+                            <input type="url" class="form-control form-control-sm"
+                                   name="sale_point_url[{{ $sp->id }}]"
+                                   placeholder="URL personalizada (opcional)"
+                                   value="{{ old('sale_point_url.'.$sp->id, $customUrl) }}">
+                        </div>
+
                     </div>
+                    @empty
+                    <p class="text-muted small mb-0">No hay puntos de venta activos.</p>
+                    @endforelse
                 </div>
             </div>
 
@@ -232,35 +250,11 @@
 
 @push('scripts')
 <script>
-const list = document.getElementById('retailersList');
-const emptyMsg = document.getElementById('retailersEmpty');
-
-function rowTemplate() {
-    return `<div class="retailer-row row g-2 mb-2 align-items-center">
-        <div class="col">
-            <input type="text" class="form-control form-control-sm" name="retailers[name][]" placeholder="Nombre del punto de venta">
-        </div>
-        <div class="col">
-            <input type="url" class="form-control form-control-sm" name="retailers[url][]" placeholder="https://...">
-        </div>
-        <div class="col-auto">
-            <button type="button" class="btn btn-sm btn-outline-danger remove-retailer"><i class="bi bi-trash"></i></button>
-        </div>
-    </div>`;
-}
-
-document.getElementById('addRetailerBtn').addEventListener('click', () => {
-    emptyMsg?.remove();
-    list.insertAdjacentHTML('beforeend', rowTemplate());
-});
-
-list.addEventListener('click', e => {
-    if (e.target.closest('.remove-retailer')) {
-        e.target.closest('.retailer-row').remove();
-        if (!list.querySelector('.retailer-row')) {
-            list.insertAdjacentHTML('beforeend', '<p class="text-muted small mb-0" id="retailersEmpty">Ningún punto de venta agregado aún.</p>');
-        }
-    }
+document.querySelectorAll('.sp-check').forEach(function (cb) {
+    cb.addEventListener('change', function () {
+        var target = document.getElementById(this.dataset.target);
+        if (target) target.style.visibility = this.checked ? 'visible' : 'hidden';
+    });
 });
 </script>
 @endpush

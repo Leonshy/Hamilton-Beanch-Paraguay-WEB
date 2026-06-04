@@ -34,6 +34,12 @@ class Product extends Model
         return $this->belongsTo(Media::class, 'media_id');
     }
 
+    public function salePoints(): BelongsToMany
+    {
+        return $this->belongsToMany(SalePoint::class, 'product_sale_point')
+            ->withPivot('custom_url');
+    }
+
     public function gallery(): BelongsToMany
     {
         return $this->belongsToMany(Media::class, 'product_media')

@@ -18,6 +18,12 @@ class SalePoint extends Model
         return $this->belongsTo(Media::class, 'media_id');
     }
 
+    public function products(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'product_sale_point')
+            ->withPivot('custom_url');
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);

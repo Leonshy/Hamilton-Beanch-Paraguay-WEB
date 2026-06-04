@@ -79,19 +79,42 @@
             @endif
 
             <!-- Puntos de venta -->
-            @if($product->retailers && count($product->retailers))
+            @if($product->salePoints->isNotEmpty())
             <div class="mb-6">
-                <h2 class="text-base font-bold text-gray-900 mb-3">¿Dónde comprar?</h2>
-                <p class="text-sm text-gray-500 mb-4">Encontrá este producto en nuestros puntos de venta autorizados:</p>
-                <div class="space-y-3">
-                    @foreach($product->retailers as $retailer)
-                    <a href="{{ $retailer['url'] ?: '#' }}" target="_blank" rel="noopener"
-                       class="flex items-center justify-between w-full bg-gray-800 hover:bg-gray-900 text-white px-5 py-3.5 rounded-xl font-semibold transition group">
-                        <span>{{ $retailer['name'] }}</span>
-                        <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                        </svg>
-                    </a>
+                <h2 class="text-base font-bold text-gray-900 mb-4">¿Dónde comprar?</h2>
+                <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:0.5rem;">
+                    @foreach($product->salePoints as $sp)
+                    @php $url = $sp->pivot->custom_url ?: $sp->url; @endphp
+                    @php
+                        $tag   = $url ? 'a' : 'div';
+                        $attrs = $url ? "href=\"{$url}\" target=\"_blank\" rel=\"noopener\"" : '';
+                    @endphp
+                    <{{ $tag }} {{ $attrs }}
+                       style="position:relative;display:block;aspect-ratio:1;border-radius:0.75rem;overflow:hidden;text-decoration:none;"
+                       @if($url)
+                       onmouseenter="this.querySelector('.sp-overlay').style.opacity='1'"
+                       onmouseleave="this.querySelector('.sp-overlay').style.opacity='0'"
+                       @endif>
+
+                        {{-- Imagen o inicial --}}
+                        @if($sp->logo)
+                            <img src="{{ $sp->logo->url }}" alt="{{ $sp->name }}"
+                                 style="width:100%;height:100%;object-fit:cover;">
+                        @else
+                            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.25rem;font-weight:700;color:#9ca3af;">
+                                {{ strtoupper(substr($sp->name, 0, 1)) }}
+                            </div>
+                        @endif
+
+                        {{-- Overlay verde con nombre --}}
+                        @if($url)
+                        <div class="sp-overlay"
+                             style="position:absolute;inset:0;background:rgba(61,107,44,0.85);opacity:0;transition:opacity .25s;display:flex;align-items:center;justify-content:center;padding:0.25rem;">
+                            <span style="color:#fff;font-size:.65rem;font-weight:700;text-align:center;line-height:1.3;">{{ $sp->name }}</span>
+                        </div>
+                        @endif
+
+                    </{{ $tag }}>
                     @endforeach
                 </div>
             </div>
