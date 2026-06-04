@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Banner extends Model
 {
     protected $fillable = [
-        'media_id', 'position', 'order', 'is_active',
+        'media_id', 'link_url', 'position', 'order', 'is_active',
     ];
 
     protected $casts = [

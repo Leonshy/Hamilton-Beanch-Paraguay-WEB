@@ -13,9 +13,19 @@
     <div class="hero-slide absolute inset-0 transition-opacity duration-700 {{ $i === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none' }}"
          data-slide="{{ $i }}">
         @if($b->image?->url)
-            <img src="{{ $b->image->url }}"
-                 alt="{{ $b->title ?? 'Hamilton Beach' }}"
-                 class="w-full h-full object-cover">
+            <div class="relative w-full h-full {{ $b->link_url ? 'cursor-pointer' : '' }}"
+                 @if($b->link_url)
+                 onclick="window.location.href='{{ $b->link_url }}'"
+                 onmouseenter="this.querySelector('.hero-hover-overlay').style.opacity='1'"
+                 onmouseleave="this.querySelector('.hero-hover-overlay').style.opacity='0'"
+                 @endif>
+                <img src="{{ $b->image->url }}"
+                     alt="{{ $b->title ?? 'Hamilton Beach' }}"
+                     class="w-full h-full object-cover">
+                @if($b->link_url)
+                <div class="hero-hover-overlay" style="position:absolute;inset:0;background:rgba(255,255,255,0.25);opacity:0;transition:opacity 0.3s;pointer-events:none;"></div>
+                @endif
+            </div>
         @else
             {{-- Placeholder cuando no hay imagen cargada --}}
             <div class="w-full h-full flex flex-col items-center justify-center bg-brand-dark gap-3">

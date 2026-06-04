@@ -84,6 +84,7 @@ class BannerController extends Controller
             'position' => 'required|in:home,productos',
             'order'    => 'nullable|integer',
             'media_id' => 'nullable|exists:media,id',
+            'link_url' => 'nullable|url|max:500',
         ]);
     }
 }

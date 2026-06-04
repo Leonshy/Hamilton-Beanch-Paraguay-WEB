@@ -64,6 +64,13 @@
                                {{ old('is_active', $banner->is_active ?? true) ? 'checked' : '' }}>
                         <label class="form-check-label">Activo (visible en el sitio)</label>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">Enlace al hacer clic</label>
+                        <input type="url" class="form-control" name="link_url"
+                               placeholder="https://..."
+                               value="{{ old('link_url', $banner->link_url ?? '') }}">
+                        <div class="form-text">Opcional — si se completa, el banner redirige a esa URL al hacer clic.</div>
+                    </div>
                     <div class="mb-4">
                         <label class="form-label">Intervalo del carrusel (segundos)</label>
                         @php $heroInterval = \App\Models\SiteSetting::get('hero_slide_interval', '6'); @endphp
