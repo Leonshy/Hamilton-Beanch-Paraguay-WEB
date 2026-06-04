@@ -310,7 +310,7 @@
 
 <!-- Puntos de Venta -->
 @if($salePoints->isNotEmpty())
-<div class="bg-white py-16">
+<div id="puntos-de-venta" class="bg-white py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-3xl font-extrabold text-gray-900 text-center mb-2">¿Dónde comprar?</h2>
         <p class="text-gray-500 text-center mb-10">Encontrá nuestros productos en estos puntos de venta</p>
