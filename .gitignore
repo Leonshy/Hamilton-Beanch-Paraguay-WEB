@@ -28,3 +28,5 @@ Thumbs.db
 CLAUDE_CONTEXT.md
 /reference
 deploy.sh
+db-export.sql
+export-db.php
