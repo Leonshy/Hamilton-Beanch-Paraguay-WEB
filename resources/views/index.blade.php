@@ -308,8 +308,114 @@
 </script>
 @endif
 
-<!-- Categorías -->
+<!-- Puntos de Venta -->
+@if($salePoints->isNotEmpty())
 <div class="bg-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-extrabold text-gray-900 text-center mb-2">¿Dónde comprar?</h2>
+        <p class="text-gray-500 text-center mb-10">Encontrá nuestros productos en estos puntos de venta</p>
+
+        <div class="relative" id="spSliderWrap" style="padding:0 2.5rem;">
+            {{-- Overflow oculto solo en el track --}}
+            <div id="spViewport" style="overflow:hidden;">
+                <div id="spTrack" style="display:flex;gap:2rem;transition:transform 0.4s ease;will-change:transform;">
+                    @foreach($salePoints as $sp)
+                    <div class="sp-card" style="flex:0 0 calc((100% - 8rem) / 5);min-width:140px;">
+                        @if($sp->url)
+                        <a href="{{ $sp->url }}" target="_blank" rel="noopener"
+                           style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;padding:1rem;text-decoration:none;transition:opacity .2s,transform .2s;"
+                           onmouseenter="this.style.opacity='.75';this.style.transform='scale(1.04)'"
+                           onmouseleave="this.style.opacity='1';this.style.transform='scale(1)'">
+                        @else
+                        <div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;padding:1rem;">
+                        @endif
+                            <div style="height:100px;display:flex;align-items:center;justify-content:center;">
+                                @if($sp->logo)
+                                    <img src="{{ $sp->logo->url }}" alt="{{ $sp->name }}"
+                                         style="max-height:100px;max-width:160px;object-fit:contain;">
+                                @else
+                                    <div style="width:80px;height:80px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;color:#6b7280;">
+                                        {{ strtoupper(substr($sp->name, 0, 1)) }}
+                                    </div>
+                                @endif
+                            </div>
+                            <p style="font-size:.85rem;font-weight:600;color:#374151;text-align:center;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">{{ $sp->name }}</p>
+                        @if($sp->url)
+                        </a>
+                        @else
+                        </div>
+                        @endif
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Flechas --}}
+            <button id="spPrev" aria-label="Anterior"
+                    style="position:absolute;top:50%;left:0;transform:translateY(-50%);z-index:10;width:2.5rem;height:2.5rem;border-radius:50%;background:white;border:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <button id="spNext" aria-label="Siguiente"
+                    style="position:absolute;top:50%;right:0;transform:translateY(-50%);z-index:10;width:2.5rem;height:2.5rem;border-radius:50%;background:white;border:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var track    = document.getElementById('spTrack');
+    var viewport = document.getElementById('spViewport');
+    var cards    = track.querySelectorAll('.sp-card');
+    if (!track || cards.length === 0) return;
+
+    var gap = 32;
+    var visibleCount = window.innerWidth < 640 ? 2 : window.innerWidth < 1024 ? 3 : 5;
+    var cardWidth    = (viewport.offsetWidth - (visibleCount - 1) * gap) / visibleCount;
+    var step         = cardWidth + gap;
+    var current      = 0;
+    var max          = Math.max(0, cards.length - visibleCount);
+
+    function updateCardWidths() {
+        visibleCount = window.innerWidth < 640 ? 2 : window.innerWidth < 1024 ? 3 : 5;
+        cardWidth    = (viewport.offsetWidth - (visibleCount - 1) * gap) / visibleCount;
+        step         = cardWidth + gap;
+        max          = Math.max(0, cards.length - visibleCount);
+        cards.forEach(function (c) { c.style.flex = '0 0 ' + cardWidth + 'px'; });
+        goTo(Math.min(current, max));
+    }
+
+    function goTo(n) {
+        current = ((n % (max + 1)) + (max + 1)) % (max + 1);
+        track.style.transform = 'translateX(-' + (current * step) + 'px)';
+    }
+
+    var paused = false;
+    var timer;
+
+    function startTimer() {
+        clearInterval(timer);
+        timer = setInterval(function () {
+            if (!paused) goTo(current + 1);
+        }, 3000);
+    }
+
+    document.getElementById('spPrev').addEventListener('click', function () { goTo(current - 1); startTimer(); });
+    document.getElementById('spNext').addEventListener('click', function () { goTo(current + 1); startTimer(); });
+
+    viewport.addEventListener('mouseenter', function () { paused = true; });
+    viewport.addEventListener('mouseleave', function () { paused = false; });
+
+    window.addEventListener('resize', updateCardWidths);
+    updateCardWidths();
+    startTimer();
+})();
+</script>
+@endif
+
+<!-- Categorías -->
+<div class="bg-gray-50 py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-3xl font-extrabold text-gray-900 text-center mb-10">Explorar por categoría</h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -337,98 +443,6 @@
         </div>
     </div>
 </div>
-
-<!-- Puntos de Venta -->
-@if($salePoints->isNotEmpty())
-<div class="bg-gray-50 py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-extrabold text-gray-900 text-center mb-2">¿Dónde comprar?</h2>
-        <p class="text-gray-500 text-center mb-10">Encontrá nuestros productos en estos puntos de venta</p>
-
-        <div class="relative" id="spSliderWrap">
-            {{-- Track --}}
-            <div id="spTrack" style="display:flex;gap:1.5rem;transition:transform 0.4s ease;will-change:transform;">
-                @foreach($salePoints as $sp)
-                <div class="sp-card" style="flex:0 0 calc((100% - 6rem) / 5);min-width:160px;">
-                    @if($sp->url)
-                    <a href="{{ $sp->url }}" target="_blank" rel="noopener"
-                       class="group flex flex-col items-center gap-3 bg-white border border-gray-200 hover:border-brand hover:shadow-md rounded-xl p-5 transition text-center h-full">
-                    @else
-                    <div class="group flex flex-col items-center gap-3 bg-white border border-gray-200 rounded-xl p-5 text-center h-full">
-                    @endif
-                        <div style="height:64px;display:flex;align-items:center;justify-content:center;">
-                            @if($sp->logo)
-                                <img src="{{ $sp->logo->url }}" alt="{{ $sp->name }}"
-                                     style="max-height:64px;max-width:120px;object-fit:contain;">
-                            @else
-                                <div style="width:64px;height:64px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;color:#9ca3af;">
-                                    {{ strtoupper(substr($sp->name, 0, 1)) }}
-                                </div>
-                            @endif
-                        </div>
-                        <p class="text-sm font-semibold text-gray-700 group-hover:text-brand transition line-clamp-2">{{ $sp->name }}</p>
-                    @if($sp->url)
-                    </a>
-                    @else
-                    </div>
-                    @endif
-                </div>
-                @endforeach
-            </div>
-
-            {{-- Flechas --}}
-            <button id="spPrev" aria-label="Anterior"
-                    style="position:absolute;top:50%;left:-1rem;transform:translateY(-50%);z-index:10;width:2.5rem;height:2.5rem;border-radius:50%;background:white;border:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;">
-                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-            </button>
-            <button id="spNext" aria-label="Siguiente"
-                    style="position:absolute;top:50%;right:-1rem;transform:translateY(-50%);z-index:10;width:2.5rem;height:2.5rem;border-radius:50%;background:white;border:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;">
-                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-            </button>
-        </div>
-    </div>
-</div>
-
-<script>
-(function () {
-    var track   = document.getElementById('spTrack');
-    var wrap    = document.getElementById('spSliderWrap');
-    var cards   = track.querySelectorAll('.sp-card');
-    if (!track || cards.length === 0) return;
-
-    var visibleCount = window.innerWidth < 640 ? 2 : window.innerWidth < 1024 ? 3 : 5;
-    var cardWidth    = (wrap.offsetWidth - (visibleCount - 1) * 24) / visibleCount;
-    var step         = cardWidth + 24;
-    var current      = 0;
-    var max          = Math.max(0, cards.length - visibleCount);
-
-    function updateCardWidths() {
-        visibleCount = window.innerWidth < 640 ? 2 : window.innerWidth < 1024 ? 3 : 5;
-        cardWidth    = (wrap.offsetWidth - (visibleCount - 1) * 24) / visibleCount;
-        step         = cardWidth + 24;
-        max          = Math.max(0, cards.length - visibleCount);
-        cards.forEach(function (c) { c.style.flex = '0 0 ' + cardWidth + 'px'; });
-        goTo(Math.min(current, max));
-    }
-
-    function goTo(n) {
-        current = Math.max(0, Math.min(n, max));
-        track.style.transform = 'translateX(-' + (current * step) + 'px)';
-    }
-
-    document.getElementById('spPrev').addEventListener('click', function () { goTo(current - 1); });
-    document.getElementById('spNext').addEventListener('click', function () { goTo(current + 1); });
-
-    window.addEventListener('resize', updateCardWidths);
-    updateCardWidths();
-
-    // Autoplay
-    setInterval(function () {
-        goTo(current >= max ? 0 : current + 1);
-    }, 3000);
-})();
-</script>
-@endif
 
 <!-- CTA Final -->
 <div class="bg-brand text-white py-16">
