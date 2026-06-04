@@ -203,7 +203,7 @@
 
 <!-- Banner Nuevos Ingresos 970×250 -->
 @if($midBanners->isNotEmpty())
-<div class="bg-gray-50 pb-10">
+<div class="bg-gray-50" style="padding-bottom: 3rem;">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="relative w-full overflow-hidden rounded-xl" id="midBannerSlider"
              style="aspect-ratio: 970/250; max-height: 250px;">
