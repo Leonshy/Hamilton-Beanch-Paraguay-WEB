@@ -27,3 +27,4 @@ Homestead.yaml
 Thumbs.db
 CLAUDE_CONTEXT.md
 /reference
+deploy.sh
