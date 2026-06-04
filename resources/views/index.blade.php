@@ -338,6 +338,98 @@
     </div>
 </div>
 
+<!-- Puntos de Venta -->
+@if($salePoints->isNotEmpty())
+<div class="bg-gray-50 py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-extrabold text-gray-900 text-center mb-2">¿Dónde comprar?</h2>
+        <p class="text-gray-500 text-center mb-10">Encontrá nuestros productos en estos puntos de venta</p>
+
+        <div class="relative" id="spSliderWrap">
+            {{-- Track --}}
+            <div id="spTrack" style="display:flex;gap:1.5rem;transition:transform 0.4s ease;will-change:transform;">
+                @foreach($salePoints as $sp)
+                <div class="sp-card" style="flex:0 0 calc((100% - 6rem) / 5);min-width:160px;">
+                    @if($sp->url)
+                    <a href="{{ $sp->url }}" target="_blank" rel="noopener"
+                       class="group flex flex-col items-center gap-3 bg-white border border-gray-200 hover:border-brand hover:shadow-md rounded-xl p-5 transition text-center h-full">
+                    @else
+                    <div class="group flex flex-col items-center gap-3 bg-white border border-gray-200 rounded-xl p-5 text-center h-full">
+                    @endif
+                        <div style="height:64px;display:flex;align-items:center;justify-content:center;">
+                            @if($sp->logo)
+                                <img src="{{ $sp->logo->url }}" alt="{{ $sp->name }}"
+                                     style="max-height:64px;max-width:120px;object-fit:contain;">
+                            @else
+                                <div style="width:64px;height:64px;border-radius:50%;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;color:#9ca3af;">
+                                    {{ strtoupper(substr($sp->name, 0, 1)) }}
+                                </div>
+                            @endif
+                        </div>
+                        <p class="text-sm font-semibold text-gray-700 group-hover:text-brand transition line-clamp-2">{{ $sp->name }}</p>
+                    @if($sp->url)
+                    </a>
+                    @else
+                    </div>
+                    @endif
+                </div>
+                @endforeach
+            </div>
+
+            {{-- Flechas --}}
+            <button id="spPrev" aria-label="Anterior"
+                    style="position:absolute;top:50%;left:-1rem;transform:translateY(-50%);z-index:10;width:2.5rem;height:2.5rem;border-radius:50%;background:white;border:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <button id="spNext" aria-label="Siguiente"
+                    style="position:absolute;top:50%;right:-1rem;transform:translateY(-50%);z-index:10;width:2.5rem;height:2.5rem;border-radius:50%;background:white;border:1px solid #e5e7eb;box-shadow:0 1px 4px rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var track   = document.getElementById('spTrack');
+    var wrap    = document.getElementById('spSliderWrap');
+    var cards   = track.querySelectorAll('.sp-card');
+    if (!track || cards.length === 0) return;
+
+    var visibleCount = window.innerWidth < 640 ? 2 : window.innerWidth < 1024 ? 3 : 5;
+    var cardWidth    = (wrap.offsetWidth - (visibleCount - 1) * 24) / visibleCount;
+    var step         = cardWidth + 24;
+    var current      = 0;
+    var max          = Math.max(0, cards.length - visibleCount);
+
+    function updateCardWidths() {
+        visibleCount = window.innerWidth < 640 ? 2 : window.innerWidth < 1024 ? 3 : 5;
+        cardWidth    = (wrap.offsetWidth - (visibleCount - 1) * 24) / visibleCount;
+        step         = cardWidth + 24;
+        max          = Math.max(0, cards.length - visibleCount);
+        cards.forEach(function (c) { c.style.flex = '0 0 ' + cardWidth + 'px'; });
+        goTo(Math.min(current, max));
+    }
+
+    function goTo(n) {
+        current = Math.max(0, Math.min(n, max));
+        track.style.transform = 'translateX(-' + (current * step) + 'px)';
+    }
+
+    document.getElementById('spPrev').addEventListener('click', function () { goTo(current - 1); });
+    document.getElementById('spNext').addEventListener('click', function () { goTo(current + 1); });
+
+    window.addEventListener('resize', updateCardWidths);
+    updateCardWidths();
+
+    // Autoplay
+    setInterval(function () {
+        goTo(current >= max ? 0 : current + 1);
+    }, 3000);
+})();
+</script>
+@endif
+
 <!-- CTA Final -->
 <div class="bg-brand text-white py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

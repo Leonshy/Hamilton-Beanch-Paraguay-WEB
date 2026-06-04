@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\SalePoint;
 
 class HomeController extends Controller
 {
@@ -36,8 +37,10 @@ class HomeController extends Controller
             ->orderBy('order')
             ->get();
 
+        $salePoints = SalePoint::with('logo')->active()->inRandomOrder()->get();
+
         $banner = $banners->first();
 
-        return view('index', compact('banners', 'banner', 'midBanners', 'featuredProducts', 'categories'));
+        return view('index', compact('banners', 'banner', 'midBanners', 'featuredProducts', 'categories', 'salePoints'));
     }
 }
