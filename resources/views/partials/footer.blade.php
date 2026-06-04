@@ -34,16 +34,16 @@
                 </div>
             </div>
 
-            <!-- Productos -->
+            <!-- Páginas dinámicas -->
             <div>
-                <h3 class="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Productos</h3>
+                @if($footerPages->isNotEmpty())
+                <h3 class="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Información</h3>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="/productos" class="hover:text-white transition">Ver todos</a></li>
-                    <li><a href="/productos?categoria=cafeteras" class="hover:text-white transition">Cafeteras</a></li>
-                    <li><a href="/productos?categoria=tostadoras" class="hover:text-white transition">Tostadoras</a></li>
-                    <li><a href="/productos?categoria=pavas" class="hover:text-white transition">Pavas Eléctricas</a></li>
-                    <li><a href="/productos?categoria=molinillos" class="hover:text-white transition">Molinillos de café</a></li>
+                    @foreach($footerPages as $fp)
+                    <li><a href="{{ route('frontend.pages.show', $fp->slug) }}" class="hover:text-white transition">{{ $fp->title }}</a></li>
+                    @endforeach
                 </ul>
+                @endif
             </div>
 
             <!-- Ayuda -->

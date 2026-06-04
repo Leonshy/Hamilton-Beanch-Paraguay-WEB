@@ -22,13 +22,17 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Sección <span class="text-danger">*</span></label>
-                            <select class="form-select @error('section') is-invalid @enderror" name="section" required>
-                                @foreach(['servicio-tecnico','manuales','garantia'] as $sec)
-                                <option value="{{ $sec }}" {{ old('section', $page->section ?? '') === $sec ? 'selected' : '' }}>
-                                    {{ $sec }}
-                                </option>
-                                @endforeach
-                            </select>
+                            @php $protectedSections = ['servicio-tecnico','manuales','garantia']; @endphp
+                            @if(isset($page) && in_array($page->section, $protectedSections))
+                                <input type="text" class="form-control" value="{{ $page->section }}" disabled>
+                                <input type="hidden" name="section" value="{{ $page->section }}">
+                            @else
+                                <input type="text" class="form-control @error('section') is-invalid @enderror"
+                                       name="section" required
+                                       value="{{ old('section', $page->section ?? '') }}"
+                                       placeholder="Ej: politica-privacidad">
+                                <div class="form-text">Identificador único, sin espacios ni tildes.</div>
+                            @endif
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Estado</label>
@@ -72,6 +76,11 @@
                         <label class="form-label">Orden</label>
                         <input type="number" class="form-control" name="order"
                                value="{{ old('order', $page->order ?? $nextOrder ?? 0) }}" min="0">
+                    </div>
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" name="show_in_footer" value="1"
+                               {{ old('show_in_footer', $page->show_in_footer ?? true) ? 'checked' : '' }}>
+                        <label class="form-check-label">Mostrar en pie de página</label>
                     </div>
                     <button type="submit" class="btn btn-hb-primary w-100">
                         <i class="bi bi-save me-2"></i>{{ isset($page) ? 'Actualizar' : 'Guardar' }}

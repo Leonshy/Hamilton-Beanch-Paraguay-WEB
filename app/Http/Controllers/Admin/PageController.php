@@ -28,7 +28,8 @@ class PageController extends Controller
         $data = $this->validatePage($request);
         $data['user_id'] = auth()->id();
         $data['slug'] = $this->uniqueSlug($request->slug ?: $request->title);
-        $data['no_index'] = $request->boolean('no_index');
+        $data['no_index']       = $request->boolean('no_index');
+        $data['show_in_footer'] = $request->boolean('show_in_footer');
         $data['order'] = $data['order'] ?? $this->nextOrder(Page::class);
         $this->shiftOrderUp(Page::class, (int) $data['order']);
         Page::create($data);
@@ -46,7 +47,8 @@ class PageController extends Controller
         if ($request->filled('slug') && $request->slug !== $page->slug) {
             $data['slug'] = $this->uniqueSlug($request->slug, $page->id);
         }
-        $data['no_index'] = $request->boolean('no_index');
+        $data['no_index']       = $request->boolean('no_index');
+        $data['show_in_footer'] = $request->boolean('show_in_footer');
         $this->shiftOrderUp(Page::class, (int) $data['order'], $page->id);
         $page->update($data);
         return redirect()->route('admin.pages.index')->with('success', 'Página actualizada correctamente.');
@@ -54,6 +56,10 @@ class PageController extends Controller
 
     public function destroy(Page $page)
     {
+        $protected = ['servicio-tecnico', 'manuales', 'garantia'];
+        if (in_array($page->section, $protected)) {
+            return redirect()->route('admin.pages.index')->with('error', 'Esta página es esencial y no puede eliminarse.');
+        }
         $page->delete();
         return redirect()->route('admin.pages.index')->with('success', 'Página eliminada.');
     }

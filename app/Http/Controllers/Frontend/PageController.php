@@ -19,11 +19,16 @@ class PageController extends Controller
         return view('centro-ayuda', compact('helpItems'));
     }
 
+    public function show(string $slug)
+    {
+        $page = Page::published()->where('slug', $slug)->firstOrFail();
+        return view('pagina', compact('page'));
+    }
+
     public function preguntasFrecuentes()
     {
-        $page = Page::published()->section('preguntas-frecuentes')->first();
         $faqs = Faq::active()->orderBy('order')->get();
-        return view('preguntas-frecuentes', compact('page', 'faqs'));
+        return view('preguntas-frecuentes', compact('faqs'));
     }
 
     public function servicioTecnico()

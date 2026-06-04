@@ -22,11 +22,13 @@ class AppServiceProvider extends ServiceProvider
             try {
                 $siteSettings  = SiteSetting::all()->pluck('value', 'key');
                 $announcements = Announcement::active()->orderBy('order')->get();
+                $footerPages   = \App\Models\Page::published()->where('show_in_footer', true)->orderBy('order')->get();
             } catch (\Exception) {
                 $siteSettings  = collect();
                 $announcements = collect();
+                $footerPages   = collect();
             }
-            $view->with(compact('siteSettings', 'announcements'));
+            $view->with(compact('siteSettings', 'announcements', 'footerPages'));
         });
 
         Gate::define('admin-only', fn($user) => $user->hasRole('admin'));

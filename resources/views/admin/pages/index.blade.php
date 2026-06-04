@@ -29,6 +29,7 @@
                         <a href="{{ route('admin.pages.edit', $page) }}" class="btn btn-sm btn-outline-primary me-1">
                             <i class="bi bi-pencil"></i>
                         </a>
+                        @if(!in_array($page->section, ['servicio-tecnico', 'manuales', 'garantia']))
                         <form action="{{ route('admin.pages.destroy', $page) }}" method="POST"
                               class="d-inline" onsubmit="return confirm('¿Eliminar esta página?')">
                             @csrf @method('DELETE')
@@ -36,6 +37,11 @@
                                 <i class="bi bi-trash"></i>
                             </button>
                         </form>
+                        @else
+                        <span class="btn btn-sm btn-outline-secondary disabled" title="Esta página es esencial y no puede eliminarse">
+                            <i class="bi bi-lock"></i>
+                        </span>
+                        @endif
                     </td>
                 </tr>
                 @empty

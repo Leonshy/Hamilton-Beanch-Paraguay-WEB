@@ -12,12 +12,13 @@ class Page extends Model
 
     protected $fillable = [
         'user_id', 'media_id', 'section', 'title', 'subtitle', 'icon', 'content',
-        'slug', 'status', 'order',
+        'slug', 'status', 'show_in_footer', 'order',
         'meta_title', 'meta_description', 'og_title', 'og_description', 'og_image', 'no_index',
     ];
 
     protected $casts = [
-        'no_index' => 'boolean',
+        'no_index'        => 'boolean',
+        'show_in_footer'  => 'boolean',
     ];
 
     public function featuredImage(): BelongsTo

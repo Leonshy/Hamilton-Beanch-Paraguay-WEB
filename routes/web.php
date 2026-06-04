@@ -17,6 +17,7 @@ Route::get('/centro-ayuda',        [Frontend\PageController::class,    'centroAy
 Route::get('/servicio-tecnico',    [Frontend\PageController::class,    'servicioTecnico'])->name('frontend.service');
 Route::get('/manuales-de-producto',[Frontend\PageController::class,    'manuales'])->name('frontend.manuals');
 Route::get('/garantia-de-producto',[Frontend\PageController::class,    'garantia'])->name('frontend.warranty');
+Route::get('/paginas/{slug}',      [Frontend\PageController::class,   'show'])->name('frontend.pages.show');
 Route::get('/contacto',            [Frontend\ContactController::class, 'index'])->name('frontend.contact');
 Route::post('/contacto',           [Frontend\ContactController::class, 'store'])->name('frontend.contact.store');
 
