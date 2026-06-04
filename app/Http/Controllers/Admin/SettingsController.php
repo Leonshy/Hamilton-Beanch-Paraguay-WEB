@@ -55,7 +55,10 @@ class SettingsController extends Controller
     {
         $fields = ['phone', 'whatsapp', 'email', 'contact_email', 'address', 'schedule', 'map_embed'];
         foreach ($fields as $field) {
-            SiteSetting::set($field, $request->input($field, ''));
+            SiteSetting::updateOrCreate(
+                ['key' => $field],
+                ['value' => $request->input($field, ''), 'group' => 'contact']
+            );
         }
         SiteSetting::clearCache();
         return back()->with('success', 'Datos de contacto guardados.');
@@ -70,7 +73,10 @@ class SettingsController extends Controller
     public function saveSocial(Request $request)
     {
         foreach (['facebook', 'instagram', 'linkedin', 'tiktok', 'youtube', 'twitter'] as $network) {
-            SiteSetting::set("social_{$network}", $request->input("social_{$network}", ''));
+            SiteSetting::updateOrCreate(
+                ['key' => "social_{$network}"],
+                ['value' => $request->input("social_{$network}", ''), 'group' => 'social']
+            );
         }
         SiteSetting::clearCache();
         return back()->with('success', 'Redes sociales guardadas.');
@@ -86,7 +92,10 @@ class SettingsController extends Controller
     {
         $fields = ['google_analytics_id', 'meta_pixel_id', 'whatsapp_float_enabled', 'custom_scripts_head', 'custom_scripts_body'];
         foreach ($fields as $field) {
-            SiteSetting::set($field, $request->input($field, ''));
+            SiteSetting::updateOrCreate(
+                ['key' => $field],
+                ['value' => $request->input($field, ''), 'group' => 'integrations']
+            );
         }
         SiteSetting::clearCache();
         return back()->with('success', 'Integraciones guardadas.');
