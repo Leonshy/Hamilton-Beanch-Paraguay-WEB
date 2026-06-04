@@ -67,6 +67,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/faqs/reorder', [Admin\FaqController::class, 'reorder'])->name('faqs.reorder');
         Route::resource('faqs', Admin\FaqController::class);
 
+        // Sale Points
+        Route::post('/sale-points/reorder', [Admin\SalePointController::class, 'reorder'])->name('sale-points.reorder');
+        Route::resource('sale-points', Admin\SalePointController::class);
+
         // Banners
         Route::post('/banners/reorder', [Admin\BannerController::class, 'reorder'])->name('banners.reorder');
         Route::resource('banners', Admin\BannerController::class);

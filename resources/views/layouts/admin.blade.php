@@ -60,6 +60,9 @@
             <a href="{{ route('admin.banners.index') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">
                 <i class="bi bi-image"></i> <span>Banners</span>
             </a>
+            <a href="{{ route('admin.sale-points.index') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.sale-points.*') ? 'active' : '' }}">
+                <i class="bi bi-shop"></i> <span>Puntos de Venta</span>
+            </a>
             <a href="{{ route('admin.media.index') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.media.*') ? 'active' : '' }}">
                 <i class="bi bi-folder2-open"></i> <span>Biblioteca de medios</span>
             </a>
