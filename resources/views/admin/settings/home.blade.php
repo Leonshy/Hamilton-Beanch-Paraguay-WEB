@@ -67,11 +67,17 @@
                                value="{{ old("features.{$i}.title", $feature['title'] ?? '') }}"
                                placeholder="Ej: Garantía oficial 1 año" required>
                     </div>
-                    <div class="col-md-5">
+                    <div class="col-md-4">
                         <label class="form-label">Descripción</label>
                         <input type="text" class="form-control" name="features[{{ $i }}][description]"
                                value="{{ old("features.{$i}.description", $feature['description'] ?? '') }}"
                                placeholder="Ej: Con respaldo de servicio técnico autorizado">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Enlace <span class="text-muted small">(opcional)</span></label>
+                        <input type="url" class="form-control" name="features[{{ $i }}][url]"
+                               value="{{ old("features.{$i}.url", $feature['url'] ?? '') }}"
+                               placeholder="https://...">
                     </div>
                 </div>
             </div>

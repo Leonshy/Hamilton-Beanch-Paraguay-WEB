@@ -123,8 +123,18 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             @foreach($homeFeatures as $feature)
+            @php $featureUrl = $feature['url'] ?? null; @endphp
+            @if($featureUrl)
+            <a href="{{ $featureUrl }}"
+               class="flex items-center gap-4 rounded-xl transition"
+               style="text-decoration:none;padding:0.75rem;margin:-0.75rem;"
+               onmouseenter="this.style.background='#f0faf4'"
+               onmouseleave="this.style.background='transparent'">
+            @else
             <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-brand-light rounded-xl flex items-center justify-center flex-shrink-0">
+            @endif
+                <div class="w-12 h-12 bg-brand-light rounded-xl flex items-center justify-center flex-shrink-0"
+                     style="transition:transform .2s;" {{ $featureUrl ? 'onmouseenter="this.style.transform=\'scale(1.1)\'" onmouseleave="this.style.transform=\'scale(1)\'"' : '' }}>
                     @include('partials.trust-icon', ['icon' => $feature['icon'] ?? 'shield'])
                 </div>
                 <div>
@@ -133,7 +143,11 @@
                     <p class="text-gray-500 text-sm mt-0.5">{{ $feature['description'] }}</p>
                     @endif
                 </div>
+            @if($featureUrl)
+            </a>
+            @else
             </div>
+            @endif
             @endforeach
         </div>
     </div>

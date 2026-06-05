@@ -136,6 +136,7 @@ class SettingsController extends Controller
             'icon'        => $f['icon'] ?? 'shield',
             'title'       => $f['title'] ?? '',
             'description' => $f['description'] ?? '',
+            'url'         => !empty($f['url']) ? $f['url'] : null,
         ])->values()->toArray();
 
         SiteSetting::set('home_features', json_encode($features, JSON_UNESCAPED_UNICODE));
