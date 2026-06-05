@@ -31,11 +31,14 @@
         </div>
 
         <nav class="hb-admin-nav">
+
+            {{-- PRINCIPAL --}}
             <div class="hb-admin-nav__label">Principal</div>
             <a href="{{ route('admin.dashboard') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
             </a>
 
+            {{-- CATÁLOGO --}}
             <div class="hb-admin-nav__label mt-3">Catálogo</div>
             <a href="{{ route('admin.products.index') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
                 <i class="bi bi-box-seam"></i> <span>Productos</span>
@@ -44,38 +47,56 @@
                 <i class="bi bi-tags"></i> <span>Categorías</span>
             </a>
 
-            <div class="hb-admin-nav__label mt-3">Contenido</div>
+            {{-- INICIO --}}
+            <div class="hb-admin-nav__label mt-3">Inicio</div>
             <a href="{{ route('admin.announcements.index') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.announcements.*') ? 'active' : '' }}">
                 <i class="bi bi-megaphone"></i> <span>Anuncios</span>
-            </a>
-            <a href="{{ route('admin.pages.index') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.pages.*') ? 'active' : '' }}">
-                <i class="bi bi-layout-text-window"></i> <span>Páginas</span>
-            </a>
-            <a href="{{ route('admin.faqs.index') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.faqs.*') ? 'active' : '' }}">
-                <i class="bi bi-question-circle"></i> <span>Preguntas frecuentes</span>
-            </a>
-            <a href="{{ route('admin.help-center.index') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.help-center.*') ? 'active' : '' }}">
-                <i class="bi bi-life-preserver"></i> <span>Centro de ayuda</span>
             </a>
             <a href="{{ route('admin.banners.index') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.banners.*') ? 'active' : '' }}">
                 <i class="bi bi-image"></i> <span>Banners</span>
             </a>
+            <a href="{{ route('admin.settings.home') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.settings.home*') ? 'active' : '' }}">
+                <i class="bi bi-layout-three-columns"></i> <span>Bloques destacados</span>
+            </a>
             <a href="{{ route('admin.sale-points.index') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.sale-points.*') ? 'active' : '' }}">
                 <i class="bi bi-shop"></i> <span>Puntos de Venta</span>
+            </a>
+
+            {{-- CONTENIDO --}}
+            <div class="hb-admin-nav__label mt-3">Contenido</div>
+            <a href="{{ route('admin.help-center.index') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.help-center.*') ? 'active' : '' }}">
+                <i class="bi bi-life-preserver"></i> <span>Centro de ayuda</span>
+            </a>
+            <a href="{{ route('admin.faqs.index') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.faqs.*') ? 'active' : '' }}">
+                <i class="bi bi-question-circle"></i> <span>Preguntas frecuentes</span>
+            </a>
+            <a href="{{ route('admin.pages.index') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.pages.*') ? 'active' : '' }}">
+                <i class="bi bi-layout-text-window"></i> <span>Páginas</span>
             </a>
             <a href="{{ route('admin.media.index') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.media.*') ? 'active' : '' }}">
                 <i class="bi bi-folder2-open"></i> <span>Biblioteca de medios</span>
             </a>
 
-            <div class="hb-admin-nav__label mt-3">Consultas</div>
+            {{-- CONTACTOS --}}
+            <div class="hb-admin-nav__label mt-3">Contactos</div>
+            <a href="{{ route('admin.settings.contact') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.settings.contact*') ? 'active' : '' }}">
+                <i class="bi bi-telephone"></i> <span>Datos de contacto</span>
+            </a>
+            <a href="{{ route('admin.settings.social') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.settings.social*') ? 'active' : '' }}">
+                <i class="bi bi-share"></i> <span>Redes sociales</span>
+            </a>
             <a href="{{ route('admin.contacts.index') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.contacts.*') ? 'active' : '' }}">
                 <i class="bi bi-envelope"></i> <span>Mensajes de contacto</span>
             </a>
 
+            {{-- CONFIGURACIÓN --}}
             @if(auth()->user()->hasRole('admin'))
             <div class="hb-admin-nav__label mt-3">Configuración</div>
-            <a href="{{ route('admin.settings.general') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
-                <i class="bi bi-sliders"></i> <span>Configuraciones</span>
+            <a href="{{ route('admin.settings.general') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.settings.general*') ? 'active' : '' }}">
+                <i class="bi bi-sliders"></i> <span>General</span>
+            </a>
+            <a href="{{ route('admin.settings.integrations') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.settings.integrations*') ? 'active' : '' }}">
+                <i class="bi bi-plug"></i> <span>Integraciones</span>
             </a>
             <a href="{{ route('admin.users.index') }}" class="hb-admin-nav__item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                 <i class="bi bi-people"></i> <span>Usuarios</span>
@@ -87,6 +108,7 @@
                     <i class="bi bi-box-arrow-up-right"></i> <span>Ver sitio web</span>
                 </a>
             </div>
+
         </nav>
     </aside>
 

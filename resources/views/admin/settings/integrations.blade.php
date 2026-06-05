@@ -2,14 +2,7 @@
 @section('title', 'Configuración — Integraciones')
 
 @section('content')
-<h2 class="mb-4">Configuración</h2>
-<ul class="nav nav-tabs mb-4">
-    <li class="nav-item"><a class="nav-link" href="{{ route('admin.settings.general') }}">General</a></li>
-    <li class="nav-item"><a class="nav-link" href="{{ route('admin.settings.contact') }}">Contacto</a></li>
-    <li class="nav-item"><a class="nav-link" href="{{ route('admin.settings.social') }}">Redes Sociales</a></li>
-    <li class="nav-item"><a class="nav-link active" href="{{ route('admin.settings.integrations') }}">Integraciones</a></li>
-    <li class="nav-item"><a class="nav-link" href="{{ route('admin.settings.home') }}">Página de Inicio</a></li>
-</ul>
+<h2 class="mb-4">Integraciones</h2>
 
 <form action="{{ route('admin.settings.integrations.save') }}" method="POST">
     @csrf
