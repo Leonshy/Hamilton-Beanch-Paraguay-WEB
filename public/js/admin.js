@@ -77,6 +77,7 @@
   var mediaPickerModal = null;
   var currentTarget    = null;
   var currentPreview   = null;
+  var currentPickerBtn = null;
 
   // ── Gallery multi-select state ──
   var galleryMode      = false;
@@ -276,15 +277,24 @@
               if (currentPreview) {
                 var prev = document.getElementById(currentPreview);
                 if (prev) {
+                  var fit    = currentPickerBtn ? (currentPickerBtn.dataset.previewFit    || 'cover')  : 'cover';
+                  var height = currentPickerBtn ? (currentPickerBtn.dataset.previewHeight || '120px') : '120px';
+                  var bg     = currentPickerBtn ? (currentPickerBtn.dataset.previewBg     || '')       : '';
                   if (prev.tagName === 'IMG') {
                     prev.src = this.dataset.url;
+                    prev.style.objectFit = fit;
+                    prev.style.maxHeight = height;
+                    if (bg) prev.style.background = bg;
                   } else {
                     var img = document.createElement('img');
                     img.src = this.dataset.url;
                     img.id = currentPreview;
                     img.className = 'img-fluid rounded mb-2 w-100';
-                    img.style.height = '120px';
-                    img.style.objectFit = 'cover';
+                    img.style.maxHeight = height;
+                    img.style.objectFit = fit;
+                    img.style.display = 'block';
+                    img.style.margin = '0 auto';
+                    if (bg) img.style.background = bg;
                     prev.replaceWith(img);
                   }
                 }
@@ -342,8 +352,9 @@
   // Botones que abren el media picker (modo single)
   document.querySelectorAll('.hb-media-picker-btn').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      currentTarget  = this.dataset.target;
-      currentPreview = this.dataset.preview || null;
+      currentTarget    = this.dataset.target;
+      currentPreview   = this.dataset.preview || null;
+      currentPickerBtn = this;
       openMediaPicker('image', null);
     });
   });

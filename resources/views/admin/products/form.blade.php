@@ -192,7 +192,8 @@
                     <input type="hidden" name="media_id" id="media_id"
                            value="{{ old('media_id', $product->media_id ?? '') }}">
                     <button type="button" class="btn btn-sm btn-outline-secondary w-100 hb-media-picker-btn"
-                            data-target="media_id" data-preview="previewFeaturedImage">
+                            data-target="media_id" data-preview="previewFeaturedImage"
+                            data-preview-fit="cover" data-preview-height="220px">
                         <i class="bi bi-folder2-open me-1"></i>Seleccionar imagen
                     </button>
                 </div>

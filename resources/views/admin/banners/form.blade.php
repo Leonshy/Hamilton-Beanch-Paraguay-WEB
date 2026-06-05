@@ -32,7 +32,8 @@
                     <input type="hidden" name="media_id" id="media_id"
                            value="{{ old('media_id', $banner->media_id ?? '') }}">
                     <button type="button" class="btn btn-outline-secondary w-100 hb-media-picker-btn"
-                            data-target="media_id" data-preview="previewBannerImage">
+                            data-target="media_id" data-preview="previewBannerImage"
+                            data-preview-fit="cover" data-preview-height="320px">
                         <i class="bi bi-folder2-open me-2"></i>Seleccionar imagen de la biblioteca
                     </button>
                     <div class="form-text mt-2" id="imgSizeHint">

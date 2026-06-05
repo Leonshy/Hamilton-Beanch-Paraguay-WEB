@@ -32,7 +32,8 @@
                     <input type="hidden" name="media_id" id="media_id"
                            value="{{ old('media_id', $salePoint->media_id ?? '') }}">
                     <button type="button" class="btn btn-outline-secondary w-100 hb-media-picker-btn"
-                            data-target="media_id" data-preview="previewLogo">
+                            data-target="media_id" data-preview="previewLogo"
+                            data-preview-fit="contain" data-preview-height="160px" data-preview-bg="#f5f5f5">
                         <i class="bi bi-folder2-open me-2"></i>Seleccionar logo de la biblioteca
                     </button>
                     <div class="form-text mt-2">
