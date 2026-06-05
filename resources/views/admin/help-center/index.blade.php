@@ -37,7 +37,7 @@ $sectionOrder = ['preguntas-frecuentes', 'servicio-tecnico', 'manuales', 'garant
 <div class="row g-4">
     @foreach($sectionOrder as $section)
     @php $item = $items->get($section); @endphp
-    @if($item)
+    @if($item) {{-- siempre existe gracias al controlador --}}
     <div class="col-12">
         <div class="card hb-admin-card">
             <div class="card-header d-flex align-items-center gap-3">
