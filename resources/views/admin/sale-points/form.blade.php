@@ -39,7 +39,7 @@
                         <i class="bi bi-folder2-open me-2"></i>Seleccionar logo de la biblioteca
                     </button>
                     <div class="form-text mt-2">
-                        Formato recomendado: <strong>PNG o WebP con fondo transparente</strong> — mínimo 200 × 100 px.
+                        Formato recomendado: <strong>PNG o WebP con fondo transparente</strong> — mínimo 400 × 400 px (cuadrado).
                     </div>
                 </div>
             </div>
