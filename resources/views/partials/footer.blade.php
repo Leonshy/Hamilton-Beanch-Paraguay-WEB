@@ -20,7 +20,7 @@
                 $ftSchedule = $siteSettings['schedule'] ?? 'Lun–Vie: 9:00 – 18:00 hs';
             @endphp
             <div class="md:col-span-1">
-                <img src="/images/logo.webp" alt="Hamilton Beach" class="h-5 w-auto mb-4 brightness-0 invert">
+                <img src="{{ $siteSettings['logo'] ?? '/images/logo.webp' }}" alt="{{ $siteSettings['site_name'] ?? 'Hamilton Beach' }}" class="h-5 w-auto mb-4 brightness-0 invert">
                 <p class="text-sm leading-relaxed mb-4">
                     {{ $siteSettings['site_description'] ?? 'Distribuidor oficial en Paraguay. Electrodomésticos de calidad con respaldo y servicio técnico oficial.' }}
                 </p>

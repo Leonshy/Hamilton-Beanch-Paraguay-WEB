@@ -3,11 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', ($siteSettings['site_name'] ?? 'Hamilton Beach') . ' - Paraguay')</title>
+    @php
+        $siteName    = $siteSettings['site_name']    ?? 'Hamilton Beach Paraguay';
+        $siteTagline = $siteSettings['site_tagline'] ?? '';
+        $siteLogo    = $siteSettings['logo']         ?? '/images/logo.webp';
+        $siteFavicon = $siteSettings['favicon']      ?? '/favicon.ico';
+        $metaDesc    = $siteSettings['meta_description'] ?? $siteSettings['site_description'] ?? '';
+    @endphp
+    <title>@yield('title', $siteName . ($siteTagline ? ' — ' . $siteTagline : ''))</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    @if(!empty($siteSettings['meta_description']))
-    <meta name="description" content="{{ $siteSettings['meta_description'] }}">
+    @if($metaDesc)
+    <meta name="description" content="{{ $metaDesc }}">
     @endif
+    <link rel="icon" href="{{ $siteFavicon }}" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">

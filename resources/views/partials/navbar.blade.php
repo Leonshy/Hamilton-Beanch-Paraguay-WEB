@@ -20,7 +20,7 @@
 
             <!-- Logo -->
             <a href="/" class="flex-shrink-0">
-                <img src="/images/logo.webp" alt="Hamilton Beach" class="h-6 w-auto">
+                <img src="{{ $siteSettings['logo'] ?? '/images/logo.webp' }}" alt="{{ $siteSettings['site_name'] ?? 'Hamilton Beach' }}" class="h-6 w-auto">
             </a>
 
             <!-- Datos de contacto -->
