@@ -20,15 +20,17 @@
             <div class="card hb-admin-card">
                 <div class="card-header"><h6 class="mb-0">Logo del punto de venta</h6></div>
                 <div class="card-body">
-                    @if(isset($salePoint) && $salePoint->logo)
-                        <img src="{{ $salePoint->logo->url }}" alt=""
-                             id="previewLogo"
-                             class="rounded mb-3" style="max-height:160px;max-width:100%;object-fit:contain;background:#f5f5f5;padding:1rem">
-                    @else
-                        <div id="previewLogo" class="hb-admin-no-img-lg mb-3" style="height:160px">
-                            <i class="bi bi-shop fs-1 text-muted"></i>
-                        </div>
-                    @endif
+                    <div class="mb-3 rounded d-flex align-items-center justify-content-center" style="height:160px;background:#f5f5f5;">
+                        @if(isset($salePoint) && $salePoint->logo)
+                            <img src="{{ $salePoint->logo->url }}" alt=""
+                                 id="previewLogo"
+                                 style="max-height:140px;max-width:90%;object-fit:contain;">
+                        @else
+                            <div id="previewLogo" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;">
+                                <i class="bi bi-shop fs-1 text-muted"></i>
+                            </div>
+                        @endif
+                    </div>
                     <input type="hidden" name="media_id" id="media_id"
                            value="{{ old('media_id', $salePoint->media_id ?? '') }}">
                     <button type="button" class="btn btn-outline-secondary w-100 hb-media-picker-btn"
