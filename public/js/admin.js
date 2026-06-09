@@ -214,6 +214,8 @@
   function loadMediaGrid(type, cb) {
     currentMediaType = type || 'image';
     currentMediaCb   = cb;
+    var typeSelect = document.getElementById('mediaPickerType');
+    if (typeSelect) typeSelect.value = currentMediaType;
     var grid = document.getElementById('mediaPickerGrid');
     if (!grid) return;
     grid.innerHTML = '<div class="col-12 text-center py-4 text-muted"><i class="bi bi-arrow-repeat"></i> Cargando...</div>';
@@ -272,9 +274,27 @@
             if (currentMediaCb) {
               currentMediaCb(this.dataset.url, this.dataset.id);
             } else if (currentTarget) {
+              var storeUrl  = currentPickerBtn && currentPickerBtn.dataset.storeUrl;
+              var urlPreviewId = currentPickerBtn && currentPickerBtn.dataset.urlPreview;
               var inp = document.getElementById(currentTarget);
-              if (inp) inp.value = this.dataset.id;
-              if (currentPreview) {
+              if (inp) inp.value = storeUrl ? this.dataset.url : this.dataset.id;
+
+              // Preview de documento (PDF)
+              if (urlPreviewId) {
+                var urlPrev = document.getElementById(urlPreviewId);
+                if (urlPrev) {
+                  var fileUrl  = this.dataset.url;
+                  var fileName = fileUrl.split('/').pop();
+                  urlPrev.innerHTML =
+                    '<div class="d-flex align-items-center gap-2 p-2 bg-light rounded">' +
+                    '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>' +
+                    '<a href="' + fileUrl + '" target="_blank" class="small text-truncate flex-grow-1">' + fileName + '</a>' +
+                    '<button type="button" class="btn btn-sm btn-link text-danger p-0" id="attachmentClear">' +
+                    '<i class="bi bi-x-lg"></i></button></div>';
+                  setupAttachmentClear();
+                }
+              } else if (currentPreview) {
+                // Preview de imagen (comportamiento original)
                 var prev = document.getElementById(currentPreview);
                 if (prev) {
                   var fit    = currentPickerBtn ? (currentPickerBtn.dataset.previewFit    || 'cover')  : 'cover';
@@ -355,9 +375,23 @@
       currentTarget    = this.dataset.target;
       currentPreview   = this.dataset.preview || null;
       currentPickerBtn = this;
-      openMediaPicker('image', null);
+      var type = this.dataset.type || 'image';
+      openMediaPicker(type, null);
     });
   });
+
+  // Limpiar attachment
+  function setupAttachmentClear() {
+    var clearBtn = document.getElementById('attachmentClear');
+    if (!clearBtn) return;
+    clearBtn.addEventListener('click', function () {
+      var inp = document.getElementById('attachmentUrl');
+      if (inp) inp.value = '';
+      var preview = document.getElementById('attachmentPreview');
+      if (preview) preview.innerHTML = '';
+    });
+  }
+  setupAttachmentClear();
 
   // Upload desde modal picker
   var uploadForm = document.getElementById('mediaPickerUploadForm');

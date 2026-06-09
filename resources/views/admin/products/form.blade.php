@@ -236,11 +236,29 @@
 
             {{-- Manual PDF --}}
             <div class="card hb-admin-card">
-                <div class="card-header"><h6 class="mb-0">Manual PDF (URL)</h6></div>
+                <div class="card-header"><h6 class="mb-0"><i class="bi bi-file-earmark-pdf me-2"></i>Manual PDF</h6></div>
                 <div class="card-body">
-                    <input type="text" class="form-control" name="attachment"
-                           value="{{ old('attachment', $product->attachment ?? '') }}"
-                           placeholder="URL del manual en PDF">
+                    <input type="hidden" name="attachment" id="attachmentUrl"
+                           value="{{ old('attachment', $product->attachment ?? '') }}">
+                    <div id="attachmentPreview" class="mb-2">
+                        @if(isset($product) && $product->attachment)
+                        <div class="d-flex align-items-center gap-2 p-2 bg-light rounded">
+                            <i class="bi bi-file-earmark-pdf text-danger fs-5"></i>
+                            <a href="{{ $product->attachment }}" target="_blank"
+                               class="small text-truncate flex-grow-1">{{ basename($product->attachment) }}</a>
+                            <button type="button" class="btn btn-sm btn-link text-danger p-0" id="attachmentClear">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                        @endif
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary w-100 hb-media-picker-btn"
+                            data-target="attachmentUrl"
+                            data-url-preview="attachmentPreview"
+                            data-store-url="true"
+                            data-type="document">
+                        <i class="bi bi-folder2-open me-1"></i>Seleccionar PDF
+                    </button>
                 </div>
             </div>
         </div>
