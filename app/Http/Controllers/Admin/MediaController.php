@@ -39,7 +39,7 @@ class MediaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'file'   => 'required|file|max:10240|mimes:jpg,jpeg,png,gif,webp,svg,pdf,doc,docx,xls,xlsx,zip',
+            'file'   => 'required|file|max:65536|mimes:jpg,jpeg,png,gif,webp,svg,pdf,doc,docx,xls,xlsx,zip',
             'folder' => 'nullable|string|max:100|regex:/^[a-zA-Z0-9_\-\/]+$/',
         ]);
 

@@ -394,6 +394,27 @@
   setupAttachmentClear();
 
   // Upload desde modal picker
+  var MAX_FILE_SIZE = 64 * 1024 * 1024; // 64 MB en bytes
+
+  var uploadFileInput = document.getElementById('mediaPickerUploadFile');
+  if (uploadFileInput) {
+    uploadFileInput.addEventListener('change', function () {
+      var errorEl = document.getElementById('mediaUploadSizeError');
+      if (!errorEl) {
+        errorEl = document.createElement('div');
+        errorEl.id = 'mediaUploadSizeError';
+        errorEl.className = 'text-danger small mt-1';
+        this.parentNode.insertBefore(errorEl, this.nextSibling);
+      }
+      if (this.files.length && this.files[0].size > MAX_FILE_SIZE) {
+        errorEl.textContent = 'El archivo supera el límite de 64 MB y no puede subirse.';
+        this.value = '';
+      } else {
+        errorEl.textContent = '';
+      }
+    });
+  }
+
   var uploadForm = document.getElementById('mediaPickerUploadForm');
   if (uploadForm) {
     uploadForm.addEventListener('submit', function (e) {
@@ -401,6 +422,12 @@
       var submitBtn = uploadForm.querySelector('[type="submit"]');
       var fileInput = document.getElementById('mediaPickerUploadFile');
       if (!fileInput || !fileInput.files.length) return;
+
+      if (fileInput.files[0].size > MAX_FILE_SIZE) {
+        var errorEl = document.getElementById('mediaUploadSizeError');
+        if (errorEl) errorEl.textContent = 'El archivo supera el límite de 64 MB y no puede subirse.';
+        return;
+      }
 
       submitBtn.disabled = true;
       submitBtn.textContent = 'Subiendo...';

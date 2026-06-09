@@ -23,7 +23,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <div class="me-auto small text-muted">También podés subir un nuevo archivo:</div>
+                <div class="me-auto small text-muted">También podés subir un nuevo archivo: <span class="text-secondary">(máx. 64 MB)</span></div>
                 <form id="mediaPickerUploadForm" enctype="multipart/form-data" class="d-flex gap-2 align-items-center">
                     @csrf
                     <input type="file" class="form-control form-control-sm" name="file"
