@@ -23,11 +23,14 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <div class="me-auto small text-muted">También podés subir un nuevo archivo: <span class="text-secondary">(máx. 64 MB)</span></div>
+                <div class="me-auto">
+                    <div class="small text-muted mb-1">También podés subir archivos: <span class="text-secondary">(máx. 64 MB c/u)</span></div>
+                    <div id="mediaPickerUploadStatus" class="small text-muted d-none"></div>
+                </div>
                 <form id="mediaPickerUploadForm" enctype="multipart/form-data" class="d-flex gap-2 align-items-center">
                     @csrf
                     <input type="file" class="form-control form-control-sm" name="file"
-                           id="mediaPickerUploadFile" accept="image/*,application/pdf,video/*">
+                           id="mediaPickerUploadFile" accept="image/*,application/pdf,video/*" multiple>
                     <button type="submit" class="btn btn-sm btn-hb-primary">Subir</button>
                 </form>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>

@@ -406,8 +406,9 @@
         errorEl.className = 'text-danger small mt-1';
         this.parentNode.insertBefore(errorEl, this.nextSibling);
       }
-      if (this.files.length && this.files[0].size > MAX_FILE_SIZE) {
-        errorEl.textContent = 'El archivo supera el límite de 64 MB y no puede subirse.';
+      var oversized = Array.from(this.files).filter(function (f) { return f.size > MAX_FILE_SIZE; });
+      if (oversized.length) {
+        errorEl.textContent = oversized.map(function (f) { return '"' + f.name + '" supera 64 MB.'; }).join(' ');
         this.value = '';
       } else {
         errorEl.textContent = '';
@@ -417,49 +418,65 @@
 
   var uploadForm = document.getElementById('mediaPickerUploadForm');
   if (uploadForm) {
-    uploadForm.addEventListener('submit', function (e) {
+    uploadForm.addEventListener('submit', async function (e) {
       e.preventDefault();
       var submitBtn = uploadForm.querySelector('[type="submit"]');
       var fileInput = document.getElementById('mediaPickerUploadFile');
+      var statusEl = document.getElementById('mediaPickerUploadStatus');
       if (!fileInput || !fileInput.files.length) return;
 
-      if (fileInput.files[0].size > MAX_FILE_SIZE) {
+      var files = fileInput.files;
+      var oversized = Array.from(files).filter(function (f) { return f.size > MAX_FILE_SIZE; });
+      if (oversized.length) {
         var errorEl = document.getElementById('mediaUploadSizeError');
-        if (errorEl) errorEl.textContent = 'El archivo supera el límite de 64 MB y no puede subirse.';
+        if (errorEl) errorEl.textContent = oversized.map(function (f) { return '"' + f.name + '" supera 64 MB.'; }).join(' ');
         return;
       }
 
+      var csrf = document.querySelector('meta[name="csrf-token"]').content;
       submitBtn.disabled = true;
       submitBtn.textContent = 'Subiendo...';
+      if (statusEl) { statusEl.textContent = ''; statusEl.classList.remove('d-none', 'text-danger'); }
 
-      var formData = new FormData(uploadForm);
-      fetch('/admin/media', {
-        method: 'POST',
-        headers: {
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-          'Accept': 'application/json',
-        },
-        body: formData,
-      })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-          if (data.success) {
-            fileInput.value = '';
-            var type = document.getElementById('mediaPickerType')
-              ? document.getElementById('mediaPickerType').value
-              : 'image';
-            loadMediaGrid(type, null);
-          } else {
-            alert('Error al subir el archivo.');
-          }
-        })
-        .catch(function () {
-          alert('Error al subir el archivo. Verificá el tamaño o formato.');
-        })
-        .finally(function () {
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Subir';
-        });
+      var total = files.length;
+      var failed = [];
+
+      for (var i = 0; i < total; i++) {
+        if (statusEl) { statusEl.classList.remove('d-none'); statusEl.textContent = 'Subiendo ' + (i + 1) + ' de ' + total + ': ' + files[i].name; }
+        var formData = new FormData();
+        formData.append('file', files[i]);
+        formData.append('_token', csrf);
+        try {
+          var res = await fetch('/admin/media', {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+            body: formData,
+          });
+          var data = await res.json();
+          if (!data.success) failed.push(files[i].name);
+        } catch (err) {
+          failed.push(files[i].name);
+        }
+      }
+
+      fileInput.value = '';
+      if (statusEl) {
+        statusEl.classList.remove('d-none');
+        if (failed.length) {
+          statusEl.classList.add('text-danger');
+          statusEl.textContent = 'Error al subir: ' + failed.join(', ');
+        } else {
+          statusEl.textContent = total === 1 ? 'Archivo subido.' : total + ' archivos subidos.';
+        }
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Subir';
+
+      var type = document.getElementById('mediaPickerType')
+        ? document.getElementById('mediaPickerType').value
+        : 'image';
+      loadMediaGrid(type, null);
     });
   }
 

@@ -120,20 +120,20 @@
                 <h5 class="modal-title">Subir archivo</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ route('admin.media.store') }}" method="POST" enctype="multipart/form-data">
+            <form id="uploadModalForm" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Archivo <span class="text-danger">*</span></label>
+                        <label class="form-label">Archivos <span class="text-danger">*</span></label>
                         <input type="file" class="form-control @error('file') is-invalid @enderror"
-                               name="file" id="mediaIndexFile" required>
+                               name="file" id="mediaIndexFile" multiple required>
                         @error('file')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        <div class="form-text">Imágenes (JPG, PNG, WebP, SVG), PDFs y documentos. Máx. 64 MB.</div>
+                        <div class="form-text">Imágenes (JPG, PNG, WebP, SVG), PDFs y documentos. Máx. 64 MB por archivo.</div>
                         <div id="mediaIndexSizeError" class="text-danger small mt-1 d-none"></div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Carpeta</label>
-                        <input type="text" class="form-control" name="folder"
+                        <input type="text" class="form-control" name="folder" id="uploadModalFolder"
                                list="folderList" placeholder="ej: productos, banners"
                                value="{{ $folder }}">
                         <datalist id="folderList">
@@ -142,10 +142,16 @@
                             @endforeach
                         </datalist>
                     </div>
+                    <div id="uploadModalProgress" class="d-none">
+                        <div class="progress mb-1" style="height:6px;">
+                            <div id="uploadModalBar" class="progress-bar bg-success" style="width:0%"></div>
+                        </div>
+                        <p id="uploadModalStatus" class="small text-muted mb-0"></p>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-hb-primary">
+                    <button type="submit" class="btn btn-hb-primary" id="uploadModalBtn">
                         <i class="bi bi-cloud-upload me-2"></i>Subir
                     </button>
                 </div>
@@ -225,13 +231,17 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    var MAX_SIZE = 64 * 1024 * 1024;
+
+    // Validación de tamaño al seleccionar archivos
     var mediaIndexFile = document.getElementById('mediaIndexFile');
     if (mediaIndexFile) {
         mediaIndexFile.addEventListener('change', function () {
             var errorEl = document.getElementById('mediaIndexSizeError');
-            var submitBtn = this.closest('form').querySelector('[type="submit"]');
-            if (this.files.length && this.files[0].size > 64 * 1024 * 1024) {
-                errorEl.textContent = 'El archivo supera el límite de 64 MB y no puede subirse.';
+            var submitBtn = document.getElementById('uploadModalBtn');
+            var oversized = Array.from(this.files).filter(function (f) { return f.size > MAX_SIZE; });
+            if (oversized.length) {
+                errorEl.textContent = oversized.map(function (f) { return '"' + f.name + '" supera 64 MB.'; }).join(' ');
                 errorEl.classList.remove('d-none');
                 submitBtn.disabled = true;
                 this.value = '';
@@ -239,6 +249,62 @@ document.addEventListener('DOMContentLoaded', function () {
                 errorEl.classList.add('d-none');
                 submitBtn.disabled = false;
             }
+        });
+    }
+
+    // Upload múltiple AJAX
+    var uploadModalForm = document.getElementById('uploadModalForm');
+    if (uploadModalForm) {
+        uploadModalForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            var files    = mediaIndexFile.files;
+            var folder   = document.getElementById('uploadModalFolder').value;
+            var submitBtn = document.getElementById('uploadModalBtn');
+            var progress  = document.getElementById('uploadModalProgress');
+            var bar       = document.getElementById('uploadModalBar');
+            var status    = document.getElementById('uploadModalStatus');
+            var csrf      = document.querySelector('meta[name="csrf-token"]').content;
+
+            if (!files.length) return;
+
+            submitBtn.disabled = true;
+            progress.classList.remove('d-none');
+
+            var total = files.length;
+            var failed = [];
+
+            for (var i = 0; i < total; i++) {
+                status.textContent = 'Subiendo ' + (i + 1) + ' de ' + total + ': ' + files[i].name;
+                bar.style.width = Math.round((i / total) * 100) + '%';
+
+                var formData = new FormData();
+                formData.append('file', files[i]);
+                formData.append('folder', folder);
+                formData.append('_token', csrf);
+
+                try {
+                    var res = await fetch('{{ route('admin.media.store') }}', {
+                        method: 'POST',
+                        headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                        body: formData,
+                    });
+                    var data = await res.json();
+                    if (!data.success) failed.push(files[i].name);
+                } catch (err) {
+                    failed.push(files[i].name);
+                }
+            }
+
+            bar.style.width = '100%';
+            if (failed.length) {
+                status.textContent = 'Error al subir: ' + failed.join(', ');
+                status.classList.add('text-danger');
+            } else {
+                status.textContent = total === 1 ? 'Archivo subido.' : total + ' archivos subidos correctamente.';
+            }
+
+            submitBtn.disabled = false;
+            setTimeout(function () { window.location.reload(); }, 800);
         });
     }
 });
