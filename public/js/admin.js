@@ -251,7 +251,7 @@
           var col = document.createElement('div');
           col.className = 'col-6 col-md-3 col-lg-2';
           col.innerHTML =
-            '<div class="hb-media-grid-item" data-url="' + item.value + '" data-id="' + item.id + '">' +
+            '<div class="hb-media-grid-item" data-url="' + item.value + '" data-id="' + item.id + '" data-title="' + item.title + '">' +
             (item.thumb
               ? '<img src="' + item.thumb + '" alt="">'
               : '<div class="hb-media-grid-item__doc"><i class="bi bi-file-earmark"></i></div>') +
@@ -284,7 +284,7 @@
                 var urlPrev = document.getElementById(urlPreviewId);
                 if (urlPrev) {
                   var fileUrl  = this.dataset.url;
-                  var fileName = fileUrl.split('/').pop();
+                  var fileName = this.dataset.title || fileUrl.split('/').pop();
                   urlPrev.innerHTML =
                     '<div class="d-flex align-items-center gap-2 p-2 bg-light rounded">' +
                     '<i class="bi bi-file-earmark-pdf text-danger fs-5"></i>' +

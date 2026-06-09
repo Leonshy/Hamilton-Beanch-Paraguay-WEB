@@ -101,7 +101,7 @@ class MediaController extends Controller
                 'id'    => $m->id,
                 'title' => $m->name,
                 'value' => $m->url,
-                'thumb' => $m->url,
+                'thumb' => $m->type === 'image' ? $m->url : null,
             ]),
             'has_more' => $paginated->hasMorePages(),
             'next_page' => $paginated->hasMorePages() ? $page + 1 : null,
