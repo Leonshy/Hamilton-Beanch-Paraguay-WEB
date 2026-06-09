@@ -126,9 +126,10 @@
                     <div class="mb-3">
                         <label class="form-label">Archivo <span class="text-danger">*</span></label>
                         <input type="file" class="form-control @error('file') is-invalid @enderror"
-                               name="file" required>
+                               name="file" id="mediaIndexFile" required>
                         @error('file')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        <div class="form-text">Imágenes (JPG, PNG, WebP, SVG), PDFs y documentos. Máx. 10 MB.</div>
+                        <div class="form-text">Imágenes (JPG, PNG, WebP, SVG), PDFs y documentos. Máx. 64 MB.</div>
+                        <div id="mediaIndexSizeError" class="text-danger small mt-1 d-none"></div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Carpeta</label>
@@ -223,6 +224,23 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => document.getElementById('mdCopyIcon').className = 'bi bi-clipboard', 2000);
         });
     });
+
+    var mediaIndexFile = document.getElementById('mediaIndexFile');
+    if (mediaIndexFile) {
+        mediaIndexFile.addEventListener('change', function () {
+            var errorEl = document.getElementById('mediaIndexSizeError');
+            var submitBtn = this.closest('form').querySelector('[type="submit"]');
+            if (this.files.length && this.files[0].size > 64 * 1024 * 1024) {
+                errorEl.textContent = 'El archivo supera el límite de 64 MB y no puede subirse.';
+                errorEl.classList.remove('d-none');
+                submitBtn.disabled = true;
+                this.value = '';
+            } else {
+                errorEl.classList.add('d-none');
+                submitBtn.disabled = false;
+            }
+        });
+    }
 });
 </script>
 @endpush
