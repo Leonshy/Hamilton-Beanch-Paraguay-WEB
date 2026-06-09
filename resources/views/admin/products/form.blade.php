@@ -120,6 +120,40 @@
                 </div>
             </div>
 
+            {{-- Puntos de venta personalizados --}}
+            @php $existingRetailers = old('retailers', isset($product) ? ($product->retailers ?? []) : []); @endphp
+            <div class="card hb-admin-card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0"><i class="bi bi-pin-map me-2"></i>Puntos de venta personalizados</h6>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="addRetailerBtn">
+                        <i class="bi bi-plus-lg me-1"></i>Agregar
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="form-text mb-3">Puntos de venta exclusivos de este producto (no necesitan estar en el listado global).</div>
+                    <div id="retailersList">
+                        @foreach($existingRetailers as $i => $retailer)
+                        <div class="d-flex gap-2 mb-2 retailer-row">
+                            <input type="text" class="form-control form-control-sm"
+                                   name="retailers[name][]"
+                                   placeholder="Nombre del punto de venta"
+                                   value="{{ $retailer['name'] ?? '' }}" required>
+                            <input type="url" class="form-control form-control-sm"
+                                   name="retailers[url][]"
+                                   placeholder="URL (https://...)"
+                                   value="{{ $retailer['url'] ?? '' }}">
+                            <button type="button" class="btn btn-sm btn-outline-danger flex-shrink-0 remove-retailer">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                        @endforeach
+                    </div>
+                    @if(empty($existingRetailers))
+                    <p class="text-muted small mb-0" id="retailersEmpty">Ninguno agregado aún.</p>
+                    @endif
+                </div>
+            </div>
+
             {{-- SEO --}}
             @php $model = $product ?? new \App\Models\Product; @endphp
             @include('admin.partials.seo-fields')
@@ -274,6 +308,36 @@ document.querySelectorAll('.sp-check').forEach(function (cb) {
         var target = document.getElementById(this.dataset.target);
         if (target) target.style.visibility = this.checked ? 'visible' : 'hidden';
     });
+});
+
+// Puntos de venta personalizados
+function retailerRow() {
+    var div = document.createElement('div');
+    div.className = 'd-flex gap-2 mb-2 retailer-row';
+    div.innerHTML =
+        '<input type="text" class="form-control form-control-sm" name="retailers[name][]" placeholder="Nombre del punto de venta" required>' +
+        '<input type="url" class="form-control form-control-sm" name="retailers[url][]" placeholder="URL (https://...)">' +
+        '<button type="button" class="btn btn-sm btn-outline-danger flex-shrink-0 remove-retailer"><i class="bi bi-x-lg"></i></button>';
+    return div;
+}
+
+document.getElementById('addRetailerBtn').addEventListener('click', function () {
+    var empty = document.getElementById('retailersEmpty');
+    if (empty) empty.remove();
+    document.getElementById('retailersList').appendChild(retailerRow());
+});
+
+document.getElementById('retailersList').addEventListener('click', function (e) {
+    var btn = e.target.closest('.remove-retailer');
+    if (!btn) return;
+    btn.closest('.retailer-row').remove();
+    if (!document.querySelector('.retailer-row')) {
+        var p = document.createElement('p');
+        p.className = 'text-muted small mb-0';
+        p.id = 'retailersEmpty';
+        p.textContent = 'Ninguno agregado aún.';
+        document.getElementById('retailersList').insertAdjacentElement('afterend', p);
+    }
 });
 </script>
 @endpush

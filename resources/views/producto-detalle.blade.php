@@ -120,6 +120,25 @@
             </div>
             @endif
 
+            <!-- Puntos de venta personalizados -->
+            @if(!empty($product->retailers))
+            <div style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1rem;">
+                @foreach($product->retailers as $retailer)
+                @if(!empty($retailer['name']))
+                <a href="{{ $retailer['url'] ?? '#' }}" target="_blank" rel="noopener"
+                   style="display:flex;align-items:center;justify-content:center;gap:0.5rem;background:#f97316;color:#fff;padding:0.75rem 1rem;border-radius:0.75rem;font-weight:600;text-decoration:none;transition:background .2s;"
+                   onmouseenter="this.style.background='#ea6c0a'"
+                   onmouseleave="this.style.background='#f97316'">
+                    <svg style="width:1.25rem;height:1.25rem;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                    </svg>
+                    {{ $retailer['name'] }}
+                </a>
+                @endif
+                @endforeach
+            </div>
+            @endif
+
             <!-- WhatsApp -->
             @php $waNum = preg_replace('/\D/', '', $siteSettings['whatsapp'] ?? '595911234567'); @endphp
             <a href="https://wa.me/{{ $waNum }}" target="_blank"
