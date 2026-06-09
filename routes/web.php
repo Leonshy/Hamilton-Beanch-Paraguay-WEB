@@ -20,6 +20,8 @@ Route::get('/garantia-de-producto',[Frontend\PageController::class,    'garantia
 Route::get('/paginas/{slug}',      [Frontend\PageController::class,   'show'])->name('frontend.pages.show');
 Route::get('/contacto',            [Frontend\ContactController::class, 'index'])->name('frontend.contact');
 Route::post('/contacto',           [Frontend\ContactController::class, 'store'])->name('frontend.contact.store');
+Route::get('/sitemap.xml',         [Frontend\SitemapController::class, 'sitemap'])->name('frontend.sitemap');
+Route::get('/robots.txt',          [Frontend\SitemapController::class, 'robots'])->name('frontend.robots');
 
 /*
 |--------------------------------------------------------------------------
