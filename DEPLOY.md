@@ -1,14 +1,14 @@
 # Hamilton Beach Paraguay — Guía de Despliegue
 
-**Dominio de producción:** `hamilton.webparaguay.com`
-**Stack:** Laravel 12 · PHP 8.2 · MySQL 8.0 · Apache + Plesk · TinyMCE 8 (self-hosted)
+**Dominio:** `hamilton.webparaguay.com`  
+**Stack:** Laravel 12 · PHP 8.2 · MySQL · Apache + Plesk · TinyMCE 8 (self-hosted) · Tailwind CSS v4 · Vite 7
 
 ---
 
 ## Tabla de contenidos
 1. [Requisitos del servidor](#1-requisitos-del-servidor)
-2. [Preparar los archivos localmente](#2-preparar-los-archivos-localmente)
-3. [Despliegue en Plesk — Paso a paso](#3-despliegue-en-plesk--paso-a-paso)
+2. [Deploy rutinario (actualizaciones)](#2-deploy-rutinario-actualizaciones)
+3. [Primer despliegue desde cero](#3-primer-despliegue-desde-cero)
 4. [Configuración del .env en producción](#4-configuración-del-env-en-producción)
 5. [Comandos post-despliegue](#5-comandos-post-despliegue)
 6. [Configuración inicial desde el panel admin](#6-configuración-inicial-desde-el-panel-admin)
@@ -27,141 +27,132 @@
 | Composer | 2.x |
 | Apache | con `mod_rewrite` habilitado |
 
-**Extensiones PHP requeridas:**
+**Extensiones PHP requeridas:**  
 `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`, `fileinfo`, `gd`
 
-**Ajustes PHP recomendados (en Plesk → PHP Settings):**
+**Ajustes PHP recomendados (Plesk → PHP Settings del dominio):**
 ```
 memory_limit = 256M
-upload_max_filesize = 50M
-post_max_size = 50M
+upload_max_filesize = 64M
+post_max_size = 64M
 max_execution_time = 120
 ```
 
+> El límite de 64 MB también está validado a nivel de Laravel y en el navegador (client-side).
+
 ---
 
-## 2. Preparar los archivos localmente
+## 2. Deploy rutinario (actualizaciones)
 
-Los assets ya están compilados (`public/build/` incluido en git). No se necesita correr npm/pnpm en el servidor.
+Para cada actualización de código, usar el script `deploy.sh` incluido en el proyecto:
 
-Si se hacen cambios al frontend y se necesita recompilar:
 ```bash
-pnpm run build
+git push origin main   # subir commits a GitHub
+./deploy.sh            # compilar + copiar assets + git pull en servidor
 ```
 
-### Qué subir / qué NO subir
+El script hace automáticamente:
+1. Compila assets con `pnpm run build`
+2. Copia `public/build/` y `public/tinymce/` al servidor por SCP
+3. En el servidor: `git pull origin main`
+4. Corre `php artisan migrate --force`, `config:cache` y `view:clear`
 
-| Incluir | Excluir |
-|---------|---------|
-| Todo el proyecto | `node_modules/` |
-| `public/tinymce/` ✅ | `.env` (se crea en el servidor) |
-| `public/build/` (incluido en git) ✅ | `storage/logs/*.log` |
-| `vendor/` se instala en servidor con Composer | `.git/` |
-| `public/images/icons/` (iconos SVG) ✅ | `reference/` |
+**Importante:** El script usa el binario `/opt/plesk/php/8.2/bin/php` para los comandos artisan (el PHP del sistema en Plesk es una versión antigua).
+
+### Después de un deploy con cambios en vistas
+
+Si el deploy corrió correctamente, las vistas ya se limpian automáticamente. Si algo no se refleja:
+
+```bash
+# En el servidor
+/opt/plesk/php/8.2/bin/php artisan view:clear
+/opt/plesk/php/8.2/bin/php artisan config:cache
+```
+
+### Si git pull falla por conflictos
+
+```bash
+# En el servidor — descartar cambios locales y forzar pull
+git checkout -- .
+git pull origin main
+```
 
 ---
 
-## 3. Despliegue en Plesk — Paso a paso
+## 3. Primer despliegue desde cero
 
 ### Paso 1: Crear el dominio en Plesk
-1. Ingresar al panel Plesk con usuario `hamiltonprueba`
+1. Ingresar al panel Plesk
 2. Ir a **Sitios Web y Dominios** → **Agregar dominio**
-3. Configurar: `hamilton.webparaguay.com`
-4. Anotar la ruta del **Document Root** (ej.: `/var/www/vhosts/webparaguay.com/hamilton.webparaguay.com/`)
+3. Configurar el Document Root para que apunte a `httpdocs/public`
 
 ### Paso 2: Configurar PHP en Plesk
 1. Ir al dominio → **PHP**
-2. Seleccionar **PHP 8.2** o superior
-3. Ajustar los valores de memoria y tamaño de archivos (ver sección 1)
+2. Seleccionar **PHP 8.2**
+3. Ajustar memoria y tamaño de archivos (ver sección 1)
 
 ### Paso 3: Crear la base de datos MySQL
 1. En Plesk → **Bases de datos** → **Agregar base de datos**
-2. Nombre sugerido: `hamiltonbeach`
-3. Crear usuario con todos los privilegios sobre esa DB
-4. Anotar: host, nombre de DB, usuario y contraseña
+2. Crear usuario con todos los privilegios
+3. Anotar: host, nombre, usuario y contraseña
 
-### Paso 4: Subir los archivos
+### Paso 4: Clonar el repositorio en el servidor
 
-**Opción A — rsync por SSH (recomendado)**
 ```bash
-rsync -avz \
-  --exclude='node_modules' \
-  --exclude='.git' \
-  --exclude='.env' \
-  --exclude='storage/logs' \
-  --exclude='reference' \
-  ./ usuario@hamilton.webparaguay.com:/ruta/al/proyecto/
+cd /var/www/vhosts/hamilton.webparaguay.com/
+git clone https://github.com/Leonshy/Hamilton-Beanch-Paraguay-WEB.git httpdocs
+cd httpdocs
 ```
 
-**Opción B — FileZilla (FTP/SFTP)**
-1. Conectar por SFTP
-2. Subir todo el proyecto (excepto `node_modules/`, `.git/`, `reference/`) a la carpeta del proyecto
-3. Verificar que `public/tinymce/` y `public/images/icons/` se hayan subido completos
+### Paso 5: Instalar dependencias PHP
 
-### Paso 5: Instalar dependencias PHP en el servidor
 ```bash
-ssh usuario@hamilton.webparaguay.com
-cd /ruta/al/proyecto
-composer install --no-dev --optimize-autoloader
+/opt/plesk/php/8.2/bin/php /usr/bin/composer install --no-dev --optimize-autoloader
 ```
 
-### Paso 6: Configurar el Document Root
-Laravel requiere que el Document Root apunte a `public/`, no a la raíz del proyecto.
+### Paso 6: Configurar el .env
 
-1. En Plesk → dominio → **Configuración del hosting** → **Document Root**
-2. Cambiar a:
-   ```
-   /ruta/al/proyecto/public
-   ```
-
-**Si no se puede cambiar el Document Root**, crear un `.htaccess` en `httpdocs/`:
-```apache
-RewriteEngine On
-RewriteRule ^(.*)$ /ruta/al/proyecto/public/$1 [L]
-```
-
-### Paso 7: Crear y configurar el .env
 ```bash
-cd /ruta/al/proyecto
 cp .env.example .env
-nano .env
+nano .env   # completar con valores reales (ver sección 4)
 ```
 
-Ver la sección siguiente con todos los valores exactos.
+### Paso 7: Generar APP_KEY y ejecutar migraciones
 
-### Paso 8: Generar la APP_KEY
 ```bash
-php artisan key:generate
+/opt/plesk/php/8.2/bin/php artisan key:generate
+/opt/plesk/php/8.2/bin/php artisan migrate --force
+/opt/plesk/php/8.2/bin/php artisan db:seed --force
 ```
 
-### Paso 9: Ejecutar migraciones y seeders
+### Paso 8: Crear enlace de storage
+
 ```bash
-php artisan migrate --force
-php artisan db:seed --force
+/opt/plesk/php/8.2/bin/php artisan storage:link
 ```
 
-### Paso 10: Crear el enlace de storage
-```bash
-php artisan storage:link
-```
-Esto crea el symlink `public/storage → storage/app/public` para servir archivos subidos.
+Verifica que exista el symlink: `public/storage → storage/app/public`
 
-### Paso 11: Configurar permisos
+### Paso 9: Configurar permisos
+
 ```bash
-chmod -R 755 storage
-chmod -R 755 bootstrap/cache
-chmod -R 775 storage/app
-chmod -R 775 storage/framework
-chmod -R 775 storage/logs
-chown -R www-data:www-data storage bootstrap/cache
+chmod -R 755 storage bootstrap/cache
+chmod -R 775 storage/app storage/framework storage/logs
 ```
 
-### Paso 12: Optimizar para producción
+### Paso 10: Compilar assets y subir (desde local)
+
 ```bash
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-composer dump-autoload --optimize
+pnpm run build
+./deploy.sh   # o copiar manualmente public/build/ y public/tinymce/
+```
+
+### Paso 11: Optimizar
+
+```bash
+/opt/plesk/php/8.2/bin/php artisan config:cache
+/opt/plesk/php/8.2/bin/php artisan route:cache
+/opt/plesk/php/8.2/bin/php artisan view:cache
 ```
 
 ---
@@ -171,7 +162,7 @@ composer dump-autoload --optimize
 ```env
 APP_NAME="Hamilton Beach Paraguay"
 APP_ENV=production
-APP_KEY=                         # se genera con php artisan key:generate
+APP_KEY=                         # se genera con artisan key:generate
 APP_DEBUG=false
 APP_URL=https://hamilton.webparaguay.com
 
@@ -212,10 +203,6 @@ MAIL_PASSWORD=
 MAIL_FROM_ADDRESS="noreply@hamilton.webparaguay.com"
 MAIL_FROM_NAME="Hamilton Beach Paraguay"
 
-# ─── EDITOR WYSIWYG ──────────────────────────────────────
-# TinyMCE está auto-hospedado en public/tinymce/ — no requiere API key
-TINYMCE_API_KEY=no-api-key
-
 VITE_APP_NAME="${APP_NAME}"
 ```
 
@@ -224,14 +211,14 @@ VITE_APP_NAME="${APP_NAME}"
 ## 5. Comandos post-despliegue
 
 ```bash
-# Verificar que todo esté en orden
-php artisan about
+# Ver estado general de la aplicación
+/opt/plesk/php/8.2/bin/php artisan about
 
-# Si algo falla, limpiar todos los cachés
-php artisan config:clear
-php artisan route:clear
-php artisan view:clear
-php artisan cache:clear
+# Limpiar todos los cachés (usar si algo no se refleja)
+/opt/plesk/php/8.2/bin/php artisan config:clear
+/opt/plesk/php/8.2/bin/php artisan route:clear
+/opt/plesk/php/8.2/bin/php artisan view:clear
+/opt/plesk/php/8.2/bin/php artisan cache:clear
 ```
 
 ---
@@ -241,20 +228,18 @@ php artisan cache:clear
 URL del panel: `https://hamilton.webparaguay.com/admin`
 
 ### Al ingresar por primera vez:
-1. **Cambiar la contraseña del admin** (ver sección 9)
-2. Ir a **Configuración del sitio**:
-   - Subir el logo
-   - Completar nombre, descripción, datos de contacto
-3. Ir a **Banners**:
-   - Crear el banner principal del hero de inicio
-4. Ir a **Categorías**:
-   - Verificar que las 4 categorías (Cafeteras, Tostadoras, Pavas, Molinillos) estén activas con sus íconos
-5. Ir a **Productos**:
-   - Cargar catálogo con imágenes y precios
-6. Ir a **Anuncios**:
-   - Configurar los textos del banner superior de desplazamiento
-7. Ir a **Centro de ayuda**:
-   - Verificar los 4 ítems (FAQ, Servicio Técnico, Manuales, Garantía)
+1. **Cambiar la contraseña del admin**
+2. Ir a **Configuración → General**:
+   - Subir logo y favicon
+   - Completar tagline, meta description, datos de contacto
+3. Ir a **Configuración → Redes sociales**: completar URLs
+4. Ir a **Configuración → Integraciones**: configurar GA4 y/o Meta Pixel si corresponde
+5. Ir a **Banners**: crear el banner principal del hero
+6. Ir a **Anuncios**: configurar los textos del marquee superior
+7. Ir a **Categorías**: verificar que las categorías estén activas con sus íconos
+8. Ir a **Puntos de Venta**: cargar los distribuidores con sus logos
+9. Ir a **Productos**: cargar el catálogo completo
+10. Ir a **Centro de Ayuda**: verificar los 4 ítems (FAQ, Servicio Técnico, Manuales, Garantía)
 
 ---
 
@@ -262,55 +247,64 @@ URL del panel: `https://hamilton.webparaguay.com/admin`
 
 ### "No application encryption key has been specified"
 ```bash
-php artisan key:generate
+/opt/plesk/php/8.2/bin/php artisan key:generate
 ```
 
 ### Error 500 al cargar el sitio
 ```bash
-# Activar debug temporalmente para ver el error
-APP_DEBUG=true  # en .env
-php artisan config:cache
+# Activar debug temporalmente
+# En .env: APP_DEBUG=true
+/opt/plesk/php/8.2/bin/php artisan config:cache
 
 # Revisar el log
 tail -100 storage/logs/laravel.log
 
-# Volver a desactivar debug
-APP_DEBUG=false
-php artisan config:cache
+# Volver a desactivar
+# En .env: APP_DEBUG=false
+/opt/plesk/php/8.2/bin/php artisan config:cache
 ```
 
-### Las imágenes subidas no se muestran
+### Las imágenes subidas no se muestran (404)
 ```bash
 ls -la public/storage
-php artisan storage:link
-# Verificar APP_URL en .env (debe ser https://hamilton.webparaguay.com sin barra final)
+# Si no existe el symlink:
+/opt/plesk/php/8.2/bin/php artisan storage:link
+# Verificar que APP_URL en .env sea correcto (sin barra final)
 ```
 
 ### Error 404 en rutas (solo carga la página de inicio)
 Apache no está aplicando el `.htaccess`:
 1. Verificar que `mod_rewrite` esté habilitado
-2. Verificar que `AllowOverride All` esté configurado
-3. En Plesk → **Configuración de Apache** → habilitar `AllowOverride All`
+2. En Plesk → **Configuración de Apache** → `AllowOverride All`
 
-### Íconos SVG de categorías no aparecen
+### git pull falla con "local changes would be overwritten"
 ```bash
-ls public/images/icons/
-# Deben estar los 18 archivos .svg (coffee-maker.svg, toaster.svg, etc.)
+git checkout -- public/js/admin.js   # o el archivo en conflicto
+git pull origin main
+```
+
+> Esto ocurre si un deploy previo copió un archivo por SCP antes del git pull.
+
+### Comandos artisan fallan con error de PHP version
+```bash
+# Usar siempre el binario correcto de Plesk:
+/opt/plesk/php/8.2/bin/php artisan <comando>
+# NO usar `php artisan` a secas (apunta a PHP 5.4 del sistema)
+```
+
+### Caché antigua después de cambios
+```bash
+/opt/plesk/php/8.2/bin/php artisan config:clear && \
+/opt/plesk/php/8.2/bin/php artisan route:clear && \
+/opt/plesk/php/8.2/bin/php artisan view:clear && \
+/opt/plesk/php/8.2/bin/php artisan cache:clear
 ```
 
 ### El editor TinyMCE no aparece
 ```bash
 ls -la public/tinymce/tinymce.min.js
-# Si no existe, fue excluida al subir — re-subir la carpeta public/tinymce/ completa
-```
-
-### Error de conexión a MySQL
-- Verificar datos de DB en `.env`
-- En Plesk, el host suele ser `127.0.0.1` o `localhost`
-
-### Caché antigua después de cambios
-```bash
-php artisan config:clear && php artisan route:clear && php artisan view:clear && php artisan cache:clear
+# Si no existe, correr desde local:
+./deploy.sh   # el script re-sube public/tinymce/ completo
 ```
 
 ---
@@ -318,50 +312,51 @@ php artisan config:clear && php artisan route:clear && php artisan view:clear &&
 ## 8. Checklist final antes de publicar
 
 ### Servidor
-- [ ] PHP 8.2+ con todas las extensiones
+- [ ] PHP 8.2+ con todas las extensiones requeridas
 - [ ] Document Root apunta a `public/`
+- [ ] `upload_max_filesize = 64M` y `post_max_size = 64M` en Plesk PHP Settings
 - [ ] `.env` configurado con datos reales de producción
 - [ ] `APP_DEBUG=false`
-- [ ] `APP_URL=https://hamilton.webparaguay.com`
+- [ ] `APP_URL=https://hamilton.webparaguay.com` (sin barra final)
 - [ ] Certificado SSL/HTTPS instalado y activo
 - [ ] `mod_rewrite` habilitado en Apache
 
 ### Base de datos
-- [ ] Migraciones ejecutadas (`php artisan migrate --force`)
-- [ ] Seeders ejecutados (`php artisan db:seed --force`)
+- [ ] Migraciones ejecutadas (`artisan migrate --force`)
+- [ ] Seeders ejecutados (`artisan db:seed --force`)
 - [ ] Conexión verificada
 
 ### Storage y archivos
-- [ ] `php artisan storage:link` ejecutado
+- [ ] `artisan storage:link` ejecutado — symlink `public/storage` existe
 - [ ] Permisos correctos en `storage/` y `bootstrap/cache/`
 - [ ] `public/.htaccess` presente
-- [ ] `public/tinymce/` subido completo
-- [ ] `public/images/icons/` con los 18 SVGs
-- [ ] `public/build/` (assets compilados) presente
+- [ ] `public/tinymce/` subido completo (via deploy.sh)
+- [ ] `public/build/` presente (via deploy.sh)
+- [ ] `public/js/admin.js` presente (via git pull)
 
 ### Panel admin
-- [ ] Acceso verificado en `https://hamilton.webparaguay.com/admin`
+- [ ] Acceso verificado en `/admin`
 - [ ] Contraseña del admin cambiada
-- [ ] Logo y favicon subidos
-- [ ] Datos de contacto actualizados
+- [ ] Logo y favicon subidos en Configuración → General
+- [ ] Datos de contacto y redes sociales completados
 - [ ] Banners del hero cargados
 - [ ] Categorías con íconos verificadas
+- [ ] Puntos de venta con logos cargados
 
 ### Frontend
-- [ ] Página de inicio carga correctamente
-- [ ] Íconos de categorías visibles
-- [ ] Banner de anuncios desplazándose
-- [ ] Navegación funciona en desktop y mobile
+- [ ] Homepage carga correctamente
+- [ ] Sitemap accesible en `/sitemap.xml`
+- [ ] Robots accesible en `/robots.txt`
 - [ ] Catálogo de productos filtra por categoría
-- [ ] Detalle de producto carga correctamente
-- [ ] Formulario de contacto funciona
-- [ ] Centro de ayuda muestra los 4 ítems con sus íconos
+- [ ] Ficha de producto muestra puntos de venta y retailers personalizados
+- [ ] Manual PDF descargable (si corresponde)
+- [ ] Formulario de contacto guarda mensajes en BD
+- [ ] Centro de Ayuda muestra los 4 ítems
 
 ### Optimización
-- [ ] `php artisan config:cache`
-- [ ] `php artisan route:cache`
-- [ ] `php artisan view:cache`
-- [ ] `composer dump-autoload --optimize`
+- [ ] `artisan config:cache`
+- [ ] `artisan route:cache`
+- [ ] `artisan view:cache`
 
 ---
 
@@ -372,9 +367,3 @@ php artisan config:clear && php artisan route:clear && php artisan view:clear &&
 | Administrador | `admin@hamiltonbeach.com.py` | `Admin1234!` |
 
 > **Cambiar la contraseña inmediatamente después del primer acceso.**
-
----
-
-## Soporte técnico
-
-**Stack:** Laravel 12 · PHP 8.2 · MySQL 8.0 · Apache + Plesk · TinyMCE 8 (self-hosted) · Tailwind CSS v4 · Vite 7
