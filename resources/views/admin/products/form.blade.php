@@ -28,9 +28,9 @@
                         @error('title')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="mb-3">
-                        <label for="subtitle" class="form-label">Subtítulo / Modelo</label>
-                        <input type="text" class="form-control" id="subtitle" name="subtitle"
-                               value="{{ old('subtitle', $product->subtitle ?? '') }}">
+                        <label for="subtitle" class="form-label">Descripción corta</label>
+                        <textarea class="form-control" id="subtitle" name="subtitle"
+                                  rows="3">{{ old('subtitle', $product->subtitle ?? '') }}</textarea>
                     </div>
                     <div class="mb-3">
                         <label for="sku" class="form-label">SKU <span class="text-muted small">(código de producto)</span></label>

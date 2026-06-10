@@ -85,7 +85,7 @@ class ProductController extends Controller
     {
         return $request->validate([
             'title'            => 'required|string|max:255',
-            'subtitle'         => 'nullable|string|max:255',
+            'subtitle'         => 'nullable|string',
             'sku'              => 'nullable|string|max:100|unique:products,sku' . ($ignoreId ? ",{$ignoreId}" : ''),
             'content'          => 'nullable|string',
             'category_id'      => 'nullable|exists:categories,id',
