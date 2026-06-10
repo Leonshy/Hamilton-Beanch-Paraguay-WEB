@@ -7,7 +7,7 @@
 <!-- Hero Section — Banner imagen pura 16:9 -->
 @if($banners->isNotEmpty())
 <div class="relative w-full bg-brand-dark overflow-hidden" id="heroSlider"
-     style="aspect-ratio: 1280/720; max-height: 80vh;">
+     style="aspect-ratio: 1280/720;">
 
     @foreach($banners as $i => $b)
     <div class="hero-slide absolute inset-0 transition-opacity duration-700 {{ $i === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none' }}"
