@@ -77,10 +77,9 @@
                 </button>
                 <div class="absolute left-0 top-full w-52 bg-white border border-gray-200 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50">
                     <a href="/productos" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-light hover:text-brand font-semibold border-b border-gray-100">Ver todos los productos</a>
-                    <a href="/productos?categoria=cafeteras" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-light hover:text-brand">Cafeteras</a>
-                    <a href="/productos?categoria=tostadoras" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-light hover:text-brand">Tostadoras</a>
-                    <a href="/productos?categoria=molinillos" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-light hover:text-brand">Molinillo de café</a>
-                    <a href="/productos?categoria=pavas" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-light hover:text-brand">Pavas eléctricas</a>
+                    @foreach($navCategories as $navCat)
+                    <a href="/productos?categoria={{ $navCat->slug }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-brand-light hover:text-brand">{{ $navCat->name }}</a>
+                    @endforeach
                 </div>
             </div>
 
@@ -130,10 +129,9 @@
         <div class="py-2">
             <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Productos</p>
             <a href="/productos" class="block py-1.5 pl-3 text-sm text-gray-700 hover:text-brand">Ver todos</a>
-            <a href="/productos?categoria=cafeteras" class="block py-1.5 pl-3 text-sm text-gray-700 hover:text-brand">Cafeteras</a>
-            <a href="/productos?categoria=tostadoras" class="block py-1.5 pl-3 text-sm text-gray-700 hover:text-brand">Tostadoras</a>
-            <a href="/productos?categoria=molinillos" class="block py-1.5 pl-3 text-sm text-gray-700 hover:text-brand">Molinillo de café</a>
-            <a href="/productos?categoria=pavas" class="block py-1.5 pl-3 text-sm text-gray-700 hover:text-brand">Pavas eléctricas</a>
+            @foreach($navCategories as $navCat)
+            <a href="/productos?categoria={{ $navCat->slug }}" class="block py-1.5 pl-3 text-sm text-gray-700 hover:text-brand">{{ $navCat->name }}</a>
+            @endforeach
         </div>
         <a href="/centro-ayuda" class="block py-2 text-sm font-medium text-gray-700 hover:text-brand">Centro de ayuda</a>
         <a href="/contacto" class="block py-2 text-sm font-medium text-gray-700 hover:text-brand">Contacto</a>

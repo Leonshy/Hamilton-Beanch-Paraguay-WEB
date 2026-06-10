@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Announcement;
+use App\Models\Category;
 use App\Models\SiteSetting;
 use App\Services\MediaService;
 use Illuminate\Support\Facades\Gate;
@@ -20,15 +21,17 @@ class AppServiceProvider extends ServiceProvider
     {
         View::composer('*', function ($view) {
             try {
-                $siteSettings  = SiteSetting::all()->pluck('value', 'key');
-                $announcements = Announcement::active()->orderBy('order')->get();
-                $footerPages   = \App\Models\Page::published()->where('show_in_footer', true)->orderBy('order')->get();
+                $siteSettings   = SiteSetting::all()->pluck('value', 'key');
+                $announcements  = Announcement::active()->orderBy('order')->get();
+                $footerPages    = \App\Models\Page::published()->where('show_in_footer', true)->orderBy('order')->get();
+                $navCategories  = Category::where('is_active', true)->where('type', 'product')->orderBy('order')->get();
             } catch (\Exception) {
-                $siteSettings  = collect();
-                $announcements = collect();
-                $footerPages   = collect();
+                $siteSettings   = collect();
+                $announcements  = collect();
+                $footerPages    = collect();
+                $navCategories  = collect();
             }
-            $view->with(compact('siteSettings', 'announcements', 'footerPages'));
+            $view->with(compact('siteSettings', 'announcements', 'footerPages', 'navCategories'));
         });
 
         Gate::define('admin-only', fn($user) => $user->hasRole('admin'));
