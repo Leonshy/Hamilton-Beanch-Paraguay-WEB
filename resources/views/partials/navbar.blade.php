@@ -14,13 +14,13 @@
 @endif
 
 <!-- Fila: Logo + Contacto -->
-<div class="bg-white border-b border-gray-100">
+<div class="relative z-10 bg-white border-b border-gray-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16 gap-8">
+        <div class="flex items-center justify-between h-20 gap-8">
 
             <!-- Logo -->
             <a href="/" class="flex-shrink-0">
-                <img src="{{ $siteSettings['logo'] ?? '/images/logo.webp' }}" alt="{{ $siteSettings['site_name'] ?? 'Hamilton Beach' }}" class="h-6 w-auto">
+                <img src="{{ $siteSettings['logo'] ?? '/images/logo.webp' }}" alt="{{ $siteSettings['site_name'] ?? 'Hamilton Beach' }}" class="h-11 w-auto">
             </a>
 
             <!-- Datos de contacto -->
