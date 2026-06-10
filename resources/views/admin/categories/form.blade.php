@@ -120,6 +120,9 @@ $currentImageUrl = isset($category) && $category->image ? $category->image->url 
                         </div>
                     </div>
 
+                    {{-- Campo maestro: único name="icon" enviado al servidor --}}
+                    <input type="hidden" name="icon" id="icon-master" value="{{ $currentIcon }}">
+
                     {{-- Panel: SVG del rubro --}}
                     <div id="panel-svg" style="{{ $currentIconType !== 'svg' ? 'display:none' : '' }}">
                         <p class="text-muted small mb-3">Elegí el ícono que mejor representa la categoría.</p>
@@ -140,14 +143,12 @@ $currentImageUrl = isset($category) && $category->image ? $category->image->url 
                             </div>
                             @endforeach
                         </div>
-                        {{-- campo oculto que guarda el filename --}}
-                        <input type="hidden" name="icon" id="svg-icon-input" value="{{ $currentIconType === 'svg' ? $currentIcon : '' }}">
                     </div>
 
                     {{-- Panel: Path SVG personalizado --}}
                     <div id="panel-icon" style="{{ $currentIconType !== 'icon' ? 'display:none' : '' }}">
                         <p class="text-muted small mb-3">Pegá el contenido del atributo <code>d=""</code> de un path SVG (viewBox 0 0 24 24).</p>
-                        <textarea id="icon-input" name="icon" class="form-control form-control-sm font-monospace"
+                        <textarea id="icon-input" class="form-control form-control-sm font-monospace"
                                   rows="2" placeholder='M12 3v1m6.364...'>{{ $currentIconType === 'icon' ? $currentIcon : '' }}</textarea>
                         <div class="mt-3 d-flex align-items-center gap-3">
                             <div class="d-flex align-items-center justify-content-center rounded-3 bg-light border"
@@ -227,10 +228,9 @@ function toggleIconType(type) {
     document.getElementById('panel-icon').style.display  = type === 'icon'  ? '' : 'none';
     document.getElementById('panel-image').style.display = type === 'image' ? '' : 'none';
 
-    // Limpiar inputs del panel que no se usa
-    if (type !== 'svg')   document.getElementById('svg-icon-input').value = '';
-    if (type !== 'icon')  document.getElementById('icon-input').value = '';
     if (type !== 'image') document.getElementById('media_id_input').value = '';
+    if (type !== 'icon')  { document.getElementById('icon-input').value = ''; }
+    if (type === 'image') document.getElementById('icon-master').value = '';
 }
 
 function selectSvgIcon(btn, filename) {
@@ -242,11 +242,12 @@ function selectSvgIcon(btn, filename) {
     btn.classList.add('btn-hb-primary');
     btn.classList.remove('btn-outline-secondary');
     btn.querySelector('img').style.filter = 'brightness(10)';
-    document.getElementById('svg-icon-input').value = filename;
+    document.getElementById('icon-master').value = filename;
 }
 
 document.getElementById('icon-input')?.addEventListener('input', function () {
     document.getElementById('icon-preview-path').setAttribute('d', this.value);
+    document.getElementById('icon-master').value = this.value;
 });
 </script>
 @endsection
