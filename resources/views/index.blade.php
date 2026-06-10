@@ -4,16 +4,17 @@
 
 @section('content')
 
-<!-- Hero Section — Banner imagen pura 16:9 -->
+<!-- Hero Section — altura adaptable al tamaño de la imagen -->
 @if($banners->isNotEmpty())
-<div class="relative w-full bg-brand-dark overflow-hidden" id="heroSlider"
-     style="aspect-ratio: 1280/720;">
+<div class="relative w-full bg-brand-dark" id="heroSlider">
 
     @foreach($banners as $i => $b)
-    <div class="hero-slide absolute inset-0 transition-opacity duration-700 {{ $i === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none' }}"
+    {{-- Slide activo: position relative (empuja la altura del contenedor)
+         Slides ocultos: absolute inset-0 (se superponen sin afectar la altura) --}}
+    <div class="hero-slide transition-opacity duration-700 {{ $i === 0 ? 'relative opacity-100' : 'absolute inset-0 opacity-0 pointer-events-none' }}"
          data-slide="{{ $i }}">
         @if($b->image?->url)
-            <div class="relative w-full h-full {{ $b->link_url ? 'cursor-pointer' : '' }}"
+            <div class="relative w-full {{ $b->link_url ? 'cursor-pointer' : '' }}"
                  @if($b->link_url)
                  onclick="window.location.href='{{ $b->link_url }}'"
                  onmouseenter="this.querySelector('.hero-hover-overlay').style.opacity='1'"
@@ -21,19 +22,19 @@
                  @endif>
                 <img src="{{ $b->image->url }}"
                      alt="{{ $b->title ?? 'Hamilton Beach' }}"
-                     class="w-full h-full object-cover">
+                     style="width:100%;height:auto;display:block;">
                 @if($b->link_url)
                 <div class="hero-hover-overlay" style="position:absolute;inset:0;background:rgba(255,255,255,0.25);opacity:0;transition:opacity 0.3s;pointer-events:none;"></div>
                 @endif
             </div>
         @else
             {{-- Placeholder cuando no hay imagen cargada --}}
-            <div class="w-full h-full flex flex-col items-center justify-center bg-brand-dark gap-3">
+            <div style="aspect-ratio:1280/720" class="w-full flex flex-col items-center justify-center bg-brand-dark gap-3">
                 <svg class="w-16 h-16 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                           d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
-                <p class="text-white/30 text-sm">Banner 1280 × 720 — Subí una imagen desde el admin</p>
+                <p class="text-white/30 text-sm">Banner — Subí una imagen desde el admin</p>
             </div>
         @endif
     </div>
@@ -81,13 +82,26 @@
     var timer;
 
     function goTo(n) {
-        slides[current].classList.replace('opacity-100', 'opacity-0');
-        slides[current].classList.add('pointer-events-none');
-        if (dots[current]) dots[current].classList.replace('bg-white', 'bg-white/40');
+        var prev = current;
         current = (n + slides.length) % slides.length;
+
+        // Fade out slide anterior
+        slides[prev].classList.replace('opacity-100', 'opacity-0');
+        slides[prev].classList.add('pointer-events-none');
+        if (dots[prev]) dots[prev].classList.replace('bg-white', 'bg-white/40');
+
+        // Fade in slide nuevo (aún absolute durante la transición)
         slides[current].classList.replace('opacity-0', 'opacity-100');
         slides[current].classList.remove('pointer-events-none');
         if (dots[current]) dots[current].classList.replace('bg-white/40', 'bg-white');
+
+        // Tras la transición: el nuevo pasa a relative (define altura), el anterior a absolute
+        setTimeout(function () {
+            slides[prev].classList.remove('relative');
+            slides[prev].classList.add('absolute', 'inset-0');
+            slides[current].classList.remove('absolute', 'inset-0');
+            slides[current].classList.add('relative');
+        }, 700);
     }
 
     function startTimer() { timer = setInterval(function () { goTo(current + 1); }, interval); }
