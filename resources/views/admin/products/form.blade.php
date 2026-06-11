@@ -24,7 +24,7 @@
                         <label for="title" class="form-label">Título <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('title') is-invalid @enderror"
                                id="title" name="title"
-                               value="{{ old('title', $product->title ?? '') }}" required>
+                               value="{{ old('title', $product->title ?? '') }}" required minlength="2">
                         @error('title')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="mb-3">
@@ -37,15 +37,16 @@
                         <input type="text" class="form-control @error('sku') is-invalid @enderror"
                                id="sku" name="sku"
                                value="{{ old('sku', $product->sku ?? '') }}"
-                               placeholder="Ej: HB-54321">
+                               placeholder="Ej: HB-54321"
+                               pattern="[A-Za-z0-9\-]+" data-pattern-msg="Solo letras, números y guiones.">
                         @error('sku')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         <div class="form-text">Opcional. Debe ser único entre todos los productos.</div>
                     </div>
                     <div class="mb-3">
-                        <label for="slug" class="form-label">Slug (URL)</label>
-                        <input type="text" class="form-control" id="slug" name="slug"
-                               value="{{ old('slug', $product->slug ?? '') }}"
-                               placeholder="se-genera-automaticamente">
+                        @include('admin.partials.slug-field', [
+                            'slugValue' => $product->slug ?? '',
+                            'urlPrefix' => config('app.url') . '/productos/',
+                        ])
                     </div>
                     <div class="mb-0">
                         <label for="content" class="form-label">Descripción completa</label>

@@ -22,7 +22,7 @@
                        name="text"
                        value="{{ old('text', $announcement->text ?? '') }}"
                        placeholder="Ej: DISTRIBUIDOR OFICIAL EN PARAGUAY"
-                       required>
+                       required minlength="3">
                 @error('text')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 <div class="form-text">El texto se mostrará en mayúsculas en la barra del sitio.</div>
             </div>

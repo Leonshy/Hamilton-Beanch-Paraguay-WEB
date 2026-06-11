@@ -46,7 +46,7 @@
                         <label class="form-label">Título <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('title') is-invalid @enderror"
                                id="title" name="title"
-                               value="{{ old('title', $page->title ?? '') }}" required>
+                               value="{{ old('title', $page->title ?? '') }}" required minlength="2">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Subtítulo</label>
@@ -67,10 +67,10 @@
             <div class="card hb-admin-card">
                 <div class="card-body">
                     <div class="mb-3">
-                        <label class="form-label">Slug (URL)</label>
-                        <input type="text" class="form-control" id="slug" name="slug"
-                               value="{{ old('slug', $page->slug ?? '') }}"
-                               placeholder="se-genera-automaticamente">
+                        @include('admin.partials.slug-field', [
+                            'slugValue' => $page->slug ?? '',
+                            'urlPrefix' => config('app.url') . '/paginas/',
+                        ])
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Orden</label>

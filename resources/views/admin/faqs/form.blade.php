@@ -22,7 +22,7 @@
                         <label class="form-label">Pregunta <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('question') is-invalid @enderror"
                                name="question"
-                               value="{{ old('question', $faq->question ?? '') }}" required>
+                               value="{{ old('question', $faq->question ?? '') }}" required minlength="5">
                         @error('question')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="mb-0">

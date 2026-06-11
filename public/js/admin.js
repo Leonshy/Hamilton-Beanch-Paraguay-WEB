@@ -481,3 +481,183 @@
   }
 
 })();
+
+// ── Validación de formularios admin ──────────────────────────────────────────
+(function () {
+  'use strict';
+
+  var MSGS = {
+    required   : 'Este campo es requerido.',
+    url        : 'Ingresá una URL válida (https://ejemplo.com o /pagina).',
+    email      : 'Ingresá un email válido.',
+    minlength  : function (n) { return 'Mínimo ' + n + ' caracteres.'; },
+    min        : function (n) { return 'El valor mínimo es ' + n + '.'; },
+    max        : function (n) { return 'El valor máximo es ' + n + '.'; },
+    pattern    : 'Formato inválido.',
+    match      : 'Las contraseñas no coinciden.',
+  };
+
+  // Formularios que se excluyen de la validación (son AJAX de subida de archivos)
+  var SKIP_FORMS = ['mediaPickerUploadForm', 'uploadModalForm'];
+
+  function isValidUrl(val) {
+    if (val.startsWith('/')) return true;
+    try {
+      var u = new URL(val);
+      return u.protocol === 'http:' || u.protocol === 'https:';
+    } catch (e) { return false; }
+  }
+
+  function isValidEmail(val) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+  }
+
+  function getErrorEl(el) {
+    // Buscar contenedor padre directo que tenga .hb-field-error
+    var parent = el.closest('.mb-3') || el.parentNode;
+    return parent.querySelector('.hb-field-error');
+  }
+
+  function showError(el, msg) {
+    el.classList.add('is-invalid');
+    var parent = el.closest('.mb-3') || el.parentNode;
+    var err = parent.querySelector('.hb-field-error');
+    if (!err) {
+      err = document.createElement('div');
+      err.className = 'invalid-feedback hb-field-error d-block';
+      // Insertarlo justo después del campo
+      el.parentNode.insertBefore(err, el.nextSibling);
+    }
+    err.textContent = msg;
+  }
+
+  function clearError(el) {
+    el.classList.remove('is-invalid');
+    var parent = el.closest('.mb-3') || el.parentNode;
+    var err = parent.querySelector('.hb-field-error');
+    if (err) { err.textContent = ''; }
+  }
+
+  function validateField(el) {
+    var val     = (el.value || '').trim();
+    var type    = el.getAttribute('data-type') || el.type;
+    var isEmpty = val === '';
+
+    // Required
+    if (el.hasAttribute('required') && isEmpty) {
+      showError(el, MSGS.required);
+      return false;
+    }
+
+    // Si está vacío y no es required → válido
+    if (isEmpty) { clearError(el); return true; }
+
+    // URL (type="url" o data-type="url")
+    if (type === 'url') {
+      if (!isValidUrl(val)) { showError(el, MSGS.url); return false; }
+    }
+
+    // Email
+    if (type === 'email') {
+      if (!isValidEmail(val)) { showError(el, MSGS.email); return false; }
+    }
+
+    // minlength
+    var minLen = el.getAttribute('minlength');
+    if (minLen && val.length < +minLen) {
+      showError(el, MSGS.minlength(minLen)); return false;
+    }
+
+    // Número: min / max
+    if (el.type === 'number') {
+      var num    = parseFloat(val);
+      var minVal = el.getAttribute('min');
+      var maxVal = el.getAttribute('max');
+      if (minVal !== null && minVal !== '' && num < +minVal) {
+        showError(el, MSGS.min(minVal)); return false;
+      }
+      if (maxVal !== null && maxVal !== '' && num > +maxVal) {
+        showError(el, MSGS.max(maxVal)); return false;
+      }
+    }
+
+    // Pattern
+    var pat = el.getAttribute('pattern');
+    if (pat && val) {
+      try {
+        if (!new RegExp('^(?:' + pat + ')$').test(val)) {
+          showError(el, el.getAttribute('data-pattern-msg') || MSGS.pattern);
+          return false;
+        }
+      } catch (e) { /* pattern inválida, ignorar */ }
+    }
+
+    // data-match (confirmación de contraseña)
+    var matchId = el.getAttribute('data-match');
+    if (matchId) {
+      var target = document.getElementById(matchId);
+      if (target && val !== target.value) {
+        showError(el, MSGS.match); return false;
+      }
+    }
+
+    clearError(el);
+    return true;
+  }
+
+  // Selector de campos a validar (excluye hidden, checkbox, radio, file y textareas de TinyMCE)
+  var FIELD_SEL = [
+    'input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=file])',
+    'textarea:not(.tox-textarea)',
+    'select',
+  ].join(',');
+
+  // Deshabilitar validación nativa del browser en todos los forms admin
+  // (usamos novalidate para controlar todo desde JS con mensajes en español)
+  document.querySelectorAll('form').forEach(function (f) {
+    f.setAttribute('novalidate', '');
+  });
+
+  // Intercepción del submit
+  document.addEventListener('submit', function (e) {
+    var form = e.target;
+    if (!form || form.tagName.toLowerCase() !== 'form') return;
+    if (SKIP_FORMS.indexOf(form.id) !== -1) return;
+
+    var fields = form.querySelectorAll(FIELD_SEL);
+    var valid  = true;
+    fields.forEach(function (f) {
+      if (!validateField(f)) valid = false;
+    });
+
+    if (!valid) {
+      e.preventDefault();
+      var first = form.querySelector('.is-invalid');
+      if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, true);
+
+  // Validación en tiempo real al perder el foco
+  document.addEventListener('blur', function (e) {
+    var el = e.target;
+    if (!el.matches || !el.matches(FIELD_SEL)) return;
+    // No validar si el campo está dentro de un form excluido
+    var form = el.closest('form');
+    if (form && SKIP_FORMS.indexOf(form.id) !== -1) return;
+    validateField(el);
+  }, true);
+
+})();
+
+// ── Slug URL copy ────────────────────────────────────────────────────────────
+function hbCopySlugUrl(btn) {
+  var group  = btn.closest('.hb-slug-group');
+  var prefix = group.querySelector('.input-group-text').title;
+  var slug   = group.querySelector('input[name="slug"]').value.trim();
+  var url    = prefix + slug;
+  navigator.clipboard.writeText(url).then(function () {
+    var icon = btn.querySelector('i');
+    icon.className = 'bi bi-check2';
+    setTimeout(function () { icon.className = 'bi bi-clipboard'; }, 2000);
+  });
+}

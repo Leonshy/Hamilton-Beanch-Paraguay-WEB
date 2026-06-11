@@ -53,7 +53,7 @@
                     <div class="mb-3">
                         <label class="form-label">Nombre <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('name') is-invalid @enderror"
-                               name="name" required
+                               name="name" required minlength="2"
                                value="{{ old('name', $salePoint->name ?? '') }}"
                                placeholder="Ej: Stock Center">
                         @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror

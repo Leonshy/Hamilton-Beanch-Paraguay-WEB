@@ -59,7 +59,7 @@ $sectionOrder = ['preguntas-frecuentes', 'servicio-tecnico', 'manuales', 'garant
                         <div class="col-md-4">
                             <label class="form-label">Título</label>
                             <input type="text" class="form-control" name="title"
-                                   value="{{ old('title', $item->title) }}" required>
+                                   value="{{ old('title', $item->title) }}" required minlength="2">
                         </div>
                         <div class="col-md-8">
                             <label class="form-label">Texto de previsualización</label>

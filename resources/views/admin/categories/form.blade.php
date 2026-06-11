@@ -53,14 +53,14 @@ $currentImageUrl = isset($category) && $category->image ? $category->image->url 
                         <label for="name" class="form-label">Nombre <span class="text-danger">*</span></label>
                         <input type="text" class="form-control @error('name') is-invalid @enderror"
                                id="name" name="name"
-                               value="{{ old('name', $category->name ?? '') }}" required>
+                               value="{{ old('name', $category->name ?? '') }}" required minlength="2">
                         @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="mb-3">
-                        <label for="slug" class="form-label">Slug</label>
-                        <input type="text" class="form-control" id="slug" name="slug"
-                               value="{{ old('slug', $category->slug ?? '') }}"
-                               placeholder="se-genera-automaticamente">
+                        @include('admin.partials.slug-field', [
+                            'slugValue' => $category->slug ?? '',
+                            'urlPrefix' => config('app.url') . '/productos?categoria=',
+                        ])
                     </div>
                     <div class="mb-3">
                         <label for="description" class="form-label">Descripción</label>

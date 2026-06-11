@@ -22,7 +22,7 @@
                     <div class="mb-3">
                         <label class="form-label">Nombre <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="name"
-                               value="{{ old('name', $user->name ?? '') }}" required>
+                               value="{{ old('name', $user->name ?? '') }}" required minlength="2">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Email <span class="text-danger">*</span></label>
@@ -31,12 +31,12 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Contraseña{{ isset($user) ? ' (dejar vacío para no cambiar)' : '' }} <span class="text-danger">*</span></label>
-                        <input type="password" class="form-control" name="password"
-                               {{ isset($user) ? '' : 'required' }} autocomplete="new-password">
+                        <input type="password" class="form-control" name="password" id="password"
+                               {{ isset($user) ? '' : 'required' }} minlength="8" autocomplete="new-password">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Confirmar contraseña</label>
-                        <input type="password" class="form-control" name="password_confirmation">
+                        <input type="password" class="form-control" name="password_confirmation" data-match="password">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Rol <span class="text-danger">*</span></label>

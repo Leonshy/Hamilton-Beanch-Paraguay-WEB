@@ -26,7 +26,7 @@
                     <div class="mb-3">
                         <label class="form-label">Nombre del sitio <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="site_name"
-                               value="{{ old('site_name', $settings['site_name'] ?? 'Hamilton Beach Paraguay') }}" required>
+                               value="{{ old('site_name', $settings['site_name'] ?? 'Hamilton Beach Paraguay') }}" required minlength="2">
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Eslogan / Tagline</label>

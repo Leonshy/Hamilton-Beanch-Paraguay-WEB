@@ -23,7 +23,8 @@
                         <label class="form-label">{{ $label }}</label>
                         <input type="{{ $type }}" class="form-control" name="{{ $key }}"
                                value="{{ old($key, $settings[$key] ?? '') }}"
-                               placeholder="{{ $placeholder }}">
+                               placeholder="{{ $placeholder }}"
+                               {{ $key === 'whatsapp' ? 'pattern="[0-9]+" data-pattern-msg="Solo números."' : '' }}>
                     </div>
                     @endforeach
                     <div class="mb-0">
