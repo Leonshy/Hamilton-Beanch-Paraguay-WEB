@@ -37,7 +37,7 @@
                         <i class="bi bi-folder2-open me-2"></i>Seleccionar imagen de la biblioteca
                     </button>
                     <div class="form-text mt-2" id="imgSizeHint">
-                        Tamaño recomendado: <strong>1280 × 720 px</strong> (ratio 16:9) — formato WebP o JPG.
+                        Tamaño recomendado: <strong>1280 × 535 px</strong> (ratio 1280:535) — formato WebP o JPG.
                     </div>
                 </div>
             </div>
@@ -102,7 +102,7 @@
     if (!select) return;
 
     var hints = {
-        'home':     '1280 × 720 px (ratio 16:9)',
+        'home':     '1280 × 535 px (ratio 1280:535)',
         'home_mid': '970 × 250 px (ratio 970:250)',
     };
 
@@ -111,7 +111,7 @@
     @endif
 
     function updateHint(pos) {
-        var hint = hints[pos] || '1280 × 720 px (ratio 16:9)';
+        var hint = hints[pos] || '1280 × 535 px (ratio 1280:535)';
         document.getElementById('imgSizeHint').innerHTML =
             'Tamaño recomendado: <strong>' + hint + '</strong> — formato WebP o JPG.';
     }

@@ -230,6 +230,7 @@
                             data-preview-fit="cover" data-preview-height="220px">
                         <i class="bi bi-folder2-open me-1"></i>Seleccionar imagen
                     </button>
+                    <div class="form-text mt-2">Tamaño recomendado: <strong>800 × 800 px</strong> (cuadrada) — formato WebP o JPG.</div>
                 </div>
             </div>
 
@@ -265,6 +266,7 @@
                     @if(!isset($product) || !$product->gallery->count())
                     <p class="text-muted small mb-0" id="galleryEmpty">Ninguna imagen seleccionada aún. Hacé clic en "Seleccionar imágenes".</p>
                     @endif
+                    <div class="form-text mt-2">Tamaño recomendado: <strong>800 × 800 px</strong> (cuadrada) — formato WebP o JPG.</div>
                 </div>
             </div>
 
