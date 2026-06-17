@@ -88,8 +88,9 @@
 
         <!-- Copyright -->
         <div class="border-t border-gray-800 pt-8 text-center text-xs text-gray-500">
-            <p>Hamilton Beach® es una marca registrada de Hamilton Beach Brands, Inc.</p>
-            <p class="mt-1">&copy; {{ date('Y') }} Hamilton Beach Paraguay. Todos los derechos reservados.</p>
+            <p>Hamilton Beach ®️ es una marca registrada propiedad de Hamilton Beach Brands, Inc. y utilizada bajo licencia de SANYCUR.</p>
+            <p class="mt-1">Hamilton Beach ®️ is a registered trademark owned by Hamilton Beach Brands, Inc. and used under license from SANYCUR.</p>
+
         </div>
     </div>
 </footer>
