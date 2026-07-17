@@ -1,13 +1,28 @@
 # Hamilton Beach Paraguay — Guía de Despliegue
 
-**Dominio:** `hamilton.webparaguay.com`  
 **Stack:** Laravel 12 · PHP 8.2 · MySQL · Apache + Plesk · TinyMCE 8 (self-hosted) · Tailwind CSS v4 · Vite 7
+
+## ⚠️ Dos entornos separados — no confundir
+
+Este proyecto tiene **dos instalaciones completamente independientes** en el mismo servidor físico (177.251.252.12), cada una con su propia carpeta, base de datos y usuario de sistema. No comparten nada entre sí — actualizar una NO actualiza la otra.
+
+| | **Staging** | **Producción real** |
+|---|---|---|
+| Dominio | `hamilton.webparaguay.com` | **`hamiltonbeach.com.py`** |
+| Carpeta | `/var/www/vhosts/hamilton.webparaguay.com/httpdocs` | `/var/www/vhosts/hamiltonbeach.com.py/httpdocs` |
+| Usuario de sistema | `hamiltonprueba` | `hamilton` (usuario distinto, con su propio acceso SSH) |
+| Base de datos | `hamilton_pru_db` | `hamilton_db` |
+| `APP_URL` | `http://hamilton.webparaguay.com` (sin HTTPS) | `https://hamiltonbeach.com.py` |
+| `deploy.sh` del repo | ✅ apunta acá | ❌ el script **no** llega acá |
+
+**El script `deploy.sh` incluido en el repo solo despliega a staging.** Para publicar en producción real hay que repetir el proceso manual a mano con el usuario SSH de `hamilton` (ver sección 2.1). Esto se descubrió el 2026-07-17 al auditar el sitio: alguien había cargado un script de Google Tag Manager desde el panel admin de staging pensando que era el sitio real, y no se reflejaba en `hamiltonbeach.com.py` porque son bases de datos distintas.
 
 ---
 
 ## Tabla de contenidos
 1. [Requisitos del servidor](#1-requisitos-del-servidor)
-2. [Deploy rutinario (actualizaciones)](#2-deploy-rutinario-actualizaciones)
+2. [Deploy rutinario a staging (automatizado)](#2-deploy-rutinario-a-staging-automatizado)
+   - [2.1 Deploy manual a producción real](#21-deploy-manual-a-producción-real-hamiltonbeachcompy)
 3. [Primer despliegue desde cero](#3-primer-despliegue-desde-cero)
 4. [Configuración del .env en producción](#4-configuración-del-env-en-producción)
 5. [Comandos post-despliegue](#5-comandos-post-despliegue)
@@ -42,9 +57,9 @@ max_execution_time = 120
 
 ---
 
-## 2. Deploy rutinario (actualizaciones)
+## 2. Deploy rutinario a staging (automatizado)
 
-Para cada actualización de código, usar el script `deploy.sh` incluido en el proyecto:
+Para cada actualización de código en **staging** (`hamilton.webparaguay.com`), usar el script `deploy.sh` incluido en el proyecto:
 
 ```bash
 git push origin main   # subir commits a GitHub
@@ -55,9 +70,54 @@ El script hace automáticamente:
 1. Compila assets con `pnpm run build`
 2. Copia `public/build/` y `public/tinymce/` al servidor por SCP
 3. En el servidor: `git pull origin main`
-4. Corre `php artisan migrate --force`, `config:cache` y `view:clear`
+4. Corre `php artisan migrate --force`, `config:cache`, `route:cache`, `event:cache` y `view:clear`
 
 **Importante:** El script usa el binario `/opt/plesk/php/8.2/bin/php` para los comandos artisan (el PHP del sistema en Plesk es una versión antigua).
+
+### 2.1 Deploy manual a producción real (`hamiltonbeach.com.py`)
+
+No hay script automatizado todavía — se hace a mano, conectado con el usuario SSH que tiene acceso a esa carpeta (no es `hamiltonprueba`, es un usuario distinto asociado a `hamilton`).
+
+```bash
+ssh <usuario-produccion>@177.251.252.12 -p <puerto>
+cd /var/www/vhosts/hamiltonbeach.com.py/httpdocs
+
+# 1. Traer el código nuevo
+git fetch origin +refs/heads/main:refs/remotes/origin/main   # ver nota sobre CentOS 7 más abajo
+git pull origin main
+
+# 2. Dependencias PHP (sin paquetes de desarrollo)
+composer install --no-dev --optimize-autoloader
+
+# 3. Migraciones
+php artisan migrate:status     # revisar qué falta antes de correr --force
+php artisan migrate --force
+
+# 4. Assets compilados (solo si el cambio tocó CSS/JS de resources/)
+#    Si el deploy es solo backend/PHP no hace falta este paso.
+#    Compilar localmente con `pnpm run build` y subir por SCP con las
+#    credenciales de producción: public/build/ y public/tinymce/
+
+# 5. Cachés
+php artisan config:cache
+php artisan route:cache
+php artisan event:cache
+php artisan view:clear
+```
+
+**⚠️ Bug conocido de `git fetch` en CentOS 7 (git 1.8.3.1):**
+Este servidor corre CentOS 7 con git muy viejo (2013). Con `git fetch origin main` (nombre de rama sin refspec completo), git actualiza `FETCH_HEAD` pero **no mueve el ref `origin/main`**, y comandos como `git log HEAD..origin/main` van a mostrar vacío aunque haya commits nuevos en GitHub. La solución es usar el refspec explícito:
+```bash
+git fetch origin +refs/heads/main:refs/remotes/origin/main
+```
+Con eso sí se actualiza `origin/main` correctamente y `git pull` funciona sin problema. Si algún día se actualiza el git del servidor (`yum install git` con un repo más nuevo, o IUS/SCL), este workaround ya no debería hacer falta.
+
+**Diagnóstico rápido si un `git pull`/`git fetch` "no trae nada" pero GitHub sí tiene el commit:**
+```bash
+git ls-remote origin main                      # confirma el SHA real en GitHub (desde tu máquina local)
+curl -s https://api.github.com/repos/Leonshy/Hamilton-Beanch-Paraguay-WEB/commits/main | grep '"sha"'
+git --version                                   # si es 1.8.x, aplica el workaround de arriba
+```
 
 ### Después de un deploy con cambios en vistas
 
@@ -159,12 +219,14 @@ pnpm run build
 
 ## 4. Configuración del .env en producción
 
+> Reemplazar `APP_URL`, `DB_DATABASE`, `DB_HOST` según el entorno (staging o producción real — ver tabla al inicio de este documento).
+
 ```env
 APP_NAME="Hamilton Beach Paraguay"
 APP_ENV=production
 APP_KEY=                         # se genera con artisan key:generate
 APP_DEBUG=false
-APP_URL=https://hamilton.webparaguay.com
+APP_URL=https://hamiltonbeach.com.py    # en staging: http://hamilton.webparaguay.com
 
 APP_LOCALE=es
 APP_FALLBACK_LOCALE=es
@@ -173,11 +235,15 @@ APP_FAKER_LOCALE=es_PY
 LOG_CHANNEL=single
 LOG_LEVEL=error
 
+# ─── SEGURIDAD ───────────────────────────────────────────
+# Obligatorio si el sitio corre con HTTPS (producción real sí; confirmar en staging)
+SESSION_SECURE_COOKIE=true
+
 # ─── BASE DE DATOS ───────────────────────────────────────
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=hamiltonbeach
+DB_DATABASE=hamilton_db          # en staging: hamilton_pru_db
 DB_USERNAME=usuario_db
 DB_PASSWORD=contraseña_db
 
@@ -356,7 +422,15 @@ ls -la public/tinymce/tinymce.min.js
 ### Optimización
 - [ ] `artisan config:cache`
 - [ ] `artisan route:cache`
+- [ ] `artisan event:cache`
 - [ ] `artisan view:cache`
+
+### Seguridad (auditoría 2026-07-17)
+- [ ] `composer audit` en 0 vulnerabilidades
+- [ ] Rate limiting activo en `/admin/login` (5 intentos/min)
+- [ ] Cabeceras de seguridad presentes (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `Strict-Transport-Security` si hay HTTPS) — verificar con `curl -I https://hamiltonbeach.com.py/`
+- [ ] Contraseñas de usuarios admin nuevos: mínimo 10 caracteres, mayúscula, minúscula, número y símbolo (se valida automático en el form)
+- [ ] Subida de SVG sanitizada automáticamente (`enshrined/svg-sanitize`) — no requiere acción manual
 
 ---
 
@@ -366,4 +440,4 @@ ls -la public/tinymce/tinymce.min.js
 |-----|-------|------------|
 | Administrador | `admin@hamiltonbeach.com.py` | `Admin1234!` |
 
-> **Cambiar la contraseña inmediatamente después del primer acceso.**
+> **Cambiar la contraseña inmediatamente después del primer acceso.** Desde la auditoría de 2026-07-17, las contraseñas nuevas o cambios de contraseña deben tener mínimo 10 caracteres con mayúscula, minúscula, número y símbolo — la de esta tabla ya cumple el requisito.

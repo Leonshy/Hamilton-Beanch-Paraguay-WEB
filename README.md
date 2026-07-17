@@ -132,25 +132,48 @@ Credenciales por defecto: `admin@hamiltonbeach.com.py` / `Admin1234!`
 
 ## Deploy
 
-Ver [`DEPLOY.md`](DEPLOY.md) para la guía completa.
+Ver [`DEPLOY.md`](DEPLOY.md) para la guía completa (incluye la distinción staging/producción).
 
-Flujo rápido con el script incluido:
+Flujo rápido a **staging** con el script incluido:
 
 ```bash
 git push origin main
-./deploy.sh          # compila assets, SCP al servidor, git pull + artisan
+./deploy.sh          # compila assets, SCP al servidor, git pull + artisan — solo staging
 ```
+
+Para producción real (`hamiltonbeach.com.py`) el proceso es manual — ver `DEPLOY.md` sección 2.1.
 
 ---
 
 ## Servidor
 
-- **URL**: http://hamilton.webparaguay.com
-- **Hosting**: Plesk en 177.251.252.12 (puerto SSH 53931)
-- **Document root**: `/httpdocs/public`
+⚠️ Hay **dos entornos separados** en el mismo servidor físico — no comparten carpeta ni base de datos. Ver [`DEPLOY.md`](DEPLOY.md) para el detalle completo.
+
+| | Staging | Producción real |
+|---|---|---|
+| URL | http://hamilton.webparaguay.com | **https://hamiltonbeach.com.py** |
+| Deploy | `./deploy.sh` (automatizado) | manual (ver `DEPLOY.md` sección 2.1) |
+
+- **Hosting**: Plesk en 177.251.252.12
 - **PHP CLI**: `/opt/plesk/php/8.2/bin/php`
 - **Base de datos**: MySQL
 
 ---
 
-**Estado**: CMS completo en producción — `hamilton.webparaguay.com`.
+## Seguridad
+
+Auditoría de seguridad y rendimiento realizada el 2026-07-17. Estado actual:
+
+- Dependencias PHP/JS sin vulnerabilidades conocidas (`composer audit` / `npm audit` en 0)
+- Rate limiting (5 intentos/min) en el login del admin
+- SVGs subidos a la biblioteca de medios se sanitizan automáticamente (`enshrined/svg-sanitize`) antes de guardarse
+- Cabeceras de seguridad HTTP en todas las respuestas (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `Strict-Transport-Security`) — middleware `App\Http\Middleware\SecurityHeaders`
+- Contraseñas de usuarios admin: mínimo 10 caracteres con mayúscula, minúscula, número y símbolo; email validado con verificación de dominio DNS real
+- Suite de tests automatizados (`php artisan test`) cubriendo login admin, catálogo de productos y formulario de contacto
+- Datos del "view composer" global (site settings, anuncios, categorías, páginas de footer) cacheados con invalidación automática al guardar desde el admin
+
+> Pendiente: `Content-Security-Policy` — requiere mapear todos los dominios externos (Google Tag Manager, Facebook Pixel, Google Fonts, jsDelivr) antes de poder aplicarla sin romper integraciones.
+
+---
+
+**Estado**: CMS completo en producción — `hamiltonbeach.com.py` (staging separado en `hamilton.webparaguay.com`).
