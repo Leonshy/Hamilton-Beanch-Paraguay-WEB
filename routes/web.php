@@ -32,7 +32,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Auth (unauthenticated)
     Route::get('/login',  [Admin\AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [Admin\AuthController::class, 'login'])->name('login.post');
+    Route::post('/login', [Admin\AuthController::class, 'login'])->middleware('throttle:5,1')->name('login.post');
 
     // Authenticated admin routes
     Route::middleware('admin')->group(function () {

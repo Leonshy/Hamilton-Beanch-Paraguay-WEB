@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 
 class Page extends Model
 {
@@ -20,6 +21,12 @@ class Page extends Model
         'no_index'        => 'boolean',
         'show_in_footer'  => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => Cache::forget('nav.footer_pages'));
+        static::deleted(fn () => Cache::forget('nav.footer_pages'));
+    }
 
     public function featuredImage(): BelongsTo
     {

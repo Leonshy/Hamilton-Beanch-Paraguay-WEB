@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Models\Media;
+use enshrined\svgSanitize\Sanitizer;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class MediaService
 {
@@ -19,7 +21,21 @@ class MediaService
         $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
         $path = "media/{$folder}/{$fileName}";
 
-        Storage::disk('public')->putFileAs("media/{$folder}", $file, $fileName);
+        if ($mimeType === 'image/svg+xml') {
+            $sanitizer = new Sanitizer();
+            $clean = $sanitizer->sanitize(file_get_contents($file->getRealPath()));
+
+            if ($clean === false) {
+                throw ValidationException::withMessages([
+                    'file' => 'El archivo SVG no pudo procesarse de forma segura.',
+                ]);
+            }
+
+            Storage::disk('public')->put($path, $clean);
+            $size = strlen($clean);
+        } else {
+            Storage::disk('public')->putFileAs("media/{$folder}", $file, $fileName);
+        }
 
         return Media::create([
             'user_id'   => auth()->id(),

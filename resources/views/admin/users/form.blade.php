@@ -32,7 +32,10 @@
                     <div class="mb-3">
                         <label class="form-label">Contraseña{{ isset($user) ? ' (dejar vacío para no cambiar)' : '' }} <span class="text-danger">*</span></label>
                         <input type="password" class="form-control" name="password" id="password"
-                               {{ isset($user) ? '' : 'required' }} minlength="8" autocomplete="new-password">
+                               {{ isset($user) ? '' : 'required' }} minlength="10"
+                               pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{10,}"
+                               autocomplete="new-password">
+                        <small class="form-text text-muted">Mínimo 10 caracteres, con mayúsculas, minúsculas, números y un símbolo.</small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Confirmar contraseña</label>

@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
@@ -28,8 +29,8 @@ class UserController extends Controller
         Gate::authorize('admin-only');
         $request->validate([
             'name'                  => 'required|string|max:255',
-            'email'                 => 'required|email|unique:users,email',
-            'password'              => 'required|string|min:8|confirmed',
+            'email'                 => 'required|email:rfc,dns|unique:users,email',
+            'password'              => ['required', 'confirmed', Password::min(10)->mixedCase()->numbers()->symbols()],
             'role'                  => 'required|in:admin,editor',
             'is_active'             => 'nullable|boolean',
         ]);
@@ -57,8 +58,8 @@ class UserController extends Controller
         Gate::authorize('admin-only');
         $request->validate([
             'name'      => 'required|string|max:255',
-            'email'     => 'required|email|unique:users,email,' . $user->id,
-            'password'  => 'nullable|string|min:8|confirmed',
+            'email'     => 'required|email:rfc,dns|unique:users,email,' . $user->id,
+            'password'  => ['nullable', 'confirmed', Password::min(10)->mixedCase()->numbers()->symbols()],
             'role'      => 'required|in:admin,editor',
             'is_active' => 'nullable|boolean',
         ]);
