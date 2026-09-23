@@ -63,12 +63,14 @@
                 @if($product->price)
                 <p class="text-xl font-bold text-gray-800 mb-3">Precio sugerido ≈ {{ $product->formatted_price }}</p>
                 @endif
+                @if($product->salePoints->isNotEmpty() || !empty($product->retailers))
                 <div class="inline-flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-100 px-3 py-1.5 rounded-lg">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                     </svg>
                     Disponible en puntos de venta
                 </div>
+                @endif
             </div>
 
             <!-- Descripción corta -->

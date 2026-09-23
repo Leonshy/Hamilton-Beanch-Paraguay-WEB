@@ -101,10 +101,12 @@
                         @if($producto->sku)
                         <p class="text-xs text-gray-400 font-mono mb-2">{{ $producto->sku }}</p>
                         @endif
+                        @if($producto->price)
                         <div class="mb-3">
                             <p class="text-xs text-gray-400 uppercase tracking-wider">Precio sugerido</p>
                             <p class="text-sm font-bold text-gray-800">≈ {{ $producto->formatted_price }}</p>
                         </div>
+                        @endif
                         <div class="flex items-center justify-between pt-3 border-t border-gray-100">
                             <span class="text-xs text-gray-500">Ver puntos de venta</span>
                             <svg class="w-4 h-4 text-brand group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

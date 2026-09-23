@@ -189,10 +189,12 @@
                     <h3 class="font-semibold text-gray-900 group-hover:text-brand transition line-clamp-2 mb-3">
                         {{ $producto->title }}
                     </h3>
+                    @if($producto->price)
                     <div class="mb-4">
                         <p class="text-xs text-gray-400 uppercase tracking-wider">Precio sugerido</p>
                         <p class="text-sm font-bold text-gray-800">≈ {{ $producto->formatted_price }}</p>
                     </div>
+                    @endif
                     <div class="flex items-center justify-between">
                         <span class="text-sm text-gray-500">Ver puntos de venta</span>
                         <span class="text-brand group-hover:translate-x-1 transition-transform">
