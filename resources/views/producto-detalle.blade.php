@@ -153,12 +153,50 @@
             </a>
 
             <!-- Compartir -->
+            @php
+                $shareUrl   = url()->current();
+                $shareTitle = $product->title;
+                $fbShare    = 'https://www.facebook.com/sharer/sharer.php?u=' . urlencode($shareUrl);
+                $twShare    = 'https://twitter.com/intent/tweet?text=' . urlencode($shareTitle) . '&url=' . urlencode($shareUrl);
+                $waShare    = 'https://wa.me/?text=' . urlencode($shareTitle . ' ' . $shareUrl);
+            @endphp
             <div class="flex items-center gap-4 text-sm text-gray-400">
                 <span>Compartir:</span>
-                <a href="#" class="hover:text-blue-600 transition">Facebook</a>
-                <a href="#" class="hover:text-sky-500 transition">Twitter</a>
-                <a href="#" class="hover:text-green-500 transition">WhatsApp</a>
+
+                {{-- Se muestra solo si el navegador soporta el share nativo (Web Share API) --}}
+                <button type="button" id="shareNativeBtn" data-title="{{ $shareTitle }}" data-url="{{ $shareUrl }}"
+                        class="hidden items-center gap-1.5 hover:text-brand transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342a3 3 0 100-2.684m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 8a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                    </svg>
+                    Compartir
+                </button>
+
+                {{-- Fallback: links directos, visibles por defecto (y para navegadores sin Web Share API) --}}
+                <span id="shareFallback" class="flex items-center gap-4">
+                    <a href="{{ $fbShare }}" target="_blank" rel="noopener" class="hover:text-blue-600 transition">Facebook</a>
+                    <a href="{{ $twShare }}" target="_blank" rel="noopener" class="hover:text-sky-500 transition">Twitter</a>
+                    <a href="{{ $waShare }}" target="_blank" rel="noopener" class="hover:text-green-500 transition">WhatsApp</a>
+                </span>
             </div>
+
+            <script>
+            (function () {
+                var nativeBtn = document.getElementById('shareNativeBtn');
+                var fallback  = document.getElementById('shareFallback');
+                if (navigator.share) {
+                    nativeBtn.classList.remove('hidden');
+                    nativeBtn.classList.add('inline-flex');
+                    fallback.classList.add('hidden');
+                    nativeBtn.addEventListener('click', function () {
+                        navigator.share({
+                            title: nativeBtn.dataset.title,
+                            url: nativeBtn.dataset.url
+                        }).catch(function () { /* usuario canceló el share, no hacer nada */ });
+                    });
+                }
+            })();
+            </script>
         </div>
     </div>
 
