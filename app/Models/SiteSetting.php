@@ -28,8 +28,23 @@ class SiteSetting extends Model
         return static::where('group', $group)->pluck('value', 'key')->toArray();
     }
 
+    /**
+     * Invalida solo la caché relacionada a la configuración del sitio.
+     *
+     * Antes usaba Cache::flush(), que borraba TODA la caché de la app —
+     * incluidos los contadores de rate limiting del login y del formulario
+     * de contacto — cada vez que se guardaba cualquier pantalla de
+     * Configuración (incluso Contacto o Redes sociales).
+     */
     public static function clearCache(): void
     {
-        Cache::flush();
+        foreach (static::pluck('key') as $key) {
+            Cache::forget("site_setting_{$key}");
+        }
+
+        Cache::forget('nav.site_settings');
+        Cache::forget('nav.announcements');
+        Cache::forget('nav.footer_pages');
+        Cache::forget('nav.categories');
     }
 }

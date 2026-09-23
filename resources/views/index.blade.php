@@ -17,9 +17,15 @@
     <div class="hero-slide absolute inset-0 transition-opacity duration-700 {{ $i === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none' }}"
          data-slide="{{ $i }}">
         @if($b->image?->url)
-            <div class="w-full h-full {{ $b->link_url ? 'cursor-pointer' : '' }}"
+            @php
+                $heroTag = $b->link_url ? 'a' : 'div';
+                // $b->link_url se escapa con e() porque $heroAttrs se imprime sin
+                // re-escapar ({!! !!}) para poder armar el tag dinámicamente —
+                // ver el mismo patrón/comentario en producto-detalle.blade.php.
+                $heroAttrs = $b->link_url ? 'href="' . e($b->link_url) . '"' : '';
+            @endphp
+            <{{ $heroTag }} {!! $heroAttrs !!} class="w-full h-full block {{ $b->link_url ? 'cursor-pointer' : '' }}"
                  @if($b->link_url)
-                 onclick="window.location.href='{{ $b->link_url }}'"
                  onmouseenter="this.querySelector('.hero-hover-overlay').style.opacity='1'"
                  onmouseleave="this.querySelector('.hero-hover-overlay').style.opacity='0'"
                  @endif>
@@ -29,7 +35,7 @@
                 @if($b->link_url)
                 <div class="hero-hover-overlay" style="position:absolute;inset:0;background:rgba(255,255,255,0.25);opacity:0;transition:opacity 0.3s;pointer-events:none;"></div>
                 @endif
-            </div>
+            </{{ $heroTag }}>
         @else
             {{-- Placeholder cuando no hay imagen cargada --}}
             <div class="w-full h-full flex flex-col items-center justify-center bg-brand-dark gap-3">
@@ -232,9 +238,12 @@
             <div class="mid-slide absolute inset-0 transition-opacity duration-700 {{ $i === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none' }}"
                  data-slide="{{ $i }}">
                 @if($b->image?->url)
-                    <div class="relative w-full h-full {{ $b->link_url ? 'cursor-pointer' : '' }}"
+                    @php
+                        $midTag = $b->link_url ? 'a' : 'div';
+                        $midAttrs = $b->link_url ? 'href="' . e($b->link_url) . '"' : '';
+                    @endphp
+                    <{{ $midTag }} {!! $midAttrs !!} class="relative w-full h-full block {{ $b->link_url ? 'cursor-pointer' : '' }}"
                          @if($b->link_url)
-                         onclick="window.location.href='{{ $b->link_url }}'"
                          onmouseenter="this.querySelector('.mid-hover-overlay').style.opacity='1'"
                          onmouseleave="this.querySelector('.mid-hover-overlay').style.opacity='0'"
                          @endif>
@@ -244,7 +253,7 @@
                         @if($b->link_url)
                         <div class="mid-hover-overlay" style="position:absolute;inset:0;background:rgba(255,255,255,0.25);opacity:0;transition:opacity 0.3s;pointer-events:none;"></div>
                         @endif
-                    </div>
+                    </{{ $midTag }}>
                 @else
                     <div class="w-full h-full bg-brand-dark flex items-center justify-center">
                         <p class="text-white/30 text-sm">Banner 970 × 250 — Subí una imagen desde el admin</p>

@@ -112,8 +112,14 @@ class ProductController extends Controller
     private function validateSalePointUrls(Request $request): void
     {
         $request->validate(
-            ['sale_point_url.*' => 'nullable|url|max:500'],
-            ['sale_point_url.*.url' => 'Una de las URLs personalizadas de puntos de venta no es válida.']
+            [
+                'sale_point_url.*' => 'nullable|url|max:500',
+                'retailers.url.*'  => 'nullable|url|max:500',
+            ],
+            [
+                'sale_point_url.*.url' => 'Una de las URLs personalizadas de puntos de venta no es válida.',
+                'retailers.url.*.url'  => 'Una de las URLs de puntos de venta personalizados no es válida.',
+            ]
         );
     }
 

@@ -19,7 +19,7 @@ Route::get('/manuales-de-producto',[Frontend\PageController::class,    'manuales
 Route::get('/garantia-de-producto',[Frontend\PageController::class,    'garantia'])->name('frontend.warranty');
 Route::get('/paginas/{slug}',      [Frontend\PageController::class,   'show'])->name('frontend.pages.show');
 Route::get('/contacto',            [Frontend\ContactController::class, 'index'])->name('frontend.contact');
-Route::post('/contacto',           [Frontend\ContactController::class, 'store'])->name('frontend.contact.store');
+Route::post('/contacto',           [Frontend\ContactController::class, 'store'])->middleware('throttle:5,1')->name('frontend.contact.store');
 Route::get('/sitemap.xml',         [Frontend\SitemapController::class, 'sitemap'])->name('frontend.sitemap');
 Route::get('/robots.txt',          [Frontend\SitemapController::class, 'robots'])->name('frontend.robots');
 

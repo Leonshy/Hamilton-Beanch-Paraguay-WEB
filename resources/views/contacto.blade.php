@@ -212,6 +212,12 @@
                     <input type="hidden" name="last_name" value="">
                     <input type="hidden" name="newsletter_consent" value="0">
 
+                    {{-- Honeypot anti-spam: invisible para personas, los bots simples lo completan --}}
+                    <div style="position:absolute;left:-9999px;" aria-hidden="true">
+                        <label for="website">Dejar en blanco</label>
+                        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                    </div>
+
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nombre</label>
                         <input type="text" name="first_name" value="{{ old('first_name') }}"
