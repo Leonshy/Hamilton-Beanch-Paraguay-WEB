@@ -83,18 +83,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('/contacts/{contact}/status',   [Admin\ContactController::class, 'updateStatus'])->name('contacts.status');
         Route::delete('/contacts/{contact}',         [Admin\ContactController::class, 'destroy'])->name('contacts.destroy');
 
-        // Settings
-        Route::get('/settings/general',             [Admin\SettingsController::class, 'general'])->name('settings.general');
-        Route::post('/settings/general',            [Admin\SettingsController::class, 'saveGeneral'])->name('settings.general.save');
+        // Settings (accesibles también para editores)
         Route::get('/settings/contact',             [Admin\SettingsController::class, 'contact'])->name('settings.contact');
         Route::post('/settings/contact',            [Admin\SettingsController::class, 'saveContact'])->name('settings.contact.save');
         Route::get('/settings/social',              [Admin\SettingsController::class, 'social'])->name('settings.social');
         Route::post('/settings/social',             [Admin\SettingsController::class, 'saveSocial'])->name('settings.social.save');
-        Route::get('/settings/integrations',        [Admin\SettingsController::class, 'integrations'])->name('settings.integrations');
-        Route::post('/settings/integrations',       [Admin\SettingsController::class, 'saveIntegrations'])->name('settings.integrations.save');
         Route::get('/settings/home',                [Admin\SettingsController::class, 'home'])->name('settings.home');
         Route::post('/settings/home',               [Admin\SettingsController::class, 'saveHome'])->name('settings.home.save');
-        Route::post('/settings/maintenance',        [Admin\SettingsController::class, 'toggleMaintenance'])->name('settings.maintenance');
+
+        // Settings sensibles (admin only): scripts inyectados en todo el sitio, logo, modo mantenimiento
+        Route::middleware('can:admin-only')->group(function () {
+            Route::get('/settings/general',         [Admin\SettingsController::class, 'general'])->name('settings.general');
+            Route::post('/settings/general',        [Admin\SettingsController::class, 'saveGeneral'])->name('settings.general.save');
+            Route::get('/settings/integrations',    [Admin\SettingsController::class, 'integrations'])->name('settings.integrations');
+            Route::post('/settings/integrations',   [Admin\SettingsController::class, 'saveIntegrations'])->name('settings.integrations.save');
+            Route::post('/settings/maintenance',    [Admin\SettingsController::class, 'toggleMaintenance'])->name('settings.maintenance');
+        });
 
         // Users (admin only)
         Route::resource('users', Admin\UserController::class)->middleware('can:admin-only');
