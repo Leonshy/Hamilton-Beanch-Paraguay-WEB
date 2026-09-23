@@ -87,9 +87,12 @@
                     @php $url = $sp->pivot->custom_url ?: $sp->url; @endphp
                     @php
                         $tag   = $url ? 'a' : 'div';
-                        $attrs = $url ? "href=\"{$url}\" target=\"_blank\" rel=\"noopener\"" : '';
+                        // $url se escapa acá con e() porque $attrs se imprime sin escapar
+                        // ({!! !!}) para poder armar el tag dinámicamente. Sin esto, {{ }}
+                        // escaparía las comillas del atributo completo y rompería el href.
+                        $attrs = $url ? 'href="' . e($url) . '" target="_blank" rel="noopener"' : '';
                     @endphp
-                    <{{ $tag }} {{ $attrs }}
+                    <{{ $tag }} {!! $attrs !!}
                        style="position:relative;display:block;aspect-ratio:1;border-radius:0.75rem;overflow:hidden;text-decoration:none;"
                        @if($url)
                        onmouseenter="this.querySelector('.sp-overlay').style.opacity='1'"
