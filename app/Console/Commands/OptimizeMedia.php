@@ -14,6 +14,14 @@ class OptimizeMedia extends Command
 
     public function handle(MediaService $mediaService): int
     {
+        // Decodificar una foto de cámara sin redimensionar (ej. 6000×4000)
+        // con GD puede pedir varios cientos de MB de golpe solo para el
+        // buffer del original — el memory_limit del CLI de Plesk suele
+        // quedar en 128M por defecto, insuficiente para esto. Se sube acá,
+        // solo para este proceso puntual, sin tocar el memory_limit del
+        // sitio web.
+        ini_set('memory_limit', '512M');
+
         $dryRun = (bool) $this->option('dry-run');
 
         $images = Media::where('type', 'image')
@@ -30,13 +38,22 @@ class OptimizeMedia extends Command
         $totalBefore = 0;
         $totalAfter  = 0;
         $optimizedCount = 0;
+        $failed = [];
 
         $bar = $this->output->createProgressBar($images->count());
         $bar->start();
 
-        foreach ($images as $media) {
+        foreach ($images as $i => $media) {
             $before = $media->size ?? 0;
-            $result = $mediaService->optimizeStoredMedia($media, $dryRun);
+
+            try {
+                $result = $mediaService->optimizeStoredMedia($media, $dryRun);
+            } catch (\Throwable $e) {
+                $failed[] = "#{$media->id} ({$media->file_name}): " . $e->getMessage();
+                $bar->advance();
+                continue;
+            }
+
             $bar->advance();
 
             if ($result === null) {
@@ -46,6 +63,12 @@ class OptimizeMedia extends Command
             $totalBefore += $before;
             $totalAfter  += $result['new_size'];
             $optimizedCount++;
+
+            // Liberar los buffers de GD de esta imagen antes de pasar a la
+            // siguiente en vez de esperar al recolector de basura de PHP.
+            if ($i % 10 === 0) {
+                gc_collect_cycles();
+            }
         }
 
         $bar->finish();
@@ -59,6 +82,13 @@ class OptimizeMedia extends Command
             ['Imágenes optimizadas', 'Antes', 'Después', 'Ahorro'],
             [[$optimizedCount, sprintf('%.1f MB', $beforeMb), sprintf('%.1f MB', $afterMb), sprintf('%.1f MB', $savedMb)]]
         );
+
+        if ($failed) {
+            $this->warn(count($failed) . ' imagen(es) no se pudieron procesar (quedaron sin tocar, no se perdió nada):');
+            foreach ($failed as $f) {
+                $this->line("  - {$f}");
+            }
+        }
 
         if ($dryRun) {
             $this->comment('Modo dry-run: no se modificó ningún archivo. Correr sin --dry-run para aplicar.');
