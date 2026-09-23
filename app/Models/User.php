@@ -21,6 +21,8 @@ class User extends Authenticatable
         'is_active',
     ];
 
+    // is_protected NO es mass-assignable a propósito: solo se setea desde el
+    // comando de consola hb:create-super-admin, nunca desde un formulario del admin.
     protected $hidden = [
         'password',
         'remember_token',
@@ -32,6 +34,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'is_protected' => 'boolean',
         ];
     }
 }

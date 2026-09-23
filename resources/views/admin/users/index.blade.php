@@ -18,7 +18,12 @@
                 @foreach($users as $user)
                 <tr>
                     <td class="text-muted small">{{ $user->id }}</td>
-                    <td><strong>{{ $user->name }}</strong></td>
+                    <td>
+                        <strong>{{ $user->name }}</strong>
+                        @if($user->is_protected)
+                        <i class="bi bi-shield-lock-fill text-warning ms-1" title="Usuario protegido"></i>
+                        @endif
+                    </td>
                     <td class="text-muted small">{{ $user->email }}</td>
                     <td>
                         @foreach($user->roles as $role)
@@ -31,6 +36,9 @@
                         </span>
                     </td>
                     <td>
+                        @if($user->is_protected)
+                        <span class="text-muted small">Protegido</span>
+                        @else
                         <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-outline-primary me-1">
                             <i class="bi bi-pencil"></i>
                         </a>
@@ -40,6 +48,7 @@
                             @csrf @method('DELETE')
                             <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
                         </form>
+                        @endif
                         @endif
                     </td>
                 </tr>

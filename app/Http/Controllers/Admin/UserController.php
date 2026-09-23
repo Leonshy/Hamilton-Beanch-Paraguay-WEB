@@ -50,12 +50,22 @@ class UserController extends Controller
     public function edit(User $user)
     {
         Gate::authorize('admin-only');
+
+        if ($user->is_protected) {
+            return redirect()->route('admin.users.index')->with('error', 'Este usuario es protegido y no puede editarse.');
+        }
+
         return view('admin.users.form', compact('user'));
     }
 
     public function update(Request $request, User $user)
     {
         Gate::authorize('admin-only');
+
+        if ($user->is_protected) {
+            return redirect()->route('admin.users.index')->with('error', 'Este usuario es protegido y no puede editarse.');
+        }
+
         $request->validate([
             'name'      => 'required|string|max:255',
             'email'     => 'required|email:rfc,dns|unique:users,email,' . $user->id,
@@ -83,6 +93,10 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         Gate::authorize('admin-only');
+
+        if ($user->is_protected) {
+            return back()->with('error', 'Este usuario es protegido y no puede eliminarse.');
+        }
 
         if ($user->id === auth()->id()) {
             return back()->with('error', 'No podés eliminarte a vos mismo.');
