@@ -29,7 +29,7 @@ Construido con Laravel 12, Blade y Tailwind CSS v4. Frontend completo con panel 
 | Módulo | Descripción |
 |--------|-------------|
 | **Dashboard** | Resumen general |
-| **Productos** | CRUD con galería, especificaciones, SKU, puntos de venta, PDF manual, SEO |
+| **Productos** | CRUD con galería, especificaciones, SKU, puntos de venta, PDF manual, SEO, preguntas frecuentes por producto |
 | **Categorías** | CRUD con íconos SVG/emoji, ordenamiento drag-and-drop |
 | **Banners** | Hero y banners intermedios con enlace opcional |
 | **Anuncios** | Barra marquee superior configurable |
@@ -39,13 +39,15 @@ Construido con Laravel 12, Blade y Tailwind CSS v4. Frontend completo con panel 
 | **FAQs** | Preguntas frecuentes con editor de texto enriquecido |
 | **Contactos** | Bandeja de mensajes recibidos del formulario |
 | **Biblioteca de Medios** | Subida de imágenes, PDFs y documentos (límite 64 MB) |
-| **Usuarios** | Gestión de administradores con roles |
+| **Usuarios** | Gestión de administradores con roles; usuarios protegidos (no editables ni eliminables desde el panel) |
 | **Configuración** | General, Contacto, Redes sociales, Integraciones (GA4, Meta Pixel), Home |
 
 ### Frontend público
 
 - Catálogo de productos con búsqueda, filtro por categoría y ordenamiento
-- Ficha de producto con galería, especificaciones, puntos de venta con logo, retailers personalizados y descarga de manual PDF
+- Ficha de producto con galería, especificaciones, puntos de venta con logo, retailers personalizados, descarga de manual PDF y preguntas frecuentes propias del producto (la sección se oculta si no tiene ninguna cargada)
+- Botón "Compartir" en la ficha de producto: usa el menú nativo del sistema (Web Share API) donde está disponible, y links directos a Facebook, X y WhatsApp en el resto de los navegadores
+- El precio sugerido y el aviso "Disponible en puntos de venta" solo se muestran si el producto tiene esos datos cargados
 - Carrusel de puntos de venta en homepage con orden aleatorio
 - Páginas de soporte (Centro de Ayuda, FAQ, Servicio Técnico, Manuales, Garantía)
 - Formulario de contacto con almacenamiento en BD
@@ -84,7 +86,8 @@ Todas las rutas bajo `/admin` con middleware de autenticación.
 
 | Modelo | Tabla | Notas |
 |--------|-------|-------|
-| `Product` | `products` | SoftDeletes, relación con Category, Media (imagen + galería), SalePoints (M2M), retailers (JSON) |
+| `Product` | `products` | SoftDeletes, relación con Category, Media (imagen + galería), SalePoints (M2M), retailers (JSON), FAQs (1:N) |
+| `ProductFaq` | `product_faqs` | Preguntas frecuentes de un producto (pregunta, respuesta, orden) |
 | `Category` | `categories` | Tipo (product/help), íconos |
 | `Banner` | `banners` | Posición (home / home_mid), enlace opcional |
 | `SalePoint` | `sale_points` | Logo via Media, relación M2M con productos |
@@ -94,7 +97,7 @@ Todas las rutas bajo `/admin` con middleware de autenticación.
 | `Media` | `media` | Archivos subidos (image / document / video), Storage::disk('public') |
 | `Contact` | `contacts` | Mensajes del formulario |
 | `SiteSetting` | `site_settings` | Configuración clave-valor con caché de 1 hora |
-| `User` | `users` | Roles vía Spatie Permission |
+| `User` | `users` | Roles vía Spatie Permission; `is_protected` marca usuarios que no se pueden editar ni eliminar desde el panel |
 
 ---
 
@@ -127,6 +130,15 @@ Credenciales por defecto: `admin@hamiltonbeach.com.py` / `Admin1234!`
 
 > No se necesita `pnpm run build` para desarrollo — los assets compilados ya están en `public/build` y `public/js/admin.js`.  
 > Para ver cambios en CSS/JS del frontend, correr `pnpm run dev`.
+
+---
+
+## Comandos de consola
+
+| Comando | Uso |
+|---------|-----|
+| `php artisan hb:create-super-admin {email} [--name=Webmaster]` | Crea o actualiza un admin protegido. Pide la contraseña por prompt oculto (no queda en el historial de bash). Se puede volver a correr sin duplicar el usuario. |
+| `php artisan hb:import-product-images` | Importa imágenes de `public/images/products` al storage y las asocia a los productos semilla |
 
 ---
 
@@ -171,6 +183,12 @@ Auditoría de seguridad y rendimiento realizada el 2026-07-17. Estado actual:
 - Contraseñas de usuarios admin: mínimo 10 caracteres con mayúscula, minúscula, número y símbolo; email validado con verificación de dominio DNS real
 - Suite de tests automatizados (`php artisan test`) cubriendo login admin, catálogo de productos y formulario de contacto
 - Datos del "view composer" global (site settings, anuncios, categorías, páginas de footer) cacheados con invalidación automática al guardar desde el admin
+
+Revisión de 2026-09-23:
+
+- Usuarios protegidos (`users.is_protected`): ningún admin puede editarlos ni eliminarlos desde el panel. El campo no es asignable desde formularios; solo se activa con el comando `hb:create-super-admin`. En producción existe `webmaster@webparaguay.com` con esta protección.
+- URLs personalizadas de puntos de venta por producto (`sale_point_url`) validadas como URL antes de guardarse (rechaza `javascript:` e intentos de inyección).
+- Corregido el armado de los links de "¿Dónde comprar?" en la ficha de producto: el `href` salía con las comillas escapadas y mandaba a una ruta relativa rota.
 
 > Pendiente: `Content-Security-Policy` — requiere mapear todos los dominios externos (Google Tag Manager, Facebook Pixel, Google Fonts, jsDelivr) antes de poder aplicarla sin romper integraciones.
 

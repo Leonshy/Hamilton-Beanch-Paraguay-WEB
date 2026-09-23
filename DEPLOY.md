@@ -441,3 +441,15 @@ ls -la public/tinymce/tinymce.min.js
 | Administrador | `admin@hamiltonbeach.com.py` | `Admin1234!` |
 
 > **Cambiar la contraseña inmediatamente después del primer acceso.** Desde la auditoría de 2026-07-17, las contraseñas nuevas o cambios de contraseña deben tener mínimo 10 caracteres con mayúscula, minúscula, número y símbolo — la de esta tabla ya cumple el requisito.
+
+### Usuario protegido (super admin)
+
+En producción existe `webmaster@webparaguay.com` con rol `admin` y `is_protected = true`: no se puede editar ni eliminar desde `/admin/users`, ni siquiera por otro admin.
+
+Para crear otro usuario protegido, o para cambiarle la contraseña a uno existente, hay que hacerlo por consola en el servidor:
+
+```bash
+/opt/plesk/php/8.2/bin/php artisan hb:create-super-admin correo@dominio.com --name="Nombre"
+```
+
+El comando pide la contraseña dos veces sin mostrarla. Si el email ya existe, actualiza la contraseña y mantiene la protección.
