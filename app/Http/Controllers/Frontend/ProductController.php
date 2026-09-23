@@ -5,10 +5,13 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use App\Traits\EscapesLikeSearch;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+    use EscapesLikeSearch;
+
     public function index(Request $request)
     {
         $categories = Category::active()->ofType('product')->orderBy('order')->get();
@@ -16,11 +19,11 @@ class ProductController extends Controller
         $query = Product::with('featuredImage', 'category')->published();
 
         if ($request->filled('q')) {
-            $search = $request->q;
+            $search = '%' . $this->escapeLike($request->q) . '%';
             $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('subtitle', 'like', "%{$search}%")
-                  ->orWhere('sku', 'like', "%{$search}%");
+                $q->whereRaw("title LIKE ? ESCAPE '\\'", [$search])
+                  ->orWhereRaw("subtitle LIKE ? ESCAPE '\\'", [$search])
+                  ->orWhereRaw("sku LIKE ? ESCAPE '\\'", [$search]);
             });
         }
 

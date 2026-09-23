@@ -79,6 +79,7 @@
             <div class="bg-gray-50 rounded-2xl h-96 flex items-center justify-center mb-3 border border-gray-200 overflow-hidden" id="main-gallery-img">
                 <img src="{{ $mainImage }}"
                      alt="{{ $product->title }}"
+                     fetchpriority="high"
                      class="w-full h-full object-contain p-6">
             </div>
             @if(count($galleryImages) > 1)
@@ -86,7 +87,7 @@
                 @foreach($galleryImages as $img)
                 <button onclick="document.querySelector('#main-gallery-img img').src='{{ $img }}'"
                         class="bg-gray-50 rounded-xl h-20 border-2 border-transparent hover:border-brand transition overflow-hidden">
-                    <img src="{{ $img }}" alt="Galería" class="w-full h-full object-contain p-2">
+                    <img src="{{ $img }}" alt="Galería" loading="lazy" class="w-full h-full object-contain p-2">
                 </button>
                 @endforeach
             </div>
@@ -147,7 +148,7 @@
 
                         {{-- Imagen o inicial --}}
                         @if($sp->logo)
-                            <img src="{{ $sp->logo->url }}" alt="{{ $sp->name }}"
+                            <img src="{{ $sp->logo->url }}" alt="{{ $sp->name }}" loading="lazy"
                                  style="width:100%;height:100%;object-fit:cover;">
                         @else
                             <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.25rem;font-weight:700;color:#9ca3af;">
@@ -300,7 +301,7 @@
                     <a href="/productos/{{ $rel->slug }}"
                        class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl hover:border-brand-muted hover:shadow-sm transition group">
                         <div class="w-14 h-14 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                            <img src="{{ $rel->featuredImage?->url ?? '/images/products/cafetera-retro-black-1.webp' }}" alt="{{ $rel->title }}" class="w-full h-full object-contain p-1">
+                            <img src="{{ $rel->featuredImage?->url ?? '/images/products/cafetera-retro-black-1.webp' }}" alt="{{ $rel->title }}" loading="lazy" class="w-full h-full object-contain p-1">
                         </div>
                         <div class="flex-1 min-w-0">
                             <p class="text-xs text-gray-400">{{ $rel->category?->name ?? '' }}</p>

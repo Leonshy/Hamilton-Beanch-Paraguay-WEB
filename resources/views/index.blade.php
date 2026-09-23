@@ -31,6 +31,7 @@
                  @endif>
                 <img src="{{ $b->image->url }}"
                      alt="{{ $b->title ?? 'Hamilton Beach' }}"
+                     @if($i === 0) fetchpriority="high" @endif
                      style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;">
                 @if($b->link_url)
                 <div class="hero-hover-overlay" style="position:absolute;inset:0;background:rgba(255,255,255,0.25);opacity:0;transition:opacity 0.3s;pointer-events:none;"></div>
@@ -187,6 +188,7 @@
                 <!-- Imagen -->
                 <div class="bg-gray-50 aspect-square relative overflow-hidden">
                     <img src="{{ $producto->featuredImage?->url ?? '/images/products/cafetera-retro-black-1.webp' }}" alt="{{ $producto->title }}"
+                         loading="lazy"
                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                     <div class="absolute top-3 left-3">
                         <span class="bg-white text-gray-600 text-xs font-medium px-2 py-1 rounded-full border border-gray-200 shadow-sm">
@@ -360,7 +362,7 @@
                         @endif
                             <div style="height:100px;display:flex;align-items:center;justify-content:center;">
                                 @if($sp->logo)
-                                    <img src="{{ $sp->logo->url }}" alt="{{ $sp->name }}"
+                                    <img src="{{ $sp->logo->url }}" alt="{{ $sp->name }}" loading="lazy"
                                          style="max-height:100px;max-width:160px;object-fit:contain;">
                                 @else
                                     <div style="width:80px;height:80px;border-radius:50%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;color:#6b7280;">
@@ -453,9 +455,9 @@
                class="group bg-gray-50 hover:bg-brand-light border border-gray-200 hover:border-brand-muted rounded-xl p-6 text-center transition flex flex-col items-center">
                 <div class="flex items-center justify-center h-24 mb-3">
                     @if($cat->icon_type === 'svg' && $cat->icon)
-                        <img src="/images/icons/{{ $cat->icon }}" alt="{{ $cat->name }}" class="w-16 h-16 object-contain opacity-70 group-hover:opacity-100 transition">
+                        <img src="/images/icons/{{ $cat->icon }}" alt="{{ $cat->name }}" loading="lazy" class="w-16 h-16 object-contain opacity-70 group-hover:opacity-100 transition">
                     @elseif($cat->icon_type === 'image' && $cat->image)
-                        <img src="{{ $cat->image->url }}" alt="{{ $cat->name }}" class="w-24 h-24 object-contain">
+                        <img src="{{ $cat->image->url }}" alt="{{ $cat->name }}" loading="lazy" class="w-24 h-24 object-contain">
                     @elseif($cat->icon)
                         <svg class="w-12 h-12 text-gray-500 group-hover:text-brand transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="{{ $cat->icon }}"/>

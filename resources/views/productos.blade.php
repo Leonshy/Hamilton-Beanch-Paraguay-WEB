@@ -88,6 +88,7 @@
                     <!-- Imagen -->
                     <div class="bg-gray-50 aspect-square relative overflow-hidden">
                         <img src="{{ $producto->featuredImage?->url ?? '/images/products/cafetera-retro-black-1.webp' }}" alt="{{ $producto->title }}"
+                             loading="lazy"
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                         <span class="absolute top-3 left-3 bg-white border border-gray-200 text-gray-600 text-xs font-medium px-2.5 py-1 rounded-full">
                             {{ $producto->category?->name ?? '' }}

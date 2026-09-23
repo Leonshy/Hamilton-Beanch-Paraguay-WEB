@@ -1,0 +1,11 @@
+# Los assets de Vite llevan un hash de contenido en el nombre de archivo
+# (app-CdOr0o7b.css) — si cambia el contenido, cambia el nombre. Seguro
+# cachear agresivo en el navegador.
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 1 year"
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header set Cache-Control "public, max-age=31536000, immutable"
+</IfModule>

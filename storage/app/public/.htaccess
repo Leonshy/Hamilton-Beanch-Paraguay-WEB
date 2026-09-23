@@ -1,0 +1,12 @@
+# Los archivos subidos acá tienen nombre UUID (MediaService::upload /
+# optimizeStoredMedia siempre generan un nombre nuevo, nunca sobrescriben
+# el mismo path) — el contenido de una URL, una vez publicada, no cambia.
+# Seguro cachear agresivo en el navegador.
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 1 year"
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header set Cache-Control "public, max-age=31536000, immutable"
+</IfModule>

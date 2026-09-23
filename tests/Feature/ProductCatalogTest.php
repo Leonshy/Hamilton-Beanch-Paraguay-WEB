@@ -53,4 +53,26 @@ class ProductCatalogTest extends TestCase
 
         $this->get(route('frontend.products.show', $product->slug))->assertStatus(404);
     }
+
+    public function test_search_treats_percent_sign_as_a_literal_character_not_a_wildcard(): void
+    {
+        Product::create(['title' => 'Freidora 50% descuento', 'slug' => 'freidora-50', 'status' => 'published', 'order' => 1]);
+        Product::create(['title' => 'Freidora normal', 'slug' => 'freidora-normal', 'status' => 'published', 'order' => 2]);
+
+        $response = $this->get(route('frontend.products.index', ['q' => '50%']));
+
+        $response->assertSee('Freidora 50% descuento');
+        $response->assertDontSee('Freidora normal');
+    }
+
+    public function test_search_treats_underscore_as_a_literal_character_not_a_wildcard(): void
+    {
+        Product::create(['title' => 'Modelo A_1', 'slug' => 'modelo-a-1', 'status' => 'published', 'order' => 1]);
+        Product::create(['title' => 'Modelo AX1', 'slug' => 'modelo-ax1', 'status' => 'published', 'order' => 2]);
+
+        $response = $this->get(route('frontend.products.index', ['q' => 'A_1']));
+
+        $response->assertSee('Modelo A_1');
+        $response->assertDontSee('Modelo AX1');
+    }
 }
