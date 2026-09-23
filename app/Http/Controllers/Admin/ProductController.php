@@ -31,6 +31,7 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $data = $this->validateProduct($request);
+        $this->validateSalePointUrls($request);
         $data['user_id'] = auth()->id();
         $data['slug'] = $this->uniqueSlug($request->slug ?: $request->title);
         $data['specifications'] = $request->input('specifications');
@@ -59,6 +60,7 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $data = $this->validateProduct($request, $product->id);
+        $this->validateSalePointUrls($request);
         if ($request->filled('slug') && $request->slug !== $product->slug) {
             $data['slug'] = $this->uniqueSlug($request->slug, $product->id);
         }
@@ -101,6 +103,14 @@ class ProductController extends Controller
             'og_description'   => 'nullable|string|max:500',
             'og_image'         => 'nullable|string|max:500',
         ]);
+    }
+
+    private function validateSalePointUrls(Request $request): void
+    {
+        $request->validate(
+            ['sale_point_url.*' => 'nullable|url|max:500'],
+            ['sale_point_url.*.url' => 'Una de las URLs personalizadas de puntos de venta no es válida.']
+        );
     }
 
     private function uniqueSlug(string $base, ?int $ignoreId = null): string
