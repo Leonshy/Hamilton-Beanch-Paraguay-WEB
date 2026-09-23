@@ -21,7 +21,9 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        View::composer('*', function ($view) {
+        // Solo layouts.app (frontend público) usa estos datos — antes corría
+        // en '*', incluido cada vista del panel admin, que nunca los usa.
+        View::composer('layouts.app', function ($view) {
             try {
                 $siteSettings   = Cache::remember('nav.site_settings', 3600, fn () => SiteSetting::all()->pluck('value', 'key'));
                 $announcements  = Cache::remember('nav.announcements', 3600, fn () => Announcement::active()->orderBy('order')->get());
