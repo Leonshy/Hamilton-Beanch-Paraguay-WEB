@@ -32,6 +32,7 @@ class ProductController extends Controller
     {
         $data = $this->validateProduct($request);
         $this->validateSalePointUrls($request);
+        $this->validateFaqs($request);
         $data['user_id'] = auth()->id();
         $data['slug'] = $this->uniqueSlug($request->slug ?: $request->title);
         $data['specifications'] = $request->input('specifications');
@@ -45,6 +46,7 @@ class ProductController extends Controller
 
         $this->syncGallery($product, $request->input('gallery_ids', []));
         $this->syncSalePoints($product, $request);
+        $this->syncFaqs($product, $request->input('faqs', []));
 
         return redirect()->route('admin.products.index')->with('success', 'Producto creado correctamente.');
     }
@@ -53,7 +55,7 @@ class ProductController extends Controller
     {
         $categories = Category::active()->ofType('product')->orderBy('name')->get();
         $salePoints = SalePoint::active()->orderBy('order')->get();
-        $product->load('gallery', 'salePoints');
+        $product->load('gallery', 'salePoints', 'faqs');
         return view('admin.products.form', compact('product', 'categories', 'salePoints'));
     }
 
@@ -61,6 +63,7 @@ class ProductController extends Controller
     {
         $data = $this->validateProduct($request, $product->id);
         $this->validateSalePointUrls($request);
+        $this->validateFaqs($request);
         if ($request->filled('slug') && $request->slug !== $product->slug) {
             $data['slug'] = $this->uniqueSlug($request->slug, $product->id);
         }
@@ -73,6 +76,7 @@ class ProductController extends Controller
         $product->update($data);
         $this->syncGallery($product, $request->input('gallery_ids', []));
         $this->syncSalePoints($product, $request);
+        $this->syncFaqs($product, $request->input('faqs', []));
 
         return redirect()->route('admin.products.index')->with('success', 'Producto actualizado correctamente.');
     }
@@ -111,6 +115,14 @@ class ProductController extends Controller
             ['sale_point_url.*' => 'nullable|url|max:500'],
             ['sale_point_url.*.url' => 'Una de las URLs personalizadas de puntos de venta no es válida.']
         );
+    }
+
+    private function validateFaqs(Request $request): void
+    {
+        $request->validate([
+            'faqs.question.*' => 'nullable|string|max:500',
+            'faqs.answer.*'   => 'nullable|string|max:2000',
+        ]);
     }
 
     private function uniqueSlug(string $base, ?int $ignoreId = null): string
@@ -174,5 +186,26 @@ class ProductController extends Controller
             $sync[$id] = ['order' => $order];
         }
         $product->gallery()->sync($sync);
+    }
+
+    private function syncFaqs(Product $product, array $faqs): void
+    {
+        $product->faqs()->delete();
+
+        $questions = $faqs['question'] ?? [];
+        $answers   = $faqs['answer']   ?? [];
+        $order     = 0;
+
+        foreach ($questions as $i => $question) {
+            $question = trim($question);
+            $answer   = trim($answers[$i] ?? '');
+            if ($question === '' || $answer === '') continue;
+
+            $product->faqs()->create([
+                'question' => $question,
+                'answer'   => $answer,
+                'order'    => $order++,
+            ]);
+        }
     }
 }

@@ -44,7 +44,7 @@ class ProductController extends Controller
     public function show(string $id)
     {
         // Soporta tanto slug como id para compatibilidad
-        $product = Product::with('featuredImage', 'category', 'gallery', 'salePoints.logo')
+        $product = Product::with('featuredImage', 'category', 'gallery', 'salePoints.logo', 'faqs')
             ->published()
             ->where(is_numeric($id) ? 'id' : 'slug', $id)
             ->firstOrFail();

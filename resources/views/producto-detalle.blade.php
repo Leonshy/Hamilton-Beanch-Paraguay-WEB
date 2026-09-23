@@ -234,31 +234,26 @@
     </div>
 
     <!-- FAQ del producto -->
+    @if($product->faqs->isNotEmpty())
     <div class="bg-white border border-gray-200 rounded-xl p-8">
         <h2 class="text-xl font-bold text-gray-900 mb-6">Preguntas frecuentes sobre este producto</h2>
         <div class="divide-y divide-gray-100">
-            @php
-                $faqs = [
-                    ['q' => '¿Cuál es la capacidad máxima de la cafetera?', 'a' => 'La capacidad máxima es de 10 tazas de café. El depósito de agua tiene una capacidad de 1.2 litros.'],
-                    ['q' => '¿Incluye filtros?', 'a' => 'Sí, la cafetera viene con filtros permanentes reutilizables. También podés usar filtros de papel desechables compatibles.'],
-                    ['q' => '¿Qué cubre la garantía de este producto?', 'a' => 'La garantía de 1 año cubre defectos de fabricación y problemas de funcionamiento. No cubre daños por mal uso, caídas o desgaste natural.'],
-                ];
-            @endphp
-            @foreach($faqs as $faq)
+            @foreach($product->faqs as $faq)
             <div class="py-5">
                 <button class="w-full text-left font-semibold text-gray-800 hover:text-brand flex justify-between items-start gap-4 transition" onclick="toggleFaq(this)">
-                    <span>{{ $faq['q'] }}</span>
+                    <span>{{ $faq->question }}</span>
                     <svg class="w-5 h-5 flex-shrink-0 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                     </svg>
                 </button>
                 <div class="faq-answer hidden mt-3">
-                    <p class="text-gray-600 text-sm leading-relaxed">{{ $faq['a'] }}</p>
+                    <p class="text-gray-600 text-sm leading-relaxed">{{ $faq->answer }}</p>
                 </div>
             </div>
             @endforeach
         </div>
     </div>
+    @endif
 
 </div>
 

@@ -155,6 +155,61 @@
                 </div>
             </div>
 
+            {{-- Preguntas frecuentes del producto --}}
+            @php
+                $existingFaqs = old('faqs', isset($product) ? $product->faqs->map(fn($f) => ['question' => $f->question, 'answer' => $f->answer])->toArray() : []);
+            @endphp
+            <div class="card hb-admin-card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0"><i class="bi bi-question-circle me-2"></i>Preguntas frecuentes del producto</h6>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="addFaqBtn">
+                        <i class="bi bi-plus-lg me-1"></i>Agregar
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="form-text mb-3">Si no cargás ninguna, la sección de preguntas frecuentes no aparece en la ficha del producto.</div>
+                    <div id="faqsList">
+                        @if(isset($existingFaqs['question']))
+                            {{-- old() con validación fallida: viene como faqs[question][]/faqs[answer][] --}}
+                            @foreach($existingFaqs['question'] as $i => $question)
+                            <div class="border rounded p-2 mb-2 faq-row">
+                                <input type="text" class="form-control form-control-sm mb-2"
+                                       name="faqs[question][]"
+                                       placeholder="Pregunta"
+                                       value="{{ $question }}">
+                                <div class="d-flex gap-2">
+                                    <textarea class="form-control form-control-sm" name="faqs[answer][]"
+                                              rows="2" placeholder="Respuesta">{{ $existingFaqs['answer'][$i] ?? '' }}</textarea>
+                                    <button type="button" class="btn btn-sm btn-outline-danger flex-shrink-0 remove-faq">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            @endforeach
+                        @else
+                            @foreach($existingFaqs as $faq)
+                            <div class="border rounded p-2 mb-2 faq-row">
+                                <input type="text" class="form-control form-control-sm mb-2"
+                                       name="faqs[question][]"
+                                       placeholder="Pregunta"
+                                       value="{{ $faq['question'] ?? '' }}">
+                                <div class="d-flex gap-2">
+                                    <textarea class="form-control form-control-sm" name="faqs[answer][]"
+                                              rows="2" placeholder="Respuesta">{{ $faq['answer'] ?? '' }}</textarea>
+                                    <button type="button" class="btn btn-sm btn-outline-danger flex-shrink-0 remove-faq">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            @endforeach
+                        @endif
+                    </div>
+                    @if(empty($existingFaqs))
+                    <p class="text-muted small mb-0" id="faqsEmpty">Ninguna agregada aún.</p>
+                    @endif
+                </div>
+            </div>
+
             {{-- SEO --}}
             @php $model = $product ?? new \App\Models\Product; @endphp
             @include('admin.partials.seo-fields')
@@ -340,6 +395,38 @@ document.getElementById('retailersList').addEventListener('click', function (e) 
         p.id = 'retailersEmpty';
         p.textContent = 'Ninguno agregado aún.';
         document.getElementById('retailersList').insertAdjacentElement('afterend', p);
+    }
+});
+
+// Preguntas frecuentes del producto
+function faqRow() {
+    var div = document.createElement('div');
+    div.className = 'border rounded p-2 mb-2 faq-row';
+    div.innerHTML =
+        '<input type="text" class="form-control form-control-sm mb-2" name="faqs[question][]" placeholder="Pregunta">' +
+        '<div class="d-flex gap-2">' +
+        '<textarea class="form-control form-control-sm" name="faqs[answer][]" rows="2" placeholder="Respuesta"></textarea>' +
+        '<button type="button" class="btn btn-sm btn-outline-danger flex-shrink-0 remove-faq"><i class="bi bi-x-lg"></i></button>' +
+        '</div>';
+    return div;
+}
+
+document.getElementById('addFaqBtn').addEventListener('click', function () {
+    var empty = document.getElementById('faqsEmpty');
+    if (empty) empty.remove();
+    document.getElementById('faqsList').appendChild(faqRow());
+});
+
+document.getElementById('faqsList').addEventListener('click', function (e) {
+    var btn = e.target.closest('.remove-faq');
+    if (!btn) return;
+    btn.closest('.faq-row').remove();
+    if (!document.querySelector('.faq-row')) {
+        var p = document.createElement('p');
+        p.className = 'text-muted small mb-0';
+        p.id = 'faqsEmpty';
+        p.textContent = 'Ninguna agregada aún.';
+        document.getElementById('faqsList').insertAdjacentElement('afterend', p);
     }
 });
 </script>
