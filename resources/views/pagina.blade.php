@@ -1,5 +1,18 @@
 @extends('layouts.app')
-@section('title', $page->meta_title ?? $page->title)
+
+@php
+    $seoDescription = $page->meta_description
+        ?: \Illuminate\Support\Str::limit(strip_tags($page->subtitle ?: $page->content ?: ''), 160);
+    $seoImage = $page->og_image ?: $page->featuredImage?->url;
+@endphp
+
+@section('title', $page->meta_title ?: $page->title)
+@section('meta_description', $seoDescription)
+@section('canonical', route('frontend.pages.show', $page->slug))
+@section('robots', $page->no_index ? 'noindex, nofollow' : 'index, follow')
+@section('og_title', $page->og_title ?: $page->title)
+@section('og_description', $page->og_description ?: $seoDescription)
+@section('og_image', $seoImage ?: '')
 
 @section('content')
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

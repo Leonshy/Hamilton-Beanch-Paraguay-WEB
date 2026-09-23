@@ -1,8 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Hamilton Beach Paraguay - Electrodomésticos de calidad')
+@section('title', ($siteSettings['site_name'] ?? 'Hamilton Beach Paraguay') . ' - ' . ($siteSettings['site_tagline'] ?? 'Electrodomésticos de calidad'))
 
 @section('content')
+
+{{-- H1 real de la página (oculto visualmente, el hero ya comunica la marca
+     con imagen) — Google y lectores de pantalla necesitan uno igual --}}
+<h1 class="sr-only">{{ $siteSettings['site_name'] ?? 'Hamilton Beach Paraguay' }} — {{ $siteSettings['site_tagline'] ?? 'Electrodomésticos de calidad con respaldo y servicio técnico oficial' }}</h1>
 
 <!-- Hero Section — proporción 1280×535, imagen centrada y recortada -->
 @if($banners->isNotEmpty())

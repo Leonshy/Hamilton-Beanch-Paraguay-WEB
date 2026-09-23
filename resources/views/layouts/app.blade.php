@@ -9,12 +9,52 @@
         $siteLogo    = $siteSettings['logo']         ?? '/images/logo.webp';
         $siteFavicon = $siteSettings['favicon']      ?? '/favicon.ico';
         $metaDesc    = $siteSettings['meta_description'] ?? $siteSettings['site_description'] ?? '';
+        $pageTitle   = trim($__env->yieldContent('title', $siteName . ($siteTagline ? ' — ' . $siteTagline : '')));
+
+        // Cada vista puede pisar estos valores con @section('meta_description', ...),
+        // @section('canonical', ...), @section('og_title', ...), etc. Si no lo hace,
+        // se usan estos valores globales por defecto.
+        $pageDesc      = trim($__env->yieldContent('meta_description', $metaDesc));
+        $pageCanonical = trim($__env->yieldContent('canonical', url()->current()));
+        $pageRobots    = trim($__env->yieldContent('robots', 'index, follow'));
+        $ogTitle       = trim($__env->yieldContent('og_title', $pageTitle));
+        $ogDescription = trim($__env->yieldContent('og_description', $pageDesc));
+        $ogType        = trim($__env->yieldContent('og_type', 'website'));
+        $ogImageRaw    = trim($__env->yieldContent('og_image', $siteLogo));
+        $ogImage       = $ogImageRaw && !str_starts_with($ogImageRaw, 'http') ? url($ogImageRaw) : $ogImageRaw;
     @endphp
-    <title>@yield('title', $siteName . ($siteTagline ? ' — ' . $siteTagline : ''))</title>
+    <title>{{ $pageTitle }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    @if($metaDesc)
-    <meta name="description" content="{{ $metaDesc }}">
+    @if($pageDesc)
+    <meta name="description" content="{{ $pageDesc }}">
     @endif
+    <meta name="robots" content="{{ $pageRobots }}">
+    <link rel="canonical" href="{{ $pageCanonical }}">
+
+    {{-- Open Graph / Twitter Card --}}
+    <meta property="og:type" content="{{ $ogType }}">
+    <meta property="og:site_name" content="{{ $siteName }}">
+    <meta property="og:url" content="{{ $pageCanonical }}">
+    @if($ogTitle)
+    <meta property="og:title" content="{{ $ogTitle }}">
+    @endif
+    @if($ogDescription)
+    <meta property="og:description" content="{{ $ogDescription }}">
+    @endif
+    @if($ogImage)
+    <meta property="og:image" content="{{ $ogImage }}">
+    @endif
+    <meta name="twitter:card" content="{{ $ogImage ? 'summary_large_image' : 'summary' }}">
+    @if($ogTitle)
+    <meta name="twitter:title" content="{{ $ogTitle }}">
+    @endif
+    @if($ogDescription)
+    <meta name="twitter:description" content="{{ $ogDescription }}">
+    @endif
+    @if($ogImage)
+    <meta name="twitter:image" content="{{ $ogImage }}">
+    @endif
+
     <link rel="icon" href="{{ $siteFavicon }}" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -52,6 +92,9 @@
     @if(!empty($siteSettings['custom_scripts_head']))
     {!! $siteSettings['custom_scripts_head'] !!}
     @endif
+
+    {{-- Datos estructurados (JSON-LD) por página, ej. schema Product --}}
+    @stack('schema')
 </head>
 <body class="bg-white">
     @include('partials.navbar')

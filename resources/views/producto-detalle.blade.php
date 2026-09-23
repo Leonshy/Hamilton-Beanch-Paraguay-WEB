@@ -1,6 +1,50 @@
 @extends('layouts.app')
 
-@section('title', $product->title . ' - Hamilton Beach Paraguay')
+@php
+    $seoDescription = $product->meta_description
+        ?: \Illuminate\Support\Str::limit(strip_tags($product->subtitle ?: $product->content ?: ''), 160);
+    $seoImage = $product->og_image ?: $product->featuredImage?->url;
+@endphp
+
+@section('title', $product->meta_title ?: ($product->title . ' - Hamilton Beach Paraguay'))
+@section('meta_description', $seoDescription)
+@section('canonical', route('frontend.products.show', $product->slug))
+@section('robots', $product->no_index ? 'noindex, nofollow' : 'index, follow')
+@section('og_type', 'product')
+@section('og_title', $product->og_title ?: $product->title)
+@section('og_description', $product->og_description ?: $seoDescription)
+@section('og_image', $seoImage ?: '')
+
+@php
+    $schemaData = [
+        '@context'    => 'https://schema.org',
+        '@type'       => 'Product',
+        'name'        => $product->title,
+        'description' => $seoDescription,
+        'image'       => $seoImage ? [$seoImage] : [],
+        'brand'       => ['@type' => 'Brand', 'name' => 'Hamilton Beach'],
+    ];
+    if ($product->sku) {
+        $schemaData['sku'] = $product->sku;
+    }
+    if ($product->price) {
+        $schemaData['offers'] = [
+            '@type'         => 'Offer',
+            'priceCurrency' => 'PYG',
+            'price'         => (string) $product->price,
+            'availability'  => ($product->salePoints->isNotEmpty() || !empty($product->retailers))
+                ? 'https://schema.org/InStock'
+                : 'https://schema.org/OutOfStock',
+            'url'           => route('frontend.products.show', $product->slug),
+        ];
+    }
+@endphp
+
+@push('schema')
+<script type="application/ld+json">
+{!! json_encode($schemaData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+</script>
+@endpush
 
 @section('content')
 

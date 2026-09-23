@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'role'  => \Spatie\Permission\Middleware\RoleMiddleware::class,
         ]);
+        $middleware->web(prepend: [
+            \App\Http\Middleware\RedirectWwwToApex::class,
+        ]);
         $middleware->web(append: [
             \App\Http\Middleware\MaintenanceMiddleware::class,
             \App\Http\Middleware\SecurityHeaders::class,
