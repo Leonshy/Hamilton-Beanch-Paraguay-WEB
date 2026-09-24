@@ -30,7 +30,7 @@
                  onmouseleave="this.querySelector('.hero-hover-overlay').style.opacity='0'"
                  @endif>
                 <img src="{{ $b->image->url }}"
-                     alt="{{ $b->title ?? 'Hamilton Beach' }}"
+                     alt="{{ ($siteSettings['site_name'] ?? 'Hamilton Beach Paraguay') . ' — banner ' . ($i + 1) }}"
                      @if($i === 0) fetchpriority="high" @endif
                      style="width:100%;height:100%;object-fit:cover;object-position:center center;display:block;">
                 @if($b->link_url)
