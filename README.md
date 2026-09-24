@@ -37,10 +37,10 @@ Construido con Laravel 12, Blade y Tailwind CSS v4. Frontend completo con panel 
 | **Páginas** | Contenido editable para Servicio Técnico, Manuales, Garantía y páginas genéricas |
 | **Centro de Ayuda** | 4 secciones configurables (FAQ, Servicio, Manuales, Garantía) |
 | **FAQs** | Preguntas frecuentes con editor de texto enriquecido |
-| **Contactos** | Bandeja de mensajes recibidos del formulario |
-| **Biblioteca de Medios** | Subida de imágenes, PDFs y documentos (límite 64 MB) |
+| **Contactos** | Bandeja de mensajes recibidos del formulario. Cada envío dispara un email de notificación a la casilla de contacto configurada |
+| **Biblioteca de Medios** | Subida de imágenes, PDFs y documentos (límite 64 MB). Las imágenes se redimensionan y convierten a WebP automáticamente; un archivo en uso (producto, categoría, banner, página, punto de venta) no se puede eliminar |
 | **Usuarios** | Gestión de administradores con roles; usuarios protegidos (no editables ni eliminables desde el panel) |
-| **Configuración** | General, Contacto, Redes sociales, Integraciones (GA4, Meta Pixel), Home |
+| **Configuración** | General, Contacto, Redes sociales, Integraciones (GA4, Meta Pixel), Home. General/Integraciones/Modo mantenimiento son exclusivos del rol `admin` (un editor no puede inyectar scripts en el sitio) |
 
 ### Frontend público
 
@@ -50,10 +50,12 @@ Construido con Laravel 12, Blade y Tailwind CSS v4. Frontend completo con panel 
 - El precio sugerido y el aviso "Disponible en puntos de venta" solo se muestran si el producto tiene esos datos cargados
 - Carrusel de puntos de venta en homepage con orden aleatorio
 - Páginas de soporte (Centro de Ayuda, FAQ, Servicio Técnico, Manuales, Garantía)
-- Formulario de contacto con almacenamiento en BD
+- Formulario de contacto con almacenamiento en BD, rate limiting (5/min), honeypot anti-spam y notificación por email
 - Modo mantenimiento activable desde el admin
 - Google Analytics, Meta Pixel y scripts personalizados inyectables desde el admin
 - `sitemap.xml` y `robots.txt` dinámicos (basados en `APP_URL`)
+- SEO: meta title/description, Open Graph, Twitter Card y `<link rel="canonical">` por página (con fallback automático si no se cargan a mano desde el admin); schema.org `Product` (JSON-LD) en la ficha de producto; redirect 301 de `www.` al dominio raíz
+- Imágenes con `loading="lazy"` (salvo el hero y la imagen principal de producto, que llevan `fetchpriority="high"`)
 
 ---
 
@@ -139,6 +141,7 @@ Credenciales por defecto: `admin@hamiltonbeach.com.py` / `Admin1234!`
 |---------|-----|
 | `php artisan hb:create-super-admin {email} [--name=Webmaster]` | Crea o actualiza un admin protegido. Pide la contraseña por prompt oculto (no queda en el historial de bash). Se puede volver a correr sin duplicar el usuario. |
 | `php artisan hb:import-product-images` | Importa imágenes de `public/images/products` al storage y las asocia a los productos semilla |
+| `php artisan hb:optimize-media {--dry-run}` | Redimensiona (máx. 1600px de lado largo) y convierte a WebP las imágenes ya subidas a la biblioteca de medios. Idempotente — no vuelve a tocar una imagen ya optimizada. `--dry-run` muestra el ahorro proyectado sin modificar nada |
 
 ---
 
@@ -181,7 +184,7 @@ Auditoría de seguridad y rendimiento realizada el 2026-07-17. Estado actual:
 - SVGs subidos a la biblioteca de medios se sanitizan automáticamente (`enshrined/svg-sanitize`) antes de guardarse
 - Cabeceras de seguridad HTTP en todas las respuestas (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `Strict-Transport-Security`) — middleware `App\Http\Middleware\SecurityHeaders`
 - Contraseñas de usuarios admin: mínimo 10 caracteres con mayúscula, minúscula, número y símbolo; email validado con verificación de dominio DNS real
-- Suite de tests automatizados (`php artisan test`) cubriendo login admin, catálogo de productos y formulario de contacto
+- Suite de tests automatizados (`php artisan test`, 46 tests) cubriendo login admin, permisos por rol, catálogo de productos, formulario de contacto, SEO, optimización de imágenes y protección de medios en uso
 - Datos del "view composer" global (site settings, anuncios, categorías, páginas de footer) cacheados con invalidación automática al guardar desde el admin
 
 Revisión de 2026-09-23:
@@ -190,8 +193,22 @@ Revisión de 2026-09-23:
 - URLs personalizadas de puntos de venta por producto (`sale_point_url`) validadas como URL antes de guardarse (rechaza `javascript:` e intentos de inyección).
 - Corregido el armado de los links de "¿Dónde comprar?" en la ficha de producto: el `href` salía con las comillas escapadas y mandaba a una ruta relativa rota.
 
+Auditoría completa de seguridad/rendimiento/SEO/QA de 2026-09-24:
+
+- **Configuración sensible restringida a `admin`**: las rutas de General, Integraciones y Modo mantenimiento solo exigían estar logueado — un editor podía entrar por URL directa e inyectar scripts en todo el sitio desde Integraciones. Ahora requieren `can:admin-only`.
+- **Contacto endurecido**: rate limiting (`throttle:5,1`, igual que el login), honeypot invisible (campo `website`, finge éxito sin guardar si un bot lo completa), y notificación por email al `contact_email` configurado (con manejo de errores — un SMTP caído nunca rompe la experiencia del visitante).
+- **URLs de retailers personalizados** (`retailers.url.*`) validadas, mismo criterio que `sale_point_url`.
+- **Banners** (hero y mid): el link se armaba con `onclick="window.location.href='{{ $b->link_url }}'"`, sin escapar para contexto JS — ahora es un `<a href>` real.
+- **`X-Powered-By`** suprimido de las respuestas (no expone la versión de PHP).
+- **`SiteSetting::clearCache()`** dejó de usar `Cache::flush()` (borraba TODA la caché, incluidos los contadores de rate limiting del login) — ahora invalida solo sus propias claves.
+- **Dependencias**: `league/commonmark` y `guzzlehttp/guzzle` actualizados (transitivos de Laravel, sin tocar `composer.json`); se saca `axios` del frontend (no se usaba, solo agregaba peso al JS público). `composer audit` y `pnpm audit`: 0 vulnerabilidades.
+- **Imágenes optimizadas automáticamente**: `MediaService::upload()` redimensiona (máx. 1600px) y convierte a WebP calidad 82 al subir. Comando `hb:optimize-media` para reprocesar lo ya subido — en producción bajó la biblioteca completa de 253,8 MB a 7,5 MB.
+- **SEO**: meta tags, Open Graph, Twitter Card, `canonical` (siempre a la versión sin filtros/sin duplicar por `/productos/{id}` vs `/productos/{slug}`) y schema.org `Product` por página. Redirect 301 `www.` → dominio raíz (confirmado que servía el mismo sitio duplicado).
+- **Rendimiento**: `loading="lazy"` en imágenes secundarias, `fetchpriority="high"` en las críticas para LCP; Cache-Control/Expires agresivo (1 año, immutable) para `storage/` y `public/build/` (nombres de archivo únicos, nunca cambia el contenido); Bootstrap Icons con carga asíncrona (no bloquea el render inicial); view composer global acotado a `layouts.app` (antes corría también en cada vista del admin).
+- **QA**: no se puede eliminar un archivo de la biblioteca que esté en uso; búsquedas (catálogo y biblioteca de medios) ya no tratan `%`/`_` como comodines de SQL cuando el usuario los escribe literal; código muerto eliminado (`MediaController::update` sin ruta).
+
 > Pendiente: `Content-Security-Policy` — requiere mapear todos los dominios externos (Google Tag Manager, Facebook Pixel, Google Fonts, jsDelivr) antes de poder aplicarla sin romper integraciones.
 
 ---
 
-**Estado**: CMS completo en producción — `hamiltonbeach.com.py` (staging separado en `hamilton.webparaguay.com`).
+**Estado**: CMS completo en producción — `hamiltonbeach.com.py` (staging separado en `hamilton.webparaguay.com`). Última auditoría integral: 2026-09-24.

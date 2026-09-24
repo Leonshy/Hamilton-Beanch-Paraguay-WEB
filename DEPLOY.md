@@ -260,13 +260,16 @@ QUEUE_CONNECTION=sync
 CACHE_STORE=file
 
 # ─── CORREO SMTP ─────────────────────────────────────────
+# Producción real usa el correo del propio dominio (Plesk Mail).
+# MAIL_SCHEME debe ser "smtps" para el puerto 465 (TLS implícito) —
+# probado y funcionando el 2026-09-24. Ver sección 7 si falla.
 MAIL_MAILER=smtp
-MAIL_SCHEME=ssl
-MAIL_HOST=mail.webparaguay.com
+MAIL_SCHEME=smtps
+MAIL_HOST=mail.hamiltonbeach.com.py
 MAIL_PORT=465
-MAIL_USERNAME=
-MAIL_PASSWORD=
-MAIL_FROM_ADDRESS="noreply@hamilton.webparaguay.com"
+MAIL_USERNAME=admin@hamiltonbeach.com.py
+MAIL_PASSWORD=                              # nunca commitear la contraseña real
+MAIL_FROM_ADDRESS="admin@hamiltonbeach.com.py"
 MAIL_FROM_NAME="Hamilton Beach Paraguay"
 
 VITE_APP_NAME="${APP_NAME}"
@@ -285,6 +288,15 @@ VITE_APP_NAME="${APP_NAME}"
 /opt/plesk/php/8.2/bin/php artisan route:clear
 /opt/plesk/php/8.2/bin/php artisan view:clear
 /opt/plesk/php/8.2/bin/php artisan cache:clear
+```
+
+### Reprocesar imágenes ya subidas (solo cuando cambia MediaService)
+
+Si un deploy toca la lógica de optimización de imágenes (`app/Services/MediaService.php` o `app/Console/Commands/OptimizeMedia.php`), correr una sola vez después del deploy para aplicar la optimización a lo que ya estaba subido — es idempotente, no hace falta correrlo en cada deploy:
+
+```bash
+/opt/plesk/php/8.2/bin/php artisan hb:optimize-media --dry-run   # ver el ahorro proyectado primero
+/opt/plesk/php/8.2/bin/php artisan hb:optimize-media              # aplicar de verdad
 ```
 
 ---
@@ -373,6 +385,24 @@ ls -la public/tinymce/tinymce.min.js
 ./deploy.sh   # el script re-sube public/tinymce/ completo
 ```
 
+### El formulario de contacto no envía el email de notificación
+El mensaje siempre se guarda en `/admin/contacts` aunque el email falle (el envío está en un try/catch a propósito). Para diagnosticar:
+
+```bash
+# 1. Confirmar que las variables MAIL_* estén cargadas después de editar .env
+/opt/plesk/php/8.2/bin/php artisan config:clear
+/opt/plesk/php/8.2/bin/php artisan config:cache
+
+# 2. Probar el envío directo, sin pasar por el formulario
+/opt/plesk/php/8.2/bin/php artisan tinker
+>>> Mail::raw('test', function($m) { $m->to('tu-email@ejemplo.com')->subject('Prueba SMTP'); });
+
+# 3. Si no tira excepción, revisar spam. Si tira TransportException con
+#    "authentication failed", la contraseña en .env está mal.
+```
+
+**⚠️ Ojo con reintentos seguidos:** el servidor de mail (Plesk) suele tener fail2ban — un intento fallido de autenticación (contraseña incorrecta) puede bloquear temporalmente la IP que lo intentó, y el siguiente intento (aunque la contraseña ya esté bien) va a fallar con "Connection refused" en vez de un error de autenticación. Si eso pasa, esperar unos minutos antes de reintentar en vez de repetir el comando en loop.
+
 ---
 
 ## 8. Checklist final antes de publicar
@@ -425,12 +455,15 @@ ls -la public/tinymce/tinymce.min.js
 - [ ] `artisan event:cache`
 - [ ] `artisan view:cache`
 
-### Seguridad (auditoría 2026-07-17)
-- [ ] `composer audit` en 0 vulnerabilidades
-- [ ] Rate limiting activo en `/admin/login` (5 intentos/min)
-- [ ] Cabeceras de seguridad presentes (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `Strict-Transport-Security` si hay HTTPS) — verificar con `curl -I https://hamiltonbeach.com.py/`
+### Seguridad (auditoría 2026-07-17 y 2026-09-24)
+- [ ] `composer audit` y `pnpm audit` en 0 vulnerabilidades
+- [ ] Rate limiting activo en `/admin/login` (5 intentos/min) y en `/contacto` (5 intentos/min)
+- [ ] Cabeceras de seguridad presentes (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `Strict-Transport-Security` si hay HTTPS) y `X-Powered-By` ausente — verificar con `curl -I https://hamiltonbeach.com.py/`
 - [ ] Contraseñas de usuarios admin nuevos: mínimo 10 caracteres, mayúscula, minúscula, número y símbolo (se valida automático en el form)
 - [ ] Subida de SVG sanitizada automáticamente (`enshrined/svg-sanitize`) — no requiere acción manual
+- [ ] Un usuario con rol `editor` no puede entrar a `/admin/settings/general` ni `/admin/settings/integrations` (deben dar 403)
+- [ ] `www.hamiltonbeach.com.py` redirige 301 al dominio sin `www`
+- [ ] Email de notificación de contacto probado (`Mail::raw(...)` en tinker o formulario real) — ver sección 7 si falla
 
 ---
 
